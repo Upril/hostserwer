@@ -6,6 +6,8 @@ This project is a video hosting service built with Spring Boot.
 
 - Java 19
 - Spring Boot 3.0.6
+- OpenAPI Swagger 3
+- Lombok
 
 ## Features
 
