@@ -2,6 +2,9 @@ package com.serwertetowy.entities;
 
 import jakarta.persistence.*;
 import lombok.*;
+
+import java.util.Set;
+
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -12,5 +15,7 @@ public class Tags {
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "tag_id_sequence")
     private Integer id;
     private String name;
+    @OneToMany(mappedBy = "tags")
+    private Set<SeriesTags> seriesTags;
 
 }
