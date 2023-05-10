@@ -20,6 +20,8 @@ public class Series {
     private String description;
     @OneToMany(mappedBy = "series")
     private Set<SeriesTags> seriesTags;
+    @OneToMany(mappedBy = "series")
+    private Set<Episodes> episodes;
 
 
 }

@@ -18,4 +18,5 @@ public class SeriesTags {
     private Series series;
     @ManyToOne
     private Tags tags;
+
 }
