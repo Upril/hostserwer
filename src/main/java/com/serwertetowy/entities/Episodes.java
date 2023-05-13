@@ -1,7 +1,6 @@
 package com.serwertetowy.entities;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -9,7 +8,6 @@ import java.util.Set;
 
 @Data
 @NoArgsConstructor
-@AllArgsConstructor
 @Entity
 public class Episodes {
     @Id
@@ -22,5 +20,16 @@ public class Episodes {
     private String title;
     @OneToMany
     private Set<Languages> languages;
+
+    @Lob
+    private byte[] data;
+
+    public Episodes(String name, Series series, Set<Languages> langs, byte[] data){
+        this.languages = langs;
+        this.series = series;
+        this.title = name;
+        this.data = data;
+    }
+
 
 }
