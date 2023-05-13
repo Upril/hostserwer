@@ -1,7 +1,6 @@
 package com.serwertetowy.services;
 
 import com.serwertetowy.entities.Episodes;
-import com.serwertetowy.entities.Languages;
 import com.serwertetowy.entities.Series;
 import com.serwertetowy.exceptions.EpisodeNotFoundException;
 import com.serwertetowy.exceptions.SeriesNotFoundException;
@@ -29,7 +28,7 @@ public class EpisodeServiceImpl implements EpisodesService {
     public List<Episodes> getEpisodesBySeries(Integer seriesId){
         return episodesRepository.findBySeriesId(seriesId);
     }
-    public void saveEpisode(MultipartFile file, String name, Set<Languages> languagesSet, Integer seriesId) throws IOException {
+    public void saveEpisode(MultipartFile file, String name, Set<String> languagesSet, Integer seriesId) throws IOException {
         Optional<Series> series = seriesRepository.findById(seriesId);
         if(!series.isPresent()) throw new SeriesNotFoundException();
         Episodes newEpisode = new Episodes(name,series.get(),languagesSet,file.getBytes());

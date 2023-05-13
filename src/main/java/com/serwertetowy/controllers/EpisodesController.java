@@ -1,7 +1,6 @@
 package com.serwertetowy.controllers;
 
 import com.serwertetowy.entities.Episodes;
-import com.serwertetowy.entities.Languages;
 import com.serwertetowy.services.EpisodesService;
 import org.springframework.core.io.Resource;
 import lombok.AllArgsConstructor;
@@ -13,6 +12,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
@@ -21,8 +21,9 @@ import java.util.Set;
 @AllArgsConstructor
 public class EpisodesController {
     private EpisodesService episodesService;
+    record video(Integer id, String title, Set<String> languages){}
     @PostMapping()
-    public ResponseEntity<Episodes> saveEpisode(@RequestParam("file")MultipartFile file, @RequestParam("name")String name, @RequestParam("languages")Set<Languages> languagesSet, @RequestParam("seriesId")Integer seriesId) throws IOException {
+    public ResponseEntity<Episodes> saveEpisode(@RequestParam("file")MultipartFile file, @RequestParam("name")String name, @RequestParam("languages")Set<String> languagesSet, @RequestParam("seriesId")Integer seriesId) throws IOException {
         episodesService.saveEpisode(file,name,languagesSet,seriesId);
         return new ResponseEntity<>(HttpStatus.OK);
     }
@@ -34,11 +35,18 @@ public class EpisodesController {
                 .body(new ByteArrayResource(episodesService.getEpisode(id).getData()));
     }
     @GetMapping("/{id}")
-    public ResponseEntity<Episodes> getEpisodebyId(@PathVariable("id")Integer id){
-        return new ResponseEntity<>(episodesService.getEpisode(id), HttpStatus.OK);
+    public ResponseEntity<video> getEpisodebyId(@PathVariable("id")Integer id){
+        Episodes episode = episodesService.getEpisode(id);
+        video video = new video(episode.getId(), episode.getTitle(), episode.getLanguages());
+        return new ResponseEntity<>(video, HttpStatus.OK);
     }
     @GetMapping("{seriesId}/all")
-    public ResponseEntity<List<Episodes>> getEpisodesBySeries(@PathVariable("seriesId")Integer id){
-        return new ResponseEntity<>(episodesService.getEpisodesBySeries(id), HttpStatus.OK);
+    public ResponseEntity<List<video>> getEpisodesBySeries(@PathVariable("seriesId")Integer id){
+        List<video> videoList=new ArrayList<>();
+        List<Episodes> episodesList = episodesService.getEpisodesBySeries(id);
+        for(Episodes e:episodesList){
+            videoList.add(new video(e.getId(),e.getTitle(),e.getLanguages()));
+        }
+        return new ResponseEntity<>(videoList, HttpStatus.OK);
     }
 }

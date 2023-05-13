@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.List;
 import java.util.Set;
 
 @Data
@@ -18,13 +19,12 @@ public class Episodes {
     @ManyToOne
     private Series series;
     private String title;
-    @OneToMany
-    private Set<Languages> languages;
+    private Set<String> languages;
 
     @Lob
     private byte[] data;
 
-    public Episodes(String name, Series series, Set<Languages> langs, byte[] data){
+    public Episodes(String name, Series series, Set<String> langs, byte[] data){
         this.languages = langs;
         this.series = series;
         this.title = name;
