@@ -10,5 +10,5 @@ import java.util.Set;
 public interface EpisodesService {
     Episodes getEpisode(Integer id);
     List<Episodes> getEpisodesBySeries(Integer seriesId);
-    void saveEpisode(MultipartFile file, String name, Set<String> languagesSet, Integer seriesId) throws IOException;
+    void saveEpisode(MultipartFile file, String name/*, Set<String> languagesSet*/, Integer seriesId) throws IOException;
 }

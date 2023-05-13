@@ -21,12 +21,13 @@ import java.util.Set;
 @AllArgsConstructor
 public class EpisodesController {
     private EpisodesService episodesService;
-    record video(Integer id, String title, Set<String> languages){}
+    record video(Integer id, String title/*, Set<String> languages*/){}
     @PostMapping()
-    public ResponseEntity<Episodes> saveEpisode(@RequestParam("file")MultipartFile file, @RequestParam("name")String name, @RequestParam("languages")Set<String> languagesSet, @RequestParam("seriesId")Integer seriesId) throws IOException {
-        episodesService.saveEpisode(file,name,languagesSet,seriesId);
+    public ResponseEntity<Episodes> saveEpisode(@RequestParam("file")MultipartFile file, @RequestParam("name")String name/*, @RequestParam("languages")Set<String> languagesSet*/, @RequestParam("seriesId")Integer seriesId) throws IOException {
+        episodesService.saveEpisode(file,name/*,languagesSet*/,seriesId);
         return new ResponseEntity<>(HttpStatus.OK);
     }
+
     @GetMapping("/{id}/play")
     public ResponseEntity<Resource> getVideoById(@PathVariable("id")Integer id){
         return ResponseEntity
@@ -37,7 +38,7 @@ public class EpisodesController {
     @GetMapping("/{id}")
     public ResponseEntity<video> getEpisodebyId(@PathVariable("id")Integer id){
         Episodes episode = episodesService.getEpisode(id);
-        video video = new video(episode.getId(), episode.getTitle(), episode.getLanguages());
+        video video = new video(episode.getId(), episode.getTitle()/*, episode.getLanguages()*/);
         return new ResponseEntity<>(video, HttpStatus.OK);
     }
     @GetMapping("{seriesId}/all")
@@ -45,7 +46,7 @@ public class EpisodesController {
         List<video> videoList=new ArrayList<>();
         List<Episodes> episodesList = episodesService.getEpisodesBySeries(id);
         for(Episodes e:episodesList){
-            videoList.add(new video(e.getId(),e.getTitle(),e.getLanguages()));
+            videoList.add(new video(e.getId(),e.getTitle()/*,e.getLanguages()*/));
         }
         return new ResponseEntity<>(videoList, HttpStatus.OK);
     }

@@ -19,13 +19,13 @@ public class Episodes {
     @ManyToOne
     private Series series;
     private String title;
-    private Set<String> languages;
+    //private Set<String> languages;
 
     @Lob
     private byte[] data;
 
-    public Episodes(String name, Series series, Set<String> langs, byte[] data){
-        this.languages = langs;
+    public Episodes(String name, Series series/*, Set<String> langs*/, byte[] data){
+        //this.languages = langs;
         this.series = series;
         this.title = name;
         this.data = data;
