@@ -13,7 +13,6 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 
 @Service
 @AllArgsConstructor
@@ -28,8 +27,8 @@ public class EpisodeServiceImpl implements EpisodesService {
         else return episode.get();
     }
     @Transactional
-    public List<Episodes> getEpisodesBySeries(Integer seriesId){
-        return episodesRepository.findBySeriesId(seriesId);
+    public List<EpisodeSummary> getEpisodesBySeries(Integer seriesId){
+        return episodesRepository.findEpisodeSummaryBySeriesId(seriesId);
     }
     public void saveEpisode(MultipartFile file, String name/*, Set<String> languagesSet*/, Integer seriesId) throws IOException {
         Optional<Series> series = seriesRepository.findById(seriesId);

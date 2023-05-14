@@ -1,6 +1,7 @@
 package com.serwertetowy.controllers;
 
 import com.serwertetowy.entities.Episodes;
+import com.serwertetowy.services.EpisodeSummary;
 import com.serwertetowy.services.EpisodesService;
 import org.springframework.core.io.Resource;
 import lombok.AllArgsConstructor;
@@ -14,7 +15,6 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
 
 @RestController
 @RequestMapping("api/v1/episode")
@@ -44,8 +44,8 @@ public class EpisodesController {
     @GetMapping("{seriesId}/all")
     public ResponseEntity<List<video>> getEpisodesBySeries(@PathVariable("seriesId")Integer id){
         List<video> videoList=new ArrayList<>();
-        List<Episodes> episodesList = episodesService.getEpisodesBySeries(id);
-        for(Episodes e:episodesList){
+        List<EpisodeSummary> episodesList = episodesService.getEpisodesBySeries(id);
+        for(EpisodeSummary e:episodesList){
             videoList.add(new video(e.getId(),e.getTitle()/*,e.getLanguages()*/));
         }
         return new ResponseEntity<>(videoList, HttpStatus.OK);

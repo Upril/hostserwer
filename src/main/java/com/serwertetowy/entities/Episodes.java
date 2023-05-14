@@ -4,9 +4,6 @@ import jakarta.persistence.*;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.util.List;
-import java.util.Set;
-
 @Data
 @NoArgsConstructor
 @Entity
@@ -22,6 +19,7 @@ public class Episodes {
     //private Set<String> languages;
 
     @Lob
+    @Basic(fetch = FetchType.LAZY)
     private byte[] data;
 
     public Episodes(String name, Series series/*, Set<String> langs*/, byte[] data){
