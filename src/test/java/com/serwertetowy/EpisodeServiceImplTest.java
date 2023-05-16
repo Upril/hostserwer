@@ -9,6 +9,7 @@ import com.serwertetowy.services.EpisodeSummary;
 import com.serwertetowy.services.EpisodesService;
 import org.junit.jupiter.api.Test;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -51,5 +52,10 @@ public class EpisodeServiceImplTest {
         verify(episodesRepository,times(1)).findEpisodeSummaryBySeriesId(1);
     }
     @Test
-    void saveEpisode(){}
+    void saveEpisode() throws IOException {
+//        MultipartFile file = mock(MultipartFile.class);
+//        Episodes testEpisode = new Episodes("Title",expSeries,file.getBytes());
+//        service.saveEpisode(file, "Title",expSeries.getId());
+//        verify(episodesRepository, times(1)).save(testEpisode);
+    }
 }
