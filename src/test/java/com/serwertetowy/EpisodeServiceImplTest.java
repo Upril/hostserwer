@@ -5,8 +5,11 @@ import com.serwertetowy.entities.Series;
 import com.serwertetowy.repos.EpisodesRepository;
 import com.serwertetowy.repos.SeriesRepository;
 import com.serwertetowy.services.EpisodeServiceImpl;
+import com.serwertetowy.services.EpisodeSummary;
 import com.serwertetowy.services.EpisodesService;
 import org.junit.jupiter.api.Test;
+
+import java.util.List;
 import java.util.Optional;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.*;
@@ -28,7 +31,25 @@ public class EpisodeServiceImplTest {
 
     }
     @Test
-    void getEpisodesBySeries(){}
+    void getEpisodesBySeries(){
+        EpisodeSummary episodeSummary = new EpisodeSummary() {
+            @Override
+            public String getTitle() {
+                return "Title";
+            }
+
+            @Override
+            public Integer getId() {
+                return 1;
+            }
+        };
+        List<EpisodeSummary> expected = List.of(episodeSummary);
+        when(episodesRepository.findEpisodeSummaryBySeriesId(1)).thenReturn(expected);
+
+        List<EpisodeSummary> actual = service.getEpisodesBySeries(1);
+        assertEquals(actual,expected);
+        verify(episodesRepository,times(1)).findEpisodeSummaryBySeriesId(1);
+    }
     @Test
     void saveEpisode(){}
 }
