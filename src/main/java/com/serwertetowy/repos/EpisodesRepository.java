@@ -17,4 +17,5 @@ public interface EpisodesRepository extends JpaRepository<Episodes, Integer> {
             from episodes
             order by id""", nativeQuery = true)
     List<EpisodeSummary> findEpisodeSummaryBySeriesId(@Param("seriesId") Integer seriesId);
+    EpisodeSummary findEpisodeSummaryById(@Param("id") Integer id);
 }

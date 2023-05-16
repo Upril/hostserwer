@@ -21,11 +21,18 @@ public class EpisodeServiceImpl implements EpisodesService {
     private SeriesRepository seriesRepository;
     @Override
     @Transactional
-    public Episodes getEpisode(Integer id){
-        Optional<Episodes> episode = episodesRepository.findById(id);
-        if(!episode.isPresent()) throw new EpisodeNotFoundException();
-        else return episode.get();
+    public EpisodeSummary getEpisode(Integer id){
+        return episodesRepository.findEpisodeSummaryById(id);
     }
+    @Transactional
+    public Episodes getEpisodeData(Integer id){
+        Optional<Episodes> episode = episodesRepository.findById(id);
+        Episodes foundEpisode = new Episodes();
+        if(episode.isPresent()) foundEpisode = episode.get();
+        else throw new EpisodeNotFoundException();
+        return foundEpisode;
+    }
+
     @Transactional
     public List<EpisodeSummary> getEpisodesBySeries(Integer seriesId){
         return episodesRepository.findEpisodeSummaryBySeriesId(seriesId);

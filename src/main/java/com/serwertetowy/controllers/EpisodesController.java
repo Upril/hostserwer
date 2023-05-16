@@ -33,13 +33,12 @@ public class EpisodesController {
         return ResponseEntity
                 .status(HttpStatus.OK)
                 .contentType(MediaType.APPLICATION_OCTET_STREAM)
-                .body(new ByteArrayResource(episodesService.getEpisode(id).getData()));
+                .body(new ByteArrayResource(episodesService.getEpisodeData(id).getData()));
     }
     @GetMapping("/{id}")
-    public ResponseEntity<video> getEpisodebyId(@PathVariable("id")Integer id){
-        Episodes episode = episodesService.getEpisode(id);
-        video video = new video(episode.getId(), episode.getTitle()/*, episode.getLanguages()*/);
-        return new ResponseEntity<>(video, HttpStatus.OK);
+    public ResponseEntity<EpisodeSummary> getEpisodebyId(@PathVariable("id")Integer id){
+        EpisodeSummary episode = episodesService.getEpisode(id);
+        return new ResponseEntity<>(episode, HttpStatus.OK);
     }
     @GetMapping("{seriesId}/all")
     public ResponseEntity<List<video>> getEpisodesBySeries(@PathVariable("seriesId")Integer id){

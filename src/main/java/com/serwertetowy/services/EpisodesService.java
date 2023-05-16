@@ -7,7 +7,8 @@ import java.io.IOException;
 import java.util.List;
 
 public interface EpisodesService {
-    Episodes getEpisode(Integer id);
+    EpisodeSummary getEpisode(Integer id);
+    Episodes getEpisodeData(Integer id);
     List<EpisodeSummary> getEpisodesBySeries(Integer seriesId);
     void saveEpisode(MultipartFile file, String name/*, Set<String> languagesSet*/, Integer seriesId) throws IOException;
 }
