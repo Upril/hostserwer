@@ -13,6 +13,6 @@ public class WatchFlags {
     @Id
     @SequenceGenerator(name="wflag_id_sequence", sequenceName = "wflag_id_sequence")
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "wflag_id_sequence")
-    private Integer id;
+    private Long id;
     private String name;
 }

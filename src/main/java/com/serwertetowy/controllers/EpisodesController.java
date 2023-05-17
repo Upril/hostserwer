@@ -21,7 +21,7 @@ import java.util.List;
 @AllArgsConstructor
 public class EpisodesController {
     private EpisodesService episodesService;
-    record video(Integer id, String title/*, Set<String> languages*/){}
+    record video(Long id, String title/*, Set<String> languages*/){}
     @PostMapping()
     public ResponseEntity<Episodes> saveEpisode(@RequestParam("file")MultipartFile file, @RequestParam("name")String name/*, @RequestParam("languages")Set<String> languagesSet*/, @RequestParam("seriesId")Integer seriesId) throws IOException {
         episodesService.saveEpisode(file,name/*,languagesSet*/,seriesId);

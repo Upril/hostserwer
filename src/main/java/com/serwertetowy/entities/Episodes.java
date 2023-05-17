@@ -11,7 +11,7 @@ public class Episodes {
     @Id
     @SequenceGenerator(name = "episode_id_sequence", sequenceName = "episode_id_sequence")
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "episode_id_sequence")
-    private Integer id;
+    private Long id;
 
     @ManyToOne
     private Series series;

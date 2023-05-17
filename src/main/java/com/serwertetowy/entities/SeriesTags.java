@@ -13,7 +13,7 @@ public class SeriesTags {
     @Id
     @SequenceGenerator(name = "seriestag_id_sequence", sequenceName = "seriestag_id_sequence")
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "seriestag_id_sequence")
-    private Integer id;
+    private Long id;
     @ManyToOne
     private Series series;
     @ManyToOne

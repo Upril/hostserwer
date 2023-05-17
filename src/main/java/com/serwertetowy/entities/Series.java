@@ -15,7 +15,7 @@ public class Series {
     @Id
     @SequenceGenerator(name = "series_id_sequence", sequenceName = "series_id_sequence")
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "series_id_sequence")
-    private Integer id;
+    private Long id;
     private String name;
     private String description;
     @OneToMany(mappedBy = "series")

@@ -34,7 +34,7 @@ public class EpisodesIT {
     EpisodesRepository episodesRepository;
     @Autowired
     SeriesRepository seriesRepository;
-    Series expSeries = new Series(1,"tet","tetowa",null,null);
+    Series expSeries = new Series(1L,"tet","tetowa",null,null,null);
     @AfterEach
     void tearDown(){
         episodesRepository.deleteAll();
@@ -71,8 +71,8 @@ public class EpisodesIT {
             }
 
             @Override
-            public Integer getId() {
-                return 1;
+            public Long getId() {
+                return 1L;
             }
         };
         List<EpisodeSummary> expected = List.of(episodeSummary);

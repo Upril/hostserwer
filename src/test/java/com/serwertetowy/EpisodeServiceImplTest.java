@@ -19,7 +19,7 @@ public class EpisodeServiceImplTest {
     EpisodesRepository episodesRepository = mock(EpisodesRepository.class);
     SeriesRepository seriesRepository = mock(SeriesRepository.class);
     EpisodesService service = new EpisodeServiceImpl(episodesRepository, seriesRepository);
-    Series expSeries = new Series(1,"tet","tetowa",null,null);
+    Series expSeries = new Series(1L,"tet","tetowa",null,null,null);
     @Test
     void getEpisode(){
         Episodes expected = new Episodes("testName",expSeries,null);
@@ -40,8 +40,8 @@ public class EpisodeServiceImplTest {
             }
 
             @Override
-            public Integer getId() {
-                return 1;
+            public Long getId() {
+                return 1L;
             }
         };
         List<EpisodeSummary> expected = List.of(episodeSummary);

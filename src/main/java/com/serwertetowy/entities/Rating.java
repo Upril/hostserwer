@@ -11,7 +11,7 @@ public class Rating {
     @Id
     @SequenceGenerator(name = "user_id_sequence", sequenceName = "user_id_sequence")
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "user_id_sequence")
-    private Integer id;
+    private Long id;
     //user one user many ratings
     @ManyToOne
     @JoinColumn(name = "series_id", nullable = false)
