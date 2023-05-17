@@ -21,6 +21,8 @@ public class Series {
     @OneToMany(mappedBy = "series")
     private Set<SeriesTags> seriesTags;
     @OneToMany(mappedBy = "series")
+    private Set<Rating> seriesRatings;
+    @OneToMany(mappedBy = "series")
     private Set<Episodes> episodes;
 
 
