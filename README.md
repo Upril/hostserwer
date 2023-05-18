@@ -8,10 +8,14 @@ This project is a video hosting service built with Spring Boot.
 - Spring Boot 3.0.6
 - OpenAPI Swagger 3
 - Lombok
+- JUnit (Tests)
 
 ## Features
 
-WIP
+- Video Sreaming
+- Authentication(WIP)
+- User Ratings (WIP)
+- Watch list (WIP)
 
 ## Getting Started
 
