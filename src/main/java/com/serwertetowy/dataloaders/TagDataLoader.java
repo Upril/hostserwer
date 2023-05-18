@@ -16,19 +16,19 @@ public class TagDataLoader implements CommandLineRunner {
     }
     private void loadTagData(){
         if(tagRepository.count() == 0){
-            Tags tag1 = new Tags(1L,"Historical");
-            Tags tag2 = new Tags(2L,"Abstract");
-            Tags tag3 = new Tags(3L,"Acting");
-            Tags tag4 = new Tags(4L,"Adventure");
+            Tags tag1 = new Tags(1L,"Sports");
+            Tags tag2 = new Tags(2L,"Character Development");
+            Tags tag3 = new Tags(3L,"Superheroes");
+            Tags tag4 = new Tags(4L,"Humor");
             Tags tag5 = new Tags(5L,"Afterlife");
-            Tags tag6 = new Tags(6L,"Agriculture");
+            Tags tag6 = new Tags(6L,"Shounen");
             Tags tag7 = new Tags(7L,"Action");
-            Tags tag8 = new Tags(8L,"Adult Couples");
-            Tags tag9 = new Tags(9L,"Adult Industry");
-            Tags tag10 = new Tags(10L,"Age Transformation");
-            Tags tag11 = new Tags(11L,"Aliens");
-            Tags tag12 = new Tags(12L,"Amnesia");
-            Tags tag13 = new Tags(13L,"Androids");
+            Tags tag8 = new Tags(8L,"Bizzare");
+            Tags tag9 = new Tags(9L,"Thriller");
+            Tags tag10 = new Tags(10L,"Psychological");
+            Tags tag11 = new Tags(11L,"Beautiful animation");
+            Tags tag12 = new Tags(12L,"Redemption");
+            Tags tag13 = new Tags(13L,"Adventure");
             Tags tag14 = new Tags(14L,"Angels");
             Tags tag15 = new Tags(15L,"Apocalypse");
             Tags tag16 = new Tags(16L,"Art");
@@ -58,6 +58,6 @@ public class TagDataLoader implements CommandLineRunner {
             tagRepository.save(tag19);
             tagRepository.save(tag20);
         }
-        System.out.println(tagRepository.count());
+        System.out.println("TagsCount: "+tagRepository.count());
     }
 }
