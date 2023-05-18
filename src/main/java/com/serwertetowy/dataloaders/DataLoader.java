@@ -1,11 +1,7 @@
 package com.serwertetowy.dataloaders;
 
-import com.serwertetowy.entities.Series;
-import com.serwertetowy.entities.SeriesTags;
-import com.serwertetowy.entities.Tags;
-import com.serwertetowy.repos.SeriesRepository;
-import com.serwertetowy.repos.SeriesTagsRepository;
-import com.serwertetowy.repos.TagRepository;
+import com.serwertetowy.entities.*;
+import com.serwertetowy.repos.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;
@@ -20,12 +16,27 @@ public class DataLoader implements CommandLineRunner {
     SeriesTagsRepository seriesTagsRepository;
     @Autowired
     TagRepository tagRepository;
+    @Autowired
+    UserRepository userRepository;
+    @Autowired
+    WatchFlagRepository watchFlagRepository;
     @Override
     public void run(String... args) throws Exception {
         loadSeriesData();
         loadTagData();
         loadSeriesTagsData();
-
+        loadUserData();
+        loadWatchFlagsData();
+        long series = seriesRepository.count();
+        long tags = tagRepository.count();
+        long stags = seriesTagsRepository.count();
+        long users = userRepository.count();
+        long watchflags = watchFlagRepository.count();
+        System.out.println("Series count: "+series);
+        System.out.println("Tags count: "+tags);
+        System.out.println("SeriesTags count: "+stags);
+        System.out.println("Users count: "+users);
+        System.out.println("Watchflags count: "+watchflags);
     }
     private void loadSeriesData(){
         if(seriesRepository.count() == 0){
@@ -51,7 +62,6 @@ public class DataLoader implements CommandLineRunner {
             seriesRepository.save(series9);
             seriesRepository.save(series10);
         }
-        System.out.println("Series count: "+seriesRepository.count());
     }
     private void loadTagData(){
         if(tagRepository.count() == 0){
@@ -215,6 +225,44 @@ public class DataLoader implements CommandLineRunner {
             seriesTagsRepository.save(tags19);
             seriesTagsRepository.save(tags20);
             seriesTagsRepository.save(tags21);
+        }
+    }
+    private void loadUserData(){
+        if(userRepository.count() == 0) {
+            User user1 = new User();
+            user1.setFirstName("John");
+            user1.setLastName("Doe");
+            user1.setEmail("john@doe.com");
+            user1.setPassword("123456");
+
+            User user2 = new User();
+            user2.setFirstName("Baba");
+            user2.setLastName("Booey");
+            user2.setEmail("baba@booey.com");
+            user2.setPassword("123456");
+
+            User user3 = new User();
+            user3.setFirstName("John");
+            user3.setLastName("Darksouls");
+            user3.setEmail("darksoulsiseasy@gg.com");
+            user3.setPassword("123456");
+
+            userRepository.save(user1);
+            userRepository.save(user2);
+            userRepository.save(user3);
+        }
+    }
+    private void loadWatchFlagsData(){
+        if(watchFlagRepository.count() == 0) {
+            WatchFlags watchFlag1 = new WatchFlags(1L, "Watching");
+            WatchFlags watchFlag2 = new WatchFlags(2L, "Finished");
+            WatchFlags watchFlag3 = new WatchFlags(3L, "Not Watched");
+            WatchFlags watchFlag4 = new WatchFlags(4L, "Ignored");
+
+            watchFlagRepository.save(watchFlag1);
+            watchFlagRepository.save(watchFlag2);
+            watchFlagRepository.save(watchFlag3);
+            watchFlagRepository.save(watchFlag4);
         }
     }
 }
