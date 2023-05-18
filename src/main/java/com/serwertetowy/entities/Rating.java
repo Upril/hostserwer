@@ -16,6 +16,9 @@ public class Rating {
     @ManyToOne
     @JoinColumn(name = "series_id", nullable = false)
     private Series series;
+    @ManyToOne
+    @JoinColumn(name="user_id", nullable = false)
+    private User user;
     private short plotRating;
     private short musicRating;
     private short graphicsRating;

@@ -5,6 +5,8 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
 import lombok.Data;
 
+import java.util.Set;
+
 @Entity
 @Data
 @Table(name = "users")
@@ -18,6 +20,8 @@ public class User {
     private String email;
     @JsonIgnore
     private String password;
+    @OneToMany(mappedBy = "user")
+    private Set<Rating> userRatings;
     @JsonProperty
     public void setPassword(String password){
         this.password = password;
