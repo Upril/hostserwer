@@ -13,7 +13,7 @@ import org.springframework.stereotype.Component;
 import java.util.Optional;
 
 @Component
-public class SeriesDataLoader implements CommandLineRunner {
+public class DataLoader implements CommandLineRunner {
     @Autowired
     SeriesRepository seriesRepository;
     @Autowired
@@ -23,6 +23,9 @@ public class SeriesDataLoader implements CommandLineRunner {
     @Override
     public void run(String... args) throws Exception {
         loadSeriesData();
+        loadTagData();
+        loadSeriesTagsData();
+
     }
     private void loadSeriesData(){
         if(seriesRepository.count() == 0){
@@ -48,6 +51,9 @@ public class SeriesDataLoader implements CommandLineRunner {
             seriesRepository.save(series9);
             seriesRepository.save(series10);
         }
+        System.out.println("Series count: "+seriesRepository.count());
+    }
+    private void loadTagData(){
         if(tagRepository.count() == 0){
             Tags tag1 = new Tags(1L,"Sports");
             Tags tag2 = new Tags(2L,"Character Development");
@@ -91,6 +97,8 @@ public class SeriesDataLoader implements CommandLineRunner {
             tagRepository.save(tag19);
             tagRepository.save(tag20);
         }
+    }
+    private void loadSeriesTagsData(){
         if (seriesTagsRepository.count() == 0) {
             Series series1 = null;
             Series series2= null;
@@ -208,6 +216,5 @@ public class SeriesDataLoader implements CommandLineRunner {
             seriesTagsRepository.save(tags20);
             seriesTagsRepository.save(tags21);
         }
-        System.out.println("Series count: "+seriesRepository.count());
     }
 }
