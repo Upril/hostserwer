@@ -23,5 +23,9 @@ public class UserSeries {
     @JoinColumn(name = "watch_flag_id")
     private WatchFlags watchFlags;
 
-
+    public UserSeries(User user, Series series, WatchFlags watchFlags) {
+        this.user = user;
+        this.series = series;
+        this.watchFlags = watchFlags;
+    }
 }

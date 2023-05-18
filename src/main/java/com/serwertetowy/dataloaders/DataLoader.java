@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;
 
+import java.util.List;
 import java.util.Optional;
 
 @Component
@@ -20,6 +21,8 @@ public class DataLoader implements CommandLineRunner {
     UserRepository userRepository;
     @Autowired
     WatchFlagRepository watchFlagRepository;
+    @Autowired
+    UserSeriesRepository userSeriesRepository;
     @Override
     public void run(String... args) throws Exception {
         loadSeriesData();
@@ -27,16 +30,19 @@ public class DataLoader implements CommandLineRunner {
         loadSeriesTagsData();
         loadUserData();
         loadWatchFlagsData();
+        loadUserSeries();
         long series = seriesRepository.count();
         long tags = tagRepository.count();
         long stags = seriesTagsRepository.count();
         long users = userRepository.count();
         long watchflags = watchFlagRepository.count();
+        long userSeries = userSeriesRepository.count();
         System.out.println("Series count: "+series);
         System.out.println("Tags count: "+tags);
         System.out.println("SeriesTags count: "+stags);
         System.out.println("Users count: "+users);
         System.out.println("Watchflags count: "+watchflags);
+        System.out.println("UserSeries count: "+userSeries);
     }
     private void loadSeriesData(){
         if(seriesRepository.count() == 0){
@@ -263,6 +269,66 @@ public class DataLoader implements CommandLineRunner {
             watchFlagRepository.save(watchFlag2);
             watchFlagRepository.save(watchFlag3);
             watchFlagRepository.save(watchFlag4);
+        }
+    }
+    private void loadUserSeries(){
+        if(userSeriesRepository.count() == 0){
+            User u1 = null;
+            User u2 = null;
+            User u3 = null;
+            Optional<User> userO1 = userRepository.findById(1L);
+            if(userO1.isPresent()) u1 = userO1.get();
+            Optional<User> userO2 = userRepository.findById(2L);
+            if(userO2.isPresent()) u2 = userO2.get();
+            Optional<User> userO3 = userRepository.findById(3L);
+            if(userO3.isPresent()) u3 = userO3.get();
+
+            Series series1 = null;
+            Series series4= null;
+            Series series6= null;
+            Series series7= null;
+            Series series8= null;
+            Series series9= null;
+
+            Optional<Series> seriesO1 = seriesRepository.findById(1);
+            if(seriesO1.isPresent()) series1 = seriesO1.get();
+            Optional<Series> seriesO4 = seriesRepository.findById(4);
+            if(seriesO4.isPresent()) series4 = seriesO4.get();
+            Optional<Series> seriesO6 = seriesRepository.findById(6);
+            if(seriesO6.isPresent()) series6 = seriesO6.get();
+            Optional<Series> seriesO7 = seriesRepository.findById(7);
+            if(seriesO7.isPresent()) series7 = seriesO7.get();
+            Optional<Series> seriesO8 = seriesRepository.findById(8);
+            if(seriesO8.isPresent()) series8 = seriesO8.get();
+            Optional<Series> seriesO9 = seriesRepository.findById(9);
+            if(seriesO9.isPresent()) series9 = seriesO9.get();
+
+            WatchFlags watchFlags1 = null;
+            WatchFlags watchFlags2 = null;
+            WatchFlags watchFlags3 = null;
+            WatchFlags watchFlags4 = null;
+
+            Optional<WatchFlags> watchFlagsO1 = watchFlagRepository.findById(1);
+            if(watchFlagsO1.isPresent()) watchFlags1 = watchFlagsO1.get();
+            Optional<WatchFlags> watchFlagsO2 = watchFlagRepository.findById(2);
+            if(watchFlagsO2.isPresent()) watchFlags2 = watchFlagsO2.get();
+            Optional<WatchFlags> watchFlagsO3 = watchFlagRepository.findById(3);
+            if(watchFlagsO3.isPresent()) watchFlags3 = watchFlagsO3.get();
+            Optional<WatchFlags> watchFlagsO4 = watchFlagRepository.findById(4);
+            if(watchFlagsO4.isPresent()) watchFlags4 = watchFlagsO4.get();
+
+            UserSeries us1 = new UserSeries(u1,series4,watchFlags1);
+            UserSeries us2 = new UserSeries(u1,series1,watchFlags3);
+            UserSeries us3 = new UserSeries(u2,series8,watchFlags2);
+            UserSeries us4 = new UserSeries(u2,series4,watchFlags1);
+            UserSeries us5 = new UserSeries(u3,series4,watchFlags4);
+            UserSeries us6 = new UserSeries(u3,series7,watchFlags1);
+            UserSeries us7 = new UserSeries(u3,series6,watchFlags1);
+            UserSeries us8 = new UserSeries(u1,series9,watchFlags2);
+
+            List<UserSeries> userSeriesList = List.of(us1,us2,us3,us4,us5,us6,us7,us8);
+            userSeriesRepository.saveAll(userSeriesList);
+
         }
     }
 }
