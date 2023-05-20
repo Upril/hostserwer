@@ -23,7 +23,7 @@ public class UserController {
         return new ResponseEntity<>(userService.getAllUsers(), HttpStatus.OK);
     }
     @GetMapping("/api/v1/user/{id}")
-    public ResponseEntity<User> getUserById(@PathVariable Integer id){
+    public ResponseEntity<User> getUserById(@PathVariable("id") Integer id){
         Long i = Long.valueOf(id);
         return new ResponseEntity<>(userService.getUserById(i), HttpStatus.OK);
     }

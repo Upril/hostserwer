@@ -5,6 +5,7 @@ import com.serwertetowy.entities.SeriesTags;
 import com.serwertetowy.entities.Tags;
 import com.serwertetowy.repos.SeriesRepository;
 import com.serwertetowy.repos.SeriesTagsRepository;
+import com.serwertetowy.services.EpisodeSummary;
 import com.serwertetowy.services.EpisodesService;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -22,6 +23,7 @@ import java.util.Set;
 public class SeriesController {
     private SeriesRepository seriesRepository;
     record SeriesRequest(String name, String description, Set<Tags> tags){}
+    record SeriesPutRequest(String name, String description, Set<Tags> tags, Set<EpisodeSummary> episodes){}
     @PostMapping
     public ResponseEntity<Series> saveSeries(@RequestBody SeriesRequest request){
         Set<SeriesTags> seriesTagsSet = new HashSet<>();
@@ -42,6 +44,8 @@ public class SeriesController {
         Optional<Series> series = seriesRepository.findById(id);
         return series.map(value -> new ResponseEntity<>(value, HttpStatus.OK)).orElseGet(() -> new ResponseEntity<>(HttpStatus.NOT_FOUND));
     }
+
+
 
 
 }
