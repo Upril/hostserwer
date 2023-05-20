@@ -1,11 +1,11 @@
 package com.serwertetowy.entities;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
-@Data
+@Setter
+@Getter
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
@@ -14,9 +14,14 @@ public class SeriesTags {
     @SequenceGenerator(name = "seriestag_id_sequence", sequenceName = "seriestag_id_sequence")
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "seriestag_id_sequence")
     private Long id;
+    @JsonBackReference
     @ManyToOne
     private Series series;
     @ManyToOne
     private Tags tags;
 
+    public SeriesTags(Series series, Tags tags) {
+        this.series = series;
+        this.tags = tags;
+    }
 }

@@ -1,13 +1,13 @@
 package com.serwertetowy.entities;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.util.Set;
 
-@Data
+@Setter
+@Getter
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
@@ -18,12 +18,22 @@ public class Series {
     private Long id;
     private String name;
     private String description;
-    @OneToMany(mappedBy = "series")
+    @JsonManagedReference
+    @OneToMany(mappedBy = "series", cascade = CascadeType.ALL)
     private Set<SeriesTags> seriesTags;
     @OneToMany(mappedBy = "series")
     private Set<Rating> seriesRatings;
     @OneToMany(mappedBy = "series")
     private Set<Episodes> episodes;
 
+    public Series(String name, String description, Set<SeriesTags> seriesTags) {
+        this.name = name;
+        this.description = description;
+        this.seriesTags = seriesTags;
+    }
 
+    public Series(String name, String description) {
+        this.name = name;
+        this.description = description;
+    }
 }
