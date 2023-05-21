@@ -40,7 +40,8 @@ public class EpisodeServiceImpl implements EpisodesService {
     public void saveEpisode(MultipartFile file, String name/*, Set<String> languagesSet*/, Integer seriesId) throws IOException {
         Optional<Series> series = seriesRepository.findById(seriesId);
         if(!series.isPresent()) throw new SeriesNotFoundException();//may delete later
-        Episodes newEpisode = new Episodes(name,series.get()/*,languagesSet*/,file.getBytes());
+        Series seriesFr = series.get();
+        Episodes newEpisode = new Episodes(name,seriesFr/*,languagesSet*/,file.getBytes());
         episodesRepository.save(newEpisode);
     }
 

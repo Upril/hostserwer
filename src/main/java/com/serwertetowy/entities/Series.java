@@ -24,6 +24,7 @@ public class Series {
     @OneToMany(mappedBy = "series")
     private Set<Rating> seriesRatings;
     @OneToMany(mappedBy = "series")
+    @JsonManagedReference
     private Set<Episodes> episodes;
 
     public Series(String name, String description, Set<SeriesTags> seriesTags) {

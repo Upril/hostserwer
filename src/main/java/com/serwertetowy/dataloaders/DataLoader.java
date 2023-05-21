@@ -163,27 +163,27 @@ public class DataLoader implements CommandLineRunner {
 
             Optional<Tags> tagO1 = tagRepository.findById(1);
             if(tagO1.isPresent()) tag1 = tagO1.get();
-            Optional<Tags> tagO2 = tagRepository.findById(1);
+            Optional<Tags> tagO2 = tagRepository.findById(2);
             if(tagO2.isPresent()) tag2 = tagO2.get();
-            Optional<Tags> tagO3 = tagRepository.findById(1);
+            Optional<Tags> tagO3 = tagRepository.findById(3);
             if(tagO3.isPresent()) tag3 = tagO3.get();
-            Optional<Tags> tagO4 = tagRepository.findById(1);
+            Optional<Tags> tagO4 = tagRepository.findById(4);
             if(tagO4.isPresent()) tag4 = tagO4.get();
-            Optional<Tags> tagO6 = tagRepository.findById(1);
+            Optional<Tags> tagO6 = tagRepository.findById(6);
             if(tagO6.isPresent()) tag6 = tagO6.get();
-            Optional<Tags> tagO7 = tagRepository.findById(1);
+            Optional<Tags> tagO7 = tagRepository.findById(7);
             if(tagO7.isPresent()) tag7 = tagO7.get();
-            Optional<Tags> tagO8 = tagRepository.findById(1);
+            Optional<Tags> tagO8 = tagRepository.findById(8);
             if(tagO8.isPresent()) tag8 = tagO8.get();
-            Optional<Tags> tagO9 = tagRepository.findById(1);
+            Optional<Tags> tagO9 = tagRepository.findById(9);
             if(tagO9.isPresent()) tag9 = tagO9.get();
-            Optional<Tags> tagO10 = tagRepository.findById(1);
+            Optional<Tags> tagO10 = tagRepository.findById(10);
             if(tagO10.isPresent()) tag10 = tagO10.get();
-            Optional<Tags> tagO11 = tagRepository.findById(1);
+            Optional<Tags> tagO11 = tagRepository.findById(11);
             if(tagO11.isPresent()) tag11 = tagO11.get();
-            Optional<Tags> tagO12 = tagRepository.findById(1);
+            Optional<Tags> tagO12 = tagRepository.findById(12);
             if(tagO12.isPresent()) tag12 = tagO12.get();
-            Optional<Tags> tagO13 = tagRepository.findById(1);
+            Optional<Tags> tagO13 = tagRepository.findById(13);
             if(tagO13.isPresent()) tag13 = tagO13.get();
 
 
