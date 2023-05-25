@@ -21,15 +21,10 @@ public class Episodes{
     private String title;
     //private Set<String> languages;
 
-    @Lob
-    @Basic(fetch = FetchType.LAZY)
-    private byte[] data;
-
     public Episodes(String name, Series series/*, Set<String> langs*/, byte[] data){
         //this.languages = langs;
         this.series = series;
         this.title = name;
-        this.data = data;
     }
 
 
