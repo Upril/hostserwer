@@ -11,6 +11,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import reactor.core.publisher.Mono;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -28,12 +29,18 @@ public class EpisodesController {
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
-    @GetMapping("/{id}/play")
-    public ResponseEntity<Resource> getVideoById(@PathVariable("id")Integer id){
-        return ResponseEntity
-                .status(HttpStatus.OK)
-                .contentType(MediaType.APPLICATION_OCTET_STREAM)
-                .body(new ByteArrayResource(episodesService.getEpisodeData(id).getData()));
+//    @GetMapping("/{id}/play")
+//    public ResponseEntity<Resource> getVideoById(@PathVariable("id")Integer id){
+//        return ResponseEntity
+//                .status(HttpStatus.OK)
+//                .contentType(MediaType.APPLICATION_OCTET_STREAM)
+//                .body(new ByteArrayResource(episodesService.getEpisodeData(id).getData()));
+//    }
+    @GetMapping(value = "/{id}/play",produces = "video/mp4")
+    public Mono<Resource> getEpisodeData(@PathVariable Integer id, @RequestHeader("Range") String range){
+        System.out.println("range in bytes: "+range);
+        EpisodeSummary episodeSummary = episodesService.getEpisode(id);
+        return episodesService.getEpisodeData(episodeSummary.getTitle());
     }
     @GetMapping("/{id}")
     public ResponseEntity<EpisodeSummary> getEpisodebyId(@PathVariable("id")Integer id){
