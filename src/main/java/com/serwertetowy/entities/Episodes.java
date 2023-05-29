@@ -21,7 +21,7 @@ public class Episodes{
     private String title;
     //private Set<String> languages;
 
-    public Episodes(String name, Series series/*, Set<String> langs*/, byte[] data){
+    public Episodes(String name, Series series/*, Set<String> langs*/){
         //this.languages = langs;
         this.series = series;
         this.title = name;

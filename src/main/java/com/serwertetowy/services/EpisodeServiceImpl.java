@@ -2,7 +2,6 @@ package com.serwertetowy.services;
 
 import com.serwertetowy.entities.Episodes;
 import com.serwertetowy.entities.Series;
-import com.serwertetowy.exceptions.EpisodeNotFoundException;
 import com.serwertetowy.exceptions.SeriesNotFoundException;
 import com.serwertetowy.repos.EpisodesRepository;
 import com.serwertetowy.repos.SeriesRepository;
@@ -16,6 +15,9 @@ import org.springframework.web.multipart.MultipartFile;
 import reactor.core.publisher.Mono;
 
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.List;
 import java.util.Optional;
 
@@ -49,13 +51,17 @@ public class EpisodeServiceImpl implements EpisodesService {
     public List<EpisodeSummary> getEpisodesBySeries(Integer seriesId){
         return episodesRepository.findEpisodeSummaryBySeriesId(seriesId);
     }
+
     public void saveEpisode(MultipartFile file, String name/*, Set<String> languagesSet*/, Integer seriesId) throws IOException {
+        Path root = Paths.get("target/classes/videos");
         Optional<Series> series = seriesRepository.findById(seriesId);
-        if(!series.isPresent()) throw new SeriesNotFoundException();//may delete later
+        if(series.isEmpty()) throw new SeriesNotFoundException();//may delete later
         Series seriesFr = series.get();
-        Episodes newEpisode = new Episodes(name,seriesFr/*,languagesSet*/,file.getBytes());
+        Episodes newEpisode = new Episodes(name,seriesFr/*,languagesSet*/);
         episodesRepository.save(newEpisode);
+        Files.copy(file.getInputStream(), root.resolve(name+".mp4"));
     }
+
 
 }
 

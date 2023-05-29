@@ -3,6 +3,10 @@ server:
   error:
     include-message: always
 spring:
+  web:
+    resources:
+      static-locations[0]: "file:src/main/resources/videos/"
+      static-locations[1]: "classpath:/videos/"
   datasource:
     url: jdbc:postgresql://localhost:5432/hostdb
     username: hostserwer
