@@ -24,4 +24,14 @@ public class Rating {
     private short graphicsRating;
     private short charactersRating;
     private short generalRating;
+
+    public Rating(Series series, User user, short plotRating, short musicRating, short graphicsRating, short charactersRating, short generalRating) {
+        this.series = series;
+        this.user = user;
+        this.plotRating = plotRating;
+        this.musicRating = musicRating;
+        this.graphicsRating = graphicsRating;
+        this.charactersRating = charactersRating;
+        this.generalRating = generalRating;
+    }
 }

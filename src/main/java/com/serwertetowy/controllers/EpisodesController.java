@@ -45,7 +45,7 @@ public class EpisodesController {
         EpisodeSummary episode = episodesService.getEpisode(id);
         return new ResponseEntity<>(episode, HttpStatus.OK);
     }
-    //@Deprecated
+    @Deprecated
     @GetMapping("{seriesId}/all")
     public ResponseEntity<List<video>> getEpisodesBySeries(@PathVariable("seriesId")Integer id){
         List<video> videoList=new ArrayList<>();
