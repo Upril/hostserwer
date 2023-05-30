@@ -52,12 +52,12 @@ public class EpisodeServiceImpl implements EpisodesService {
         return episodesRepository.findEpisodeSummaryBySeriesId(seriesId);
     }
 
-    public void saveEpisode(MultipartFile file, String name/*, Set<String> languagesSet*/, Integer seriesId) throws IOException {
+    public void saveEpisode(MultipartFile file, String name, List<String> languagesList, Integer seriesId) throws IOException {
         Path root = Paths.get("target/classes/videos");
         Optional<Series> series = seriesRepository.findById(seriesId);
         if(series.isEmpty()) throw new SeriesNotFoundException();//may delete later
         Series seriesFr = series.get();
-        Episodes newEpisode = new Episodes(name,seriesFr/*,languagesSet*/);
+        Episodes newEpisode = new Episodes(name,seriesFr,languagesList);
         episodesRepository.save(newEpisode);
         Files.copy(file.getInputStream(), root.resolve(name+".mp4"));
     }

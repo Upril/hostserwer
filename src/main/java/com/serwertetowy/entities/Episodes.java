@@ -5,6 +5,9 @@ import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+
+import java.util.List;
+
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -19,10 +22,10 @@ public class Episodes{
     @JsonManagedReference
     private Series series;
     private String title;
-    //private Set<String> languages;
+    private List<String> languages;
 
-    public Episodes(String name, Series series/*, Set<String> langs*/){
-        //this.languages = langs;
+    public Episodes(String name, Series series, List<String> langs){
+        this.languages = langs;
         this.series = series;
         this.title = name;
     }
