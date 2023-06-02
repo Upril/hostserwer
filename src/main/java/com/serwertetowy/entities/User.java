@@ -15,11 +15,17 @@ public class User {
     @SequenceGenerator(name = "user_id_sequence", sequenceName = "user_id_sequence")
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "user_id_sequence")
     private Long id;
-    private String firstName;
-    private String lastName;
+    @Column(name = "firstName")
+    private String firstname;
+    @Column(name = "lastName")
+    private String lastname;
     private String email;
     @JsonIgnore
     private String password;
+    @Lob
+    @Column(name = "imageData", length = 1000)
+    @Basic(fetch = FetchType.LAZY)
+    private byte[] imageData;
     @OneToMany(mappedBy = "user")
     private Set<Rating> userRatings;
     @JsonProperty

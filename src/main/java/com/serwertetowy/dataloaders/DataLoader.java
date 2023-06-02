@@ -2,10 +2,12 @@ package com.serwertetowy.dataloaders;
 
 import com.serwertetowy.entities.*;
 import com.serwertetowy.repos.*;
+import com.serwertetowy.services.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
 
@@ -19,6 +21,8 @@ public class DataLoader implements CommandLineRunner {
     TagRepository tagRepository;
     @Autowired
     UserRepository userRepository;
+    @Autowired
+    UserService userService;
     @Autowired
     WatchFlagRepository watchFlagRepository;
     @Autowired
@@ -233,29 +237,29 @@ public class DataLoader implements CommandLineRunner {
             seriesTagsRepository.save(tags21);
         }
     }
-    private void loadUserData(){
+    private void loadUserData() throws IOException {
         if(userRepository.count() == 0) {
             User user1 = new User();
-            user1.setFirstName("John");
-            user1.setLastName("Doe");
+            user1.setFirstname("John");
+            user1.setLastname("Doe");
             user1.setEmail("john@doe.com");
             user1.setPassword("123456");
 
             User user2 = new User();
-            user2.setFirstName("Baba");
-            user2.setLastName("Booey");
+            user2.setFirstname("Baba");
+            user2.setLastname("Booey");
             user2.setEmail("baba@booey.com");
             user2.setPassword("123456");
 
             User user3 = new User();
-            user3.setFirstName("John");
-            user3.setLastName("Darksouls");
+            user3.setFirstname("John");
+            user3.setLastname("Darksouls");
             user3.setEmail("darksoulsiseasy@gg.com");
             user3.setPassword("123456");
 
-            userRepository.save(user1);
-            userRepository.save(user2);
-            userRepository.save(user3);
+            userService.registerUser(user1);
+            userService.registerUser(user2);
+            userService.registerUser(user3);
         }
     }
     private void loadWatchFlagsData(){
