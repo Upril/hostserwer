@@ -18,14 +18,14 @@ import java.util.List;
 @AllArgsConstructor
 public class UserController {
     private UserService userService;
-
-    @PostMapping(value = "/api/v1/user/register", params = "file")
-    public ResponseEntity<User> register(@RequestBody User user, @RequestParam("file")MultipartFile file) throws IOException {
-        return new ResponseEntity<>(userService.registerUserWithImage(user, file), HttpStatus.OK);
-    }
-    @PostMapping("/api/v1/user/register")
-    public ResponseEntity<User> registerNoImage(@RequestBody User user) throws IOException {
-        return new ResponseEntity<>(userService.registerUser(user), HttpStatus.OK);
+    //register user with file set in form-data
+    @PostMapping(value = "/api/v1/user/register")
+    public ResponseEntity<User> register(@RequestParam String firstname, @RequestParam String lastname,
+                                         @RequestParam String email, @RequestParam String password ,
+                                         @RequestParam(required = false) MultipartFile file) throws IOException {
+        User user = new User(firstname, lastname, email, password);
+        if(file == null) return new ResponseEntity<>(userService.registerUser(user), HttpStatus.OK);
+        else return new ResponseEntity<>(userService.registerUserWithImage(user, file), HttpStatus.OK);
     }
     @GetMapping("/api/v1/user/all")
     public ResponseEntity<List<UserSummary>> getAllUsers(){
