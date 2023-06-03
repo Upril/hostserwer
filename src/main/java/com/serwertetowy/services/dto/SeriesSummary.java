@@ -1,4 +1,4 @@
-package com.serwertetowy.services;
+package com.serwertetowy.services.dto;
 import com.serwertetowy.entities.Tags;
 import lombok.Data;
 import lombok.NoArgsConstructor;

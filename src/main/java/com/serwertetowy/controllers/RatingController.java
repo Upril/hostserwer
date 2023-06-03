@@ -2,7 +2,7 @@ package com.serwertetowy.controllers;
 
 import com.serwertetowy.entities.Rating;
 import com.serwertetowy.services.RatingService;
-import com.serwertetowy.services.RatingSummary;
+import com.serwertetowy.services.dto.RatingSummary;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

@@ -1,4 +1,4 @@
-package com.serwertetowy.services;
+package com.serwertetowy.services.implementations;
 
 import com.serwertetowy.entities.Rating;
 import com.serwertetowy.entities.Series;
@@ -6,6 +6,9 @@ import com.serwertetowy.entities.User;
 import com.serwertetowy.exceptions.SeriesNotFoundException;
 import com.serwertetowy.repos.RatingRepository;
 import com.serwertetowy.repos.SeriesRepository;
+import com.serwertetowy.services.RatingService;
+import com.serwertetowy.services.dto.RatingSummary;
+import com.serwertetowy.services.UserService;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -14,7 +17,7 @@ import java.util.Optional;
 
 @Service
 @AllArgsConstructor
-public class RatingServiceImpl implements RatingService{
+public class RatingServiceImpl implements RatingService {
     private RatingRepository ratingRepository;
     private UserService userService;
     private SeriesRepository seriesRepository;

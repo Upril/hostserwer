@@ -1,5 +1,6 @@
 package com.serwertetowy.services;
 
+import com.serwertetowy.services.dto.EpisodeSummary;
 import org.springframework.core.io.Resource;
 import org.springframework.web.multipart.MultipartFile;
 import reactor.core.publisher.Mono;

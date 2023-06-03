@@ -1,7 +1,7 @@
 package com.serwertetowy.repos;
 
 import com.serwertetowy.entities.Rating;
-import com.serwertetowy.services.RatingSummary;
+import com.serwertetowy.services.dto.RatingSummary;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;

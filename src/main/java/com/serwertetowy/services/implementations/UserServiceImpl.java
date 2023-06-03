@@ -1,7 +1,9 @@
-package com.serwertetowy.services;
+package com.serwertetowy.services.implementations;
 
 import com.serwertetowy.entities.User;
 import com.serwertetowy.repos.UserRepository;
+import com.serwertetowy.services.UserService;
+import com.serwertetowy.services.dto.UserSummary;
 import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ByteArrayResource;
@@ -17,7 +19,7 @@ import java.util.List;
 
 @Service
 @AllArgsConstructor
-public class UserServiceImpl implements UserService{
+public class UserServiceImpl implements UserService {
     @Autowired
     UserRepository repository;
     @Autowired

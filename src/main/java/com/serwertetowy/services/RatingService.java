@@ -1,5 +1,7 @@
 package com.serwertetowy.services;
 
+import com.serwertetowy.services.dto.RatingSummary;
+
 import java.util.List;
 
 public interface RatingService {

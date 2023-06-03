@@ -1,7 +1,7 @@
 package com.serwertetowy.repos;
 
 import com.serwertetowy.entities.User;
-import com.serwertetowy.services.UserSummary;
+import com.serwertetowy.services.dto.UserSummary;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 

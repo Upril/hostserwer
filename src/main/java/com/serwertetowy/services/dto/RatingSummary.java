@@ -1,4 +1,4 @@
-package com.serwertetowy.services;
+package com.serwertetowy.services.dto;
 
 public interface RatingSummary {
     Long getId();

@@ -1,24 +1,30 @@
-package com.serwertetowy.services;
+package com.serwertetowy.services.implementations;
 
-import com.serwertetowy.entities.Series;
-import com.serwertetowy.entities.SeriesTags;
-import com.serwertetowy.entities.Tags;
+import com.serwertetowy.entities.*;
 import com.serwertetowy.exceptions.TagNotFoundException;
-import com.serwertetowy.repos.SeriesRepository;
-import com.serwertetowy.repos.SeriesTagsRepository;
-import com.serwertetowy.repos.TagRepository;
+import com.serwertetowy.repos.*;
+import com.serwertetowy.services.EpisodesService;
+import com.serwertetowy.services.UserService;
+import com.serwertetowy.services.dto.SeriesData;
+import com.serwertetowy.services.SeriesService;
+import com.serwertetowy.services.dto.SeriesSummary;
 import lombok.AllArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.*;
 
 @Service
 @AllArgsConstructor
-public class SeriesServiceImpl implements SeriesService{
+public class SeriesServiceImpl implements SeriesService {
     private EpisodesService episodesService;
     private SeriesRepository seriesRepository;
     private SeriesTagsRepository seriesTagsRepository;
     private TagRepository tagRepository;
+    private WatchFlagRepository watchFlagRepository;
+    private UserSeriesRepository userSeriesRepository;
+    private UserService userService;
     @Override
     public Series saveSeries(String name, String description, Set<Tags> tags) {
         Set<SeriesTags> seriesTagsSet = new HashSet<>();
@@ -70,5 +76,14 @@ public class SeriesServiceImpl implements SeriesService{
         summary.setSeriesTags(tags);
         summary.setEpisodes(episodesService.getEpisodesBySeries(summary.getId().intValue()));
         return summary;
+    }
+
+    @Override
+    public UserSeries addToWatchlist(Integer seriesId, Integer userId) {
+        User user = userService.getUserById(userId.longValue());
+        Series series = seriesRepository.findById(seriesId).orElseThrow(()->new ResponseStatusException(HttpStatus.NOT_FOUND));
+        UserSeries userSeries = new UserSeries(user,series,watchFlagRepository.findById(1).orElseThrow(()->new ResponseStatusException(HttpStatus.NOT_FOUND)));
+        userSeriesRepository.save(userSeries);
+        return userSeries;
     }
 }

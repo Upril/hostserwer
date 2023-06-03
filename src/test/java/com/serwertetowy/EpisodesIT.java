@@ -4,7 +4,7 @@ import com.serwertetowy.entities.Episodes;
 import com.serwertetowy.entities.Series;
 import com.serwertetowy.repos.EpisodesRepository;
 import com.serwertetowy.repos.SeriesRepository;
-import com.serwertetowy.services.EpisodeSummary;
+import com.serwertetowy.services.dto.EpisodeSummary;
 import com.serwertetowy.services.EpisodesService;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;

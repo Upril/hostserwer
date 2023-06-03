@@ -1,7 +1,7 @@
 package com.serwertetowy.controllers;
 
 import com.serwertetowy.entities.Episodes;
-import com.serwertetowy.services.EpisodeSummary;
+import com.serwertetowy.services.dto.EpisodeSummary;
 import com.serwertetowy.services.EpisodesService;
 import org.springframework.core.io.Resource;
 import lombok.AllArgsConstructor;

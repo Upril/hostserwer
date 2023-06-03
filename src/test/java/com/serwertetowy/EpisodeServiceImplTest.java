@@ -1,17 +1,12 @@
 package com.serwertetowy;
 
-import com.serwertetowy.entities.Episodes;
 import com.serwertetowy.entities.Series;
 import com.serwertetowy.repos.EpisodesRepository;
 import com.serwertetowy.repos.SeriesRepository;
-import com.serwertetowy.services.EpisodeServiceImpl;
-import com.serwertetowy.services.EpisodeSummary;
-import com.serwertetowy.services.EpisodesService;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
-import java.util.List;
-import java.util.Optional;
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.*;
 

@@ -1,7 +1,7 @@
 package com.serwertetowy.repos;
 
 import com.serwertetowy.entities.Episodes;
-import com.serwertetowy.services.EpisodeSummary;
+import com.serwertetowy.services.dto.EpisodeSummary;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;

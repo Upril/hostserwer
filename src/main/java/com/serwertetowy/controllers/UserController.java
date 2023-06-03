@@ -2,7 +2,7 @@ package com.serwertetowy.controllers;
 
 import com.serwertetowy.entities.User;
 import com.serwertetowy.services.UserService;
-import com.serwertetowy.services.UserSummary;
+import com.serwertetowy.services.dto.UserSummary;
 import lombok.AllArgsConstructor;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpStatus;

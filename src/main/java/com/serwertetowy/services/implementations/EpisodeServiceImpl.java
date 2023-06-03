@@ -1,10 +1,12 @@
-package com.serwertetowy.services;
+package com.serwertetowy.services.implementations;
 
 import com.serwertetowy.entities.Episodes;
 import com.serwertetowy.entities.Series;
 import com.serwertetowy.exceptions.SeriesNotFoundException;
 import com.serwertetowy.repos.EpisodesRepository;
 import com.serwertetowy.repos.SeriesRepository;
+import com.serwertetowy.services.dto.EpisodeSummary;
+import com.serwertetowy.services.EpisodesService;
 import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
