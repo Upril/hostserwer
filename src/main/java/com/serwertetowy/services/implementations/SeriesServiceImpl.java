@@ -5,9 +5,8 @@ import com.serwertetowy.exceptions.TagNotFoundException;
 import com.serwertetowy.repos.*;
 import com.serwertetowy.services.EpisodesService;
 import com.serwertetowy.services.UserService;
-import com.serwertetowy.services.dto.SeriesData;
+import com.serwertetowy.services.dto.*;
 import com.serwertetowy.services.SeriesService;
-import com.serwertetowy.services.dto.SeriesSummary;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -79,11 +78,38 @@ public class SeriesServiceImpl implements SeriesService {
     }
 
     @Override
-    public UserSeries addToWatchlist(Integer seriesId, Integer userId) {
+    public UserSeriesSummary addToWatchlist(Integer seriesId, Integer userId) {
         User user = userService.getUserById(userId.longValue());
         Series series = seriesRepository.findById(seriesId).orElseThrow(()->new ResponseStatusException(HttpStatus.NOT_FOUND));
         UserSeries userSeries = new UserSeries(user,series,watchFlagRepository.findById(1).orElseThrow(()->new ResponseStatusException(HttpStatus.NOT_FOUND)));
         userSeriesRepository.save(userSeries);
-        return userSeries;
+        SeriesSummary seriesSummary = new SeriesSummary();
+        seriesSummary.setId(series.getId());
+        seriesSummary.setName(series.getName());
+        seriesSummary.setDescription(series.getDescription());
+        seriesSummary.setEpisodes(episodesService.getEpisodesBySeries(seriesId));
+        List<Tags> tags = new ArrayList<>();
+        for(SeriesTags sTag: seriesTagsRepository.findBySeriesId(series.getId())){
+            Optional<Tags> optionalTags = tagRepository.findById(sTag.getTags().getId().intValue());
+            if (!optionalTags.isPresent()) throw new TagNotFoundException();
+            else tags.add(optionalTags.get());
+        }
+        seriesSummary.setSeriesTags(tags);
+        return new UserSeriesSummary() {
+            @Override
+            public Long getId() {
+                return userSeries.getId();
+            }
+
+            @Override
+            public SeriesSummary getSeriesSummary() {
+                return seriesSummary;
+            }
+
+            @Override
+            public UserSummary getUserSummary() {
+                return userService.getUserByEmail(user.getEmail());
+            }
+        };
     }
 }

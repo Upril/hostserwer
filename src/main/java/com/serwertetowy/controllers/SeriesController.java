@@ -1,10 +1,10 @@
 package com.serwertetowy.controllers;
 import com.serwertetowy.entities.Series;
 import com.serwertetowy.entities.Tags;
-import com.serwertetowy.entities.UserSeries;
 import com.serwertetowy.services.dto.EpisodeSummary;
 import com.serwertetowy.services.SeriesService;
 import com.serwertetowy.services.dto.SeriesSummary;
+import com.serwertetowy.services.dto.UserSeriesSummary;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -34,7 +34,7 @@ public class SeriesController {
         return new ResponseEntity<>(seriesService.getSeriesById(id), HttpStatus.OK);
     }
     @PostMapping("/addToWatchlist")
-    public ResponseEntity<UserSeries> addSeriesToWatchlist(@RequestParam Integer seriesId, @RequestParam Integer userId){
+    public ResponseEntity<UserSeriesSummary> addSeriesToWatchlist(@RequestParam Integer seriesId, @RequestParam Integer userId){
         return new ResponseEntity<>(seriesService.addToWatchlist(seriesId,userId), HttpStatus.OK);
     }
 
