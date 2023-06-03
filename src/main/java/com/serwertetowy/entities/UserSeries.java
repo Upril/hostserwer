@@ -2,8 +2,10 @@ package com.serwertetowy.entities;
 
 import jakarta.persistence.*;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Data
+@NoArgsConstructor
 @Entity
 public class UserSeries {
     @Id

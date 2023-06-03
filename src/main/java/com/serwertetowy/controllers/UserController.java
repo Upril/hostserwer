@@ -2,6 +2,7 @@ package com.serwertetowy.controllers;
 
 import com.serwertetowy.entities.User;
 import com.serwertetowy.services.UserService;
+import com.serwertetowy.services.dto.SeriesSummary;
 import com.serwertetowy.services.dto.UserSummary;
 import lombok.AllArgsConstructor;
 import org.springframework.core.io.Resource;
@@ -39,5 +40,9 @@ public class UserController {
     @GetMapping(value = "/api/v1/user/{id}/image", produces = MediaType.IMAGE_JPEG_VALUE)
     ResponseEntity<Resource> getUserImage(@PathVariable Long id){
         return new ResponseEntity<>(userService.getUserImage(id), HttpStatus.OK);
+    }
+    @GetMapping("/api/v1/user/{id}/watchlist")
+    public ResponseEntity<List<SeriesSummary>> getUserWatchlist(@PathVariable Long id){
+        return new ResponseEntity<>(userService.getWatchlist(id), HttpStatus.OK);
     }
 }

@@ -1,6 +1,7 @@
 package com.serwertetowy.services;
 
 import com.serwertetowy.entities.User;
+import com.serwertetowy.services.dto.SeriesSummary;
 import com.serwertetowy.services.dto.UserSummary;
 import org.springframework.core.io.Resource;
 import org.springframework.web.multipart.MultipartFile;
@@ -15,4 +16,5 @@ public interface UserService {
     UserSummary getUserByEmail(String email);
     User getUserById(Long id);
     Resource getUserImage(Long id);
+    List<SeriesSummary> getWatchlist(Long id);
 }

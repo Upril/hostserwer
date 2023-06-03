@@ -77,6 +77,7 @@ public class SeriesServiceImpl implements SeriesService {
         return summary;
     }
 
+
     @Override
     public UserSeriesSummary addToWatchlist(Integer seriesId, Integer userId) {
         User user = userService.getUserById(userId.longValue());
