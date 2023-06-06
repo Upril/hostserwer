@@ -8,4 +8,5 @@ import java.util.List;
 
 public interface UserSeriesRepository extends JpaRepository<UserSeries, Long> {
     List<UserSeriesData> findByUserId(Long id);
+    UserSeriesData findByUserIdAndSeriesId(Long userId, Long seriesId);
 }

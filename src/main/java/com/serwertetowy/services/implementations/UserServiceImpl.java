@@ -2,7 +2,9 @@ package com.serwertetowy.services.implementations;
 import com.serwertetowy.entities.SeriesTags;
 import com.serwertetowy.entities.Tags;
 import com.serwertetowy.entities.User;
+import com.serwertetowy.entities.WatchFlags;
 import com.serwertetowy.exceptions.TagNotFoundException;
+import com.serwertetowy.exceptions.UserNotFoundException;
 import com.serwertetowy.repos.*;
 import com.serwertetowy.services.EpisodesService;
 import com.serwertetowy.services.UserService;
@@ -38,6 +40,9 @@ public class UserServiceImpl implements UserService {
     TagRepository tagRepository;
     @Autowired
     EpisodesService episodesService;
+    @Autowired
+    WatchFlagRepository watchFlagRepository;
+    record WatchlistDto(SeriesSummary seriesSummary, String watchFlag){}
 
     @Override
     public User registerUser(User user) throws IOException {
@@ -70,14 +75,43 @@ public class UserServiceImpl implements UserService {
         return new ByteArrayResource(image);
     }
     @Override
-    public List<SeriesSummary> getWatchlist(Long id) {
+    public List<UserSeriesSummary> getWatchlist(Long id) {
         List<UserSeriesData> userSeriesList = userSeriesRepository.findByUserId(id);
-        List<SeriesSummary> seriesSummaries = new ArrayList<>();
+        List<UserSeriesSummary> userSeriesSummaryList = new ArrayList<>();
         for (UserSeriesData userSeries: userSeriesList){
-            seriesSummaries.add(getSeriesById(userSeries.getSeriesId().intValue()));
+            userSeriesSummaryList.add(new UserSeriesSummary() {
+                @Override
+                public Long getId() {
+                    return userSeries.getId();
+                }
+
+                @Override
+                public SeriesSummary getSeriesSummary() {
+                    return getSeriesById(userSeries.getSeriesId().intValue());
+                }
+
+                @Override
+                public UserSummary getUserSummary() {
+                    return null;
+                }
+
+                @Override
+                public WatchFlags getWatchflag() {
+                    return watchFlagRepository.findById(userSeries.getWatchFlagsId().intValue()).orElseThrow(()->new ResponseStatusException(HttpStatus.NOT_FOUND));
+                }
+            });
+
         }
-        return seriesSummaries;
+        return userSeriesSummaryList;
     }
+
+    @Override
+    public void putUserImage(MultipartFile file, Long id) throws IOException {
+        User user = userRepository.findById(id).orElseThrow(UserNotFoundException::new);
+        user.setImageData(file.getBytes());
+        userRepository.save(user);
+    }
+
     private SeriesSummary getSeriesById(Integer id) {
         SeriesSummary summary = new SeriesSummary();
         SeriesData data = seriesRepository.findSeriesDataById(id);

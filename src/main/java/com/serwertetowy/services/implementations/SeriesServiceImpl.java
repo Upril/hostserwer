@@ -111,6 +111,11 @@ public class SeriesServiceImpl implements SeriesService {
             public UserSummary getUserSummary() {
                 return userService.getUserByEmail(user.getEmail());
             }
+
+            @Override
+            public WatchFlags getWatchflag() {
+                return watchFlagRepository.findById(1).orElseThrow(()->new ResponseStatusException(HttpStatus.NOT_FOUND));
+            }
         };
     }
 }
