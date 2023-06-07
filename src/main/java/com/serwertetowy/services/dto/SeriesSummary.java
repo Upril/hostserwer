@@ -4,6 +4,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.util.List;
+//dto used for returning series data without episodes videos, but with detailed tag information
 @Data
 @NoArgsConstructor
 public class SeriesSummary {

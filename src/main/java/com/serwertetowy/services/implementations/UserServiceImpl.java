@@ -42,11 +42,11 @@ public class UserServiceImpl implements UserService {
     EpisodesService episodesService;
     @Autowired
     WatchFlagRepository watchFlagRepository;
-    record WatchlistDto(SeriesSummary seriesSummary, String watchFlag){}
-
     @Override
     public User registerUser(User user) throws IOException {
+        //in the future used for password encription
         user.setPassword(user.getPassword());
+        //if no pic is sent, use a default one
         user.setImageData(resourceLoader.getResource("classpath:/images/defalt.jpg").getContentAsByteArray());
         userRepository.save(user);
         return user;
@@ -78,6 +78,7 @@ public class UserServiceImpl implements UserService {
     public List<UserSeriesSummary> getWatchlist(Long id) {
         List<UserSeriesData> userSeriesList = userSeriesRepository.findByUserId(id);
         List<UserSeriesSummary> userSeriesSummaryList = new ArrayList<>();
+        //convert userseriesdata, which contains only user and series id, into a proper watchlist dto
         for (UserSeriesData userSeries: userSeriesList){
             userSeriesSummaryList.add(new UserSeriesSummary() {
                 @Override
@@ -104,21 +105,23 @@ public class UserServiceImpl implements UserService {
         }
         return userSeriesSummaryList;
     }
-
     @Override
     public void putUserImage(MultipartFile file, Long id) throws IOException {
         User user = userRepository.findById(id).orElseThrow(UserNotFoundException::new);
         user.setImageData(file.getBytes());
         userRepository.save(user);
     }
-
+    //method to get series summary, since using the one from series service would create a dependency loop, may be
+    // resolved by moving watchlists here or to a separate controller
     private SeriesSummary getSeriesById(Integer id) {
         SeriesSummary summary = new SeriesSummary();
         SeriesData data = seriesRepository.findSeriesDataById(id);
+        //assemble series summary from raw db data
         summary.setId(data.getId());
         summary.setName(data.getName());
         summary.setDescription(data.getDescription());
         List<Tags> tags = new ArrayList<>();
+        //adding series tags data
         for(SeriesTags sTag: seriesTagsRepository.findBySeriesId(summary.getId())){
             Optional<Tags> optionalTags = tagRepository.findById(sTag.getTags().getId().intValue());
             if (!optionalTags.isPresent()) throw new TagNotFoundException();

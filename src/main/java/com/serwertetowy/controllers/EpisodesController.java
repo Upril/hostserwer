@@ -12,7 +12,6 @@ import org.springframework.web.multipart.MultipartFile;
 import reactor.core.publisher.Mono;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
 
 @RestController
@@ -20,39 +19,23 @@ import java.util.List;
 @AllArgsConstructor
 public class EpisodesController {
     private EpisodesService episodesService;
-    record video(Long id, String title/*, Set<String> languages*/){}
+    //episode saving in /target/classes/videos, to change to a cloud based file storage
     @PostMapping()
     public ResponseEntity<Episodes> saveEpisode(@RequestParam("file")MultipartFile file, @RequestParam("name")String name, @RequestParam("languages")List<String> languagesList, @RequestParam("seriesId")Integer seriesId) throws IOException {
         episodesService.saveEpisode(file,name,languagesList,seriesId);
         return new ResponseEntity<>(HttpStatus.OK);
     }
-
-//    @GetMapping("/{id}/play")
-//    public ResponseEntity<Resource> getVideoById(@PathVariable("id")Integer id){
-//        return ResponseEntity
-//                .status(HttpStatus.OK)
-//                .contentType(MediaType.APPLICATION_OCTET_STREAM)
-//                .body(new ByteArrayResource(episodesService.getEpisodeData(id).getData()));
-//    }
+    //Webflux method for video streaming in ranges of bytes, ensuring fast video load times
     @GetMapping(value = "/{id}/play",produces = "video/mp4")
     public Mono<Resource> getEpisodeData(@PathVariable Integer id, @RequestHeader("Range") String range){
         System.out.println("range in bytes: "+range);
         EpisodeSummary episodeSummary = episodesService.getEpisode(id);
         return episodesService.getEpisodeData(episodeSummary.getTitle());
     }
+    //Episode summary information: id, title and languages, may include icon in the future
     @GetMapping("/{id}")
     public ResponseEntity<EpisodeSummary> getEpisodebyId(@PathVariable("id")Integer id){
         EpisodeSummary episode = episodesService.getEpisode(id);
         return new ResponseEntity<>(episode, HttpStatus.OK);
-    }
-    @Deprecated
-    @GetMapping("{seriesId}/all")
-    public ResponseEntity<List<video>> getEpisodesBySeries(@PathVariable("seriesId")Integer id){
-        List<video> videoList=new ArrayList<>();
-        List<EpisodeSummary> episodesList = episodesService.getEpisodesBySeries(id);
-        for(EpisodeSummary e:episodesList){
-            videoList.add(new video(e.getId(),e.getTitle()/*,e.getLanguages()*/));
-        }
-        return new ResponseEntity<>(videoList, HttpStatus.OK);
     }
 }

@@ -21,8 +21,9 @@ import java.util.List;
 @AllArgsConstructor
 public class UserController {
     private UserService userService;
+    //dto for neat request response data construction, used to add watchflag info to series in watchlist
     record WatchlistDto(SeriesSummary seriesSummary, String watchFlag){}
-    //register user with file set in form-data
+    //register user, depending on whether the file was sent or not assign a default profile picture
     @PostMapping(value = "/api/v1/user/register")
     public ResponseEntity<User> register(@RequestParam String firstname, @RequestParam String lastname,
                                          @RequestParam String email, @RequestParam String password ,
@@ -31,28 +32,34 @@ public class UserController {
         if(file == null) return new ResponseEntity<>(userService.registerUser(user), HttpStatus.OK);
         else return new ResponseEntity<>(userService.registerUserWithImage(user, file), HttpStatus.OK);
     }
+    //get all users with only id, names and email
     @GetMapping("/api/v1/user/all")
     public ResponseEntity<List<UserSummary>> getAllUsers(){
         return new ResponseEntity<>(userService.getAllUsers(), HttpStatus.OK);
     }
+    //get speific user with profile picture? and ratings
     @GetMapping("/api/v1/user/{id}")
     public ResponseEntity<User> getUserById(@PathVariable("id") Integer id){
         Long i = Long.valueOf(id);
         return new ResponseEntity<>(userService.getUserById(i), HttpStatus.OK);
     }
+    //get image for given user
     @GetMapping(value = "/api/v1/user/{id}/image", produces = MediaType.IMAGE_JPEG_VALUE)
     ResponseEntity<Resource> getUserImage(@PathVariable Long id){
         return new ResponseEntity<>(userService.getUserImage(id), HttpStatus.OK);
     }
+    //get series from user watchlist with watchflags
     @GetMapping("/api/v1/user/{id}/watchlist")
     public ResponseEntity<List<WatchlistDto>> getUserWatchlist(@PathVariable Long id){
         List<UserSeriesSummary> userSeriesSummaryList = userService.getWatchlist(id);
         List<WatchlistDto> watchlistDtoList = new ArrayList<>();
+        //assembling watchlistdto from userseries data
         for(UserSeriesSummary userSeriesSummary: userSeriesSummaryList){
             watchlistDtoList.add(new WatchlistDto(userSeriesSummary.getSeriesSummary(), userSeriesSummary.getWatchflag().getName()));
         }
         return new ResponseEntity<>(watchlistDtoList, HttpStatus.OK);
     }
+    //put request to change user profile picture
     @PutMapping("/api/v1/user/{id}/image")
     ResponseEntity<Void> putUserImage(@PathVariable Long id, @RequestParam MultipartFile file) throws IOException {
         userService.putUserImage(file, id);

@@ -8,6 +8,7 @@ import org.springframework.data.jpa.repository.Query;
 import java.util.List;
 
 public interface UserRepository extends JpaRepository<User, Long> {
+    //selective db data retrieval without watchlists and pictures
     UserSummary findByEmail(String email);
     @Query(nativeQuery = true, value = """
             select
@@ -15,5 +16,6 @@ public interface UserRepository extends JpaRepository<User, Long> {
             from users
             order by id""")
     List<UserSummary> findAllUserData();
+    //may be used for logins
     User findByEmailAndPassword(String email, String password);
 }

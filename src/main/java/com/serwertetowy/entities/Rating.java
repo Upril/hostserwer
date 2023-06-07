@@ -9,10 +9,9 @@ import lombok.NoArgsConstructor;
 @Entity
 public class Rating {
     @Id
-    @SequenceGenerator(name = "user_id_sequence", sequenceName = "user_id_sequence")
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "user_id_sequence")
+    @SequenceGenerator(name = "rating_id_sequence", sequenceName = "rating_id_sequence")
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "rating_id_sequence")
     private Long id;
-    //user one user many ratings
     @ManyToOne
     @JoinColumn(name = "series_id", nullable = false)
     private Series series;
@@ -24,7 +23,7 @@ public class Rating {
     private short graphicsRating;
     private short charactersRating;
     private short generalRating;
-
+    //constructor allowing automatic id generation
     public Rating(Series series, User user, short plotRating, short musicRating, short graphicsRating, short charactersRating, short generalRating) {
         this.series = series;
         this.user = user;

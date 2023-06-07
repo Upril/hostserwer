@@ -11,6 +11,7 @@ import java.util.List;
 public interface EpisodesRepository extends JpaRepository<Episodes, Integer> {
     @Deprecated
     List<Episodes> findBySeriesId(Integer seriesId);
+    //selective episode data retrieval without the video file
     @Query(value = """
             select
                 id, title, languages, series_id

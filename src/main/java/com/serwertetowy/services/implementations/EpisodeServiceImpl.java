@@ -36,24 +36,16 @@ public class EpisodeServiceImpl implements EpisodesService {
     public EpisodeSummary getEpisode(Integer id){
         return episodesRepository.findEpisodeSummaryById(id);
     }
-//    @Transactional
-//    public Episodes getEpisodeData(Integer id){
-//        Optional<Episodes> episode = episodesRepository.findById(id);
-//        Episodes foundEpisode = new Episodes();
-//        if(episode.isPresent()) foundEpisode = episode.get();
-//        else throw new EpisodeNotFoundException();
-//        foundEpisode.setData(getVideo(foundEpisode.getTitle()));
-//        return foundEpisode;
-//    }
+    @Override
     public Mono<Resource> getEpisodeData(String title){
         return Mono.fromSupplier(()->resourceLoader.getResource(String.format(FORMAT,title)));
     }
-
+    @Override
     @Transactional
     public List<EpisodeSummary> getEpisodesBySeries(Integer seriesId){
         return episodesRepository.findEpisodeSummaryBySeriesId(seriesId);
     }
-
+    @Override
     public void saveEpisode(MultipartFile file, String name, List<String> languagesList, Integer seriesId) throws IOException {
         Path root = Paths.get("target/classes/videos");
         Optional<Series> series = seriesRepository.findById(seriesId);

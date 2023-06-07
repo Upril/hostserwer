@@ -8,7 +8,9 @@ import org.springframework.data.repository.query.Param;
 import java.util.List;
 
 public interface SeriesRepository extends JpaRepository<Series, Integer>{
+    //method for future filtering, currently not used
     List<Series> findByNameContainingIgnoreCase(String name);
+    //methods for retrieving db info for translation into Series summary dto
     @Query(value = """
             SELECT series.id, series.description, series.name
             	FROM series

@@ -13,21 +13,24 @@ import java.util.Optional;
 @RequestMapping("api/v1/tags")
 public class TagController {
     private final TagRepository tagRepository;
+    //not sure if that's needed
     record TagRequest(String name){}
 
     public TagController(TagRepository tagRepository) {
         this.tagRepository = tagRepository;
     }
-
+    //get for all tags
     @GetMapping
     public List<Tags> getTags(){
         return tagRepository.findAllByOrderByIdAsc();
     }
+    //get for specific tag data
     @GetMapping("/{id}")
     public ResponseEntity<Tags> getById(@PathVariable Integer id){
         Optional<Tags> tag = tagRepository.findById(id);
         return tag.map(tags -> new ResponseEntity<>(tags, HttpStatus.OK)).orElseGet(() -> new ResponseEntity<>(HttpStatus.NOT_FOUND));
     }
+    //post for adding a tag
     @PostMapping
     public ResponseEntity<Tags> addTag(@RequestBody TagRequest request){
         Tags tag = new Tags();
@@ -35,6 +38,7 @@ public class TagController {
         tagRepository.save(tag);
         return new ResponseEntity<>(tag, HttpStatus.OK);
     }
+    //delete for a tag (may cause problems with series)
     @DeleteMapping("/{id}")
     public ResponseEntity<Tags> deleteTag(@PathVariable Integer id){
         if(tagRepository.existsById(id)){
@@ -43,6 +47,7 @@ public class TagController {
         }
         else return new ResponseEntity<>(HttpStatus.NOT_FOUND);
     }
+    //put tag request
     @PutMapping("/{id}")
     public ResponseEntity<Tags> updateTag(@PathVariable Integer id, @RequestBody TagRequest request){
         Optional<Tags> tag = tagRepository.findById(id);

@@ -18,15 +18,18 @@ public class Series {
     private Long id;
     private String name;
     private String description;
+    //@JsonManagedReference to allow seriestags db info being updated with adding of the series
     @JsonManagedReference
     @OneToMany(mappedBy = "series", cascade = CascadeType.ALL)
     private Set<SeriesTags> seriesTags;
     @OneToMany(mappedBy = "series")
     private Set<Rating> seriesRatings;
+    //@JsonManagedReference to allow seriestags db info being updated with adding of the series
     @OneToMany(mappedBy = "series")
     @JsonManagedReference
     private Set<Episodes> episodes;
-
+    //different constructors needed for dynamic translation of series tags data from db into summaries
+    //this constructor apparently not used, may be used in the future
     public Series(String name, String description, Set<SeriesTags> seriesTags) {
         this.name = name;
         this.description = description;

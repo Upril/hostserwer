@@ -26,6 +26,7 @@ public class SeriesServiceImpl implements SeriesService {
     private UserService userService;
     @Override
     public Series saveSeries(String name, String description, Set<Tags> tags) {
+        //assembling series tag data from request data
         Set<SeriesTags> seriesTagsSet = new HashSet<>();
         Series series = new Series(name,description);
         for (Tags tag : tags){
@@ -40,6 +41,7 @@ public class SeriesServiceImpl implements SeriesService {
     public List<SeriesSummary> getAllSeries() {
         List<SeriesSummary> seriesSummaries = new ArrayList<>();
         List<SeriesData> data = seriesRepository.findAllData();
+        //assembling series summary data from the SeriesData dto, containing only id,name and desc
         for(SeriesData foundSeries : data){
             SeriesSummary summary = new SeriesSummary();
             summary.setId(foundSeries.getId());
@@ -53,6 +55,7 @@ public class SeriesServiceImpl implements SeriesService {
                 else tags.add(optionalTags.get());
             }
             summary.setSeriesTags(tags);
+            //assembling the series summary - adding the episode summary data without the video file
             summary.setEpisodes(episodesService.getEpisodesBySeries(summary.getId().intValue()));
             seriesSummaries.add(summary);
         }
@@ -61,6 +64,7 @@ public class SeriesServiceImpl implements SeriesService {
 
     @Override
     public SeriesSummary getSeriesById(Integer id) {
+        //identical as the previous method, but for only 1 seriesgiven by id
         SeriesSummary summary = new SeriesSummary();
         SeriesData data = seriesRepository.findSeriesDataById(id);
         summary.setId(data.getId());
@@ -77,11 +81,13 @@ public class SeriesServiceImpl implements SeriesService {
         return summary;
     }
 
-
+    //may be changed in the future to allow the user to just ignore a series
     @Override
     public UserSeriesSummary addToWatchlist(Integer seriesId, Integer userId) {
+        //adding the series to user watchlist
         User user = userService.getUserById(userId.longValue());
         Series series = seriesRepository.findById(seriesId).orElseThrow(()->new ResponseStatusException(HttpStatus.NOT_FOUND));
+        //series added to watchlist by default are set to the "Watching" watchflag
         UserSeries userSeries = new UserSeries(user,series,watchFlagRepository.findById(1).orElseThrow(()->new ResponseStatusException(HttpStatus.NOT_FOUND)));
         userSeriesRepository.save(userSeries);
         SeriesSummary seriesSummary = new SeriesSummary();

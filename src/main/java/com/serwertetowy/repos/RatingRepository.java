@@ -9,5 +9,6 @@ import java.util.List;
 public interface RatingRepository extends JpaRepository<Rating, Integer> {
     List<RatingSummary> findBySeriesId(Long id);
     List<RatingSummary> findByUserId(Long id);
+    //selective db info retrieval
     RatingSummary findById(Long id);
 }

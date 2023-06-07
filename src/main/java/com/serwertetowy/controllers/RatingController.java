@@ -15,9 +15,11 @@ import java.util.List;
 @AllArgsConstructor
 public class RatingController {
     private RatingService ratingService;
+    //record to simplify the post request
     record PostRatingRequest(Long userId, Long seriesId,
                              short plotRating, short musicRating, short graphicsRating,
                              short charactersRating, short generalRating){}
+    //saving ratings with post requests
     @PostMapping
     public ResponseEntity<Rating> saveRating(@RequestBody PostRatingRequest request){
         ratingService.saveRating(request.userId, request.seriesId, request.plotRating,
@@ -25,14 +27,17 @@ public class RatingController {
                                 request.charactersRating, request.generalRating);
         return new ResponseEntity<>(HttpStatus.OK);
     }
+    //GET request for the ratings of given user
     @GetMapping("/user/{id}")
     public ResponseEntity<List<RatingSummary>> getRatingsByUser(@PathVariable("id") Long id){
         return new ResponseEntity<>(ratingService.getRatingsByUser(id), HttpStatus.OK);
     }
+    //GET request for rating of given series by different users
     @GetMapping("/series/{id}")
     public ResponseEntity<List<RatingSummary>> getRatingsBySeries(@PathVariable("id") Long id){
         return new ResponseEntity<>(ratingService.getRatingsBySeries(id), HttpStatus.OK);
     }
+    //GET request for a given rating
     @GetMapping("/{id}")
     public ResponseEntity<RatingSummary> getRatingById(@PathVariable("id") Long id){
         return new ResponseEntity<>(ratingService.getRating(id), HttpStatus.OK);

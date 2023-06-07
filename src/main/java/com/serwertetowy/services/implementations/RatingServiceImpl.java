@@ -39,6 +39,7 @@ public class RatingServiceImpl implements RatingService {
     @Override
     public void saveRating(Long userId, Long seriesId, short plotRating, short musicRating, short graphicsRating, short charactersRating, short generalRating) {
         User user = userService.getUserById(userId);
+        //assemble rating data - get series information
         Optional<Series> series = seriesRepository.findById(seriesId.intValue());
         if(series.isEmpty()) throw new SeriesNotFoundException();//may delete later
         Series seriesFr = series.get();

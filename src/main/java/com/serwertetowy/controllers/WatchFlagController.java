@@ -1,6 +1,5 @@
 package com.serwertetowy.controllers;
 
-import com.serwertetowy.entities.User;
 import com.serwertetowy.entities.WatchFlags;
 import com.serwertetowy.repos.WatchFlagRepository;
 import lombok.AllArgsConstructor;
@@ -17,6 +16,7 @@ import java.util.Optional;
 public class WatchFlagController {
     private WatchFlagRepository watchFlagRepository;
     record WatchFlagRequest(String flag){}
+    //save new watchflag using the record with flag data
     @PostMapping
     public ResponseEntity<WatchFlags> saveWatchFlag(@RequestBody WatchFlagRequest request){
         WatchFlags watchFlag = new WatchFlags();
@@ -24,10 +24,12 @@ public class WatchFlagController {
         watchFlagRepository.save(watchFlag);
         return new ResponseEntity<>(watchFlag, HttpStatus.OK);
     }
+    //get request for all watchflags
     @GetMapping
     public ResponseEntity<List<WatchFlags>> getAllWatchFlags(){
         return new ResponseEntity<>(watchFlagRepository.findAll(),HttpStatus.OK);
     }
+    //get request for specific watchflag
     @GetMapping("/{id}")
     public ResponseEntity<WatchFlags> getWatchFlag(@PathVariable("id") Integer id){
         Optional<WatchFlags> watchFlag = watchFlagRepository.findById(id);

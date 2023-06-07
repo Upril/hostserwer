@@ -7,7 +7,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.util.List;
-
+//Entity for storing episode info in the db using Spring data jpa
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -23,6 +23,7 @@ public class Episodes{
     private Series series;
     private String title;
     private List<String> languages;
+    //may add episode icon
 
     public Episodes(String name, Series series, List<String> langs){
         this.languages = langs;

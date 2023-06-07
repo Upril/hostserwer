@@ -30,6 +30,7 @@ public class User {
     private byte[] imageData;
     @OneToMany(mappedBy = "user")
     private Set<Rating> userRatings;
+    //in the future used for password encription
     @JsonProperty
     public void setPassword(String password){
         this.password = password;
