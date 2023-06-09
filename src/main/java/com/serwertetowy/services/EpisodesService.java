@@ -17,4 +17,6 @@ public interface EpisodesService {
     List<EpisodeSummary> getEpisodesBySeries(Integer seriesId);
     //method saving sent mp4 files to storage, may be replaced by cloud based storage
     EpisodeSummary saveEpisode(MultipartFile file, String name, List<String> languagesList, Integer seriesId) throws IOException;
+    EpisodeSummary putEpisodeData(Long id, MultipartFile file) throws IOException;
+    EpisodeSummary putEpisode(Long id, String name, List<String> languagesList, Integer seriesId) throws IOException;
 }

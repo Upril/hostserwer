@@ -22,6 +22,16 @@ public class EpisodesController {
     public ResponseEntity<EpisodeSummary> saveEpisode(@RequestParam("file")MultipartFile file, @RequestParam("name")String name, @RequestParam("languages")List<String> languagesList, @RequestParam("seriesId")Integer seriesId) throws IOException {
         return new ResponseEntity<>(episodesService.saveEpisode(file,name,languagesList,seriesId),HttpStatus.OK);
     }
+    //method for updating episode video data
+    @PutMapping("/{id}/data")
+    public ResponseEntity<EpisodeSummary>putEpisodeData(@PathVariable("id") Long id, @RequestParam("file")MultipartFile file) throws IOException {
+        return new ResponseEntity<>(episodesService.putEpisodeData(id,file),HttpStatus.OK);
+    }
+    //method for updating episode data without the video
+    @PutMapping("/{id}")
+    public ResponseEntity<EpisodeSummary>putEpisode(@PathVariable("id") Long id, @RequestParam("name")String name, @RequestParam("languages")List<String> languagesList, @RequestParam("seriesId")Integer seriesId) throws IOException {
+        return new ResponseEntity<>(episodesService.putEpisode(id,name,languagesList,seriesId),HttpStatus.OK);
+    }
     //Webflux method for video streaming in ranges of bytes, ensuring fast video load times
     @GetMapping(value = "/{id}/play",produces = "video/mp4")
     public Mono<Resource> getEpisodeData(@PathVariable Integer id, @RequestHeader("Range") String range){

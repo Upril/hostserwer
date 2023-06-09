@@ -74,6 +74,11 @@ public class EpisodesIT {
             public Long getId() {
                 return 1L;
             }
+
+            @Override
+            public List<String> getLanguages() {
+                return null;
+            }
         };
         List<EpisodeSummary> expected = List.of(episodeSummary);
         episodesRepository.save(new Episodes("Title",expSeries,null));
