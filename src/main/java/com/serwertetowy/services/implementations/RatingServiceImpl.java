@@ -10,7 +10,9 @@ import com.serwertetowy.services.RatingService;
 import com.serwertetowy.services.dto.RatingSummary;
 import com.serwertetowy.services.UserService;
 import lombok.AllArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 import java.util.Optional;
@@ -24,6 +26,24 @@ public class RatingServiceImpl implements RatingService {
     @Override
     public RatingSummary getRating(Long id) {
         return ratingRepository.findById(id);
+    }
+
+    @Override
+    public RatingSummary putRating(Long id, short plotRating, short musicRating, short graphicsRating, short charactersRating, short generalRating) {
+        Rating rating = ratingRepository.findById(id.intValue()).orElseThrow(()->new ResponseStatusException(HttpStatus.NOT_FOUND));
+        rating.setPlotRating(plotRating);
+        rating.setMusicRating(musicRating);
+        rating.setGraphicsRating(graphicsRating);
+        rating.setCharactersRating(charactersRating);
+        rating.setGeneralRating(generalRating);
+        ratingRepository.save(rating);
+        return ratingRepository.findById(id);
+    }
+
+    @Override
+    public void deleteRatingById(Long id) {
+        Rating rating = ratingRepository.findById(id.intValue()).orElseThrow(()->new ResponseStatusException(HttpStatus.NOT_FOUND));
+        ratingRepository.delete(rating);
     }
 
     @Override

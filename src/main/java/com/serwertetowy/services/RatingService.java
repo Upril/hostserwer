@@ -7,6 +7,11 @@ import java.util.List;
 public interface RatingService {
     //method that returns a ratingSummary based on rating id
     RatingSummary getRating(Long id);
+    //method to update rating data
+    RatingSummary putRating(Long id, short plotRating, short musicRating, short graphicsRating,
+                            short charactersRating, short generalRating);
+    //method to delete a rating
+    void deleteRatingById(Long id);
     //method that returns a list of ratings of given series
     List<RatingSummary> getRatingsBySeries(Long seriesId);
     //method that returns a list of ratings of given user

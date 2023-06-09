@@ -2,7 +2,6 @@ package com.serwertetowy.controllers;
 
 import com.serwertetowy.entities.User;
 import com.serwertetowy.services.UserService;
-import com.serwertetowy.services.dto.RatingSummary;
 import com.serwertetowy.services.dto.SeriesSummary;
 import com.serwertetowy.services.dto.UserSeriesSummary;
 import com.serwertetowy.services.dto.UserSummary;
@@ -44,12 +43,6 @@ public class UserController {
 //        Long i = Long.valueOf(id);
 //        return new ResponseEntity<>(userService.getUserById(i), HttpStatus.OK);
 //    }
-    //get ratings of specific user
-    @GetMapping("/api/v1/user/{id}/ratings")
-    public ResponseEntity<List<RatingSummary>> getUserRatings(@PathVariable("id") Integer id){
-        Long i = Long.valueOf(id);
-        return new ResponseEntity<>(userService.getUserRatingsById(i), HttpStatus.OK);
-    }
     //get image for given user
     @GetMapping(value = "/api/v1/user/{id}/image", produces = MediaType.IMAGE_JPEG_VALUE)
     ResponseEntity<Resource> getUserImage(@PathVariable Long id){

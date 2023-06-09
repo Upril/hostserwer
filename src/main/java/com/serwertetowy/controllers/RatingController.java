@@ -19,12 +19,26 @@ public class RatingController {
     record PostRatingRequest(Long userId, Long seriesId,
                              short plotRating, short musicRating, short graphicsRating,
                              short charactersRating, short generalRating){}
+    record PutRatingRequest(short plotRating, short musicRating, short graphicsRating,
+                            short charactersRating, short generalRating){}
     //saving ratings with post requests
     @PostMapping
     public ResponseEntity<Rating> saveRating(@RequestBody PostRatingRequest request){
         ratingService.saveRating(request.userId, request.seriesId, request.plotRating,
                                 request.musicRating, request.graphicsRating,
                                 request.charactersRating, request.generalRating);
+        return new ResponseEntity<>(HttpStatus.OK);
+    }
+    //update rating data
+    @PutMapping("/{id}")
+    public ResponseEntity<RatingSummary> putRating(@PathVariable("id") Long id,@RequestBody PutRatingRequest request){
+        return new ResponseEntity<>(ratingService.putRating(id, request.plotRating,
+                request.musicRating, request.graphicsRating,
+                request.charactersRating, request.generalRating),HttpStatus.OK);
+    }
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteRating(@PathVariable("id") Long id){
+        ratingService.deleteRatingById(id);
         return new ResponseEntity<>(HttpStatus.OK);
     }
     //GET request for the ratings of given user
