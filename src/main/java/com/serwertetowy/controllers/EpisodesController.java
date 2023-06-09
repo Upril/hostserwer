@@ -1,6 +1,4 @@
 package com.serwertetowy.controllers;
-
-import com.serwertetowy.entities.Episodes;
 import com.serwertetowy.services.dto.EpisodeSummary;
 import com.serwertetowy.services.EpisodesService;
 import org.springframework.core.io.Resource;
@@ -21,9 +19,8 @@ public class EpisodesController {
     private EpisodesService episodesService;
     //episode saving in /target/classes/videos, to change to a cloud based file storage
     @PostMapping()
-    public ResponseEntity<Episodes> saveEpisode(@RequestParam("file")MultipartFile file, @RequestParam("name")String name, @RequestParam("languages")List<String> languagesList, @RequestParam("seriesId")Integer seriesId) throws IOException {
-        episodesService.saveEpisode(file,name,languagesList,seriesId);
-        return new ResponseEntity<>(HttpStatus.OK);
+    public ResponseEntity<EpisodeSummary> saveEpisode(@RequestParam("file")MultipartFile file, @RequestParam("name")String name, @RequestParam("languages")List<String> languagesList, @RequestParam("seriesId")Integer seriesId) throws IOException {
+        return new ResponseEntity<>(episodesService.saveEpisode(file,name,languagesList,seriesId),HttpStatus.OK);
     }
     //Webflux method for video streaming in ranges of bytes, ensuring fast video load times
     @GetMapping(value = "/{id}/play",produces = "video/mp4")

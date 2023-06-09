@@ -46,7 +46,7 @@ public class EpisodeServiceImpl implements EpisodesService {
         return episodesRepository.findEpisodeSummaryBySeriesId(seriesId);
     }
     @Override
-    public void saveEpisode(MultipartFile file, String name, List<String> languagesList, Integer seriesId) throws IOException {
+    public EpisodeSummary saveEpisode(MultipartFile file, String name, List<String> languagesList, Integer seriesId) throws IOException {
         Path root = Paths.get("target/classes/videos");
         Optional<Series> series = seriesRepository.findById(seriesId);
         if(series.isEmpty()) throw new SeriesNotFoundException();//may delete later
@@ -54,6 +54,8 @@ public class EpisodeServiceImpl implements EpisodesService {
         Episodes newEpisode = new Episodes(name,seriesFr,languagesList);
         episodesRepository.save(newEpisode);
         Files.copy(file.getInputStream(), root.resolve(name+".mp4"));
+        EpisodeSummary summary = episodesRepository.findEpisodeSummaryById(newEpisode.getId().intValue());
+        return summary;
     }
 
 
