@@ -1,6 +1,7 @@
 package com.serwertetowy.services;
 
 import com.serwertetowy.entities.User;
+import com.serwertetowy.services.dto.RatingSummary;
 import com.serwertetowy.services.dto.UserSeriesSummary;
 import com.serwertetowy.services.dto.UserSummary;
 import org.springframework.core.io.Resource;
@@ -19,6 +20,7 @@ public interface UserService {
     UserSummary getUserByEmail(String email);
     //get all user info
     User getUserById(Long id);
+    List<RatingSummary> getUserRatingsById(Long id);
     //get only user profile pic
     Resource getUserImage(Long id);
     //get watchlist info for given user

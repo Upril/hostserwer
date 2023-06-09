@@ -39,6 +39,8 @@ public class UserServiceImpl implements UserService {
     @Autowired
     TagRepository tagRepository;
     @Autowired
+    RatingRepository ratingRepository;
+    @Autowired
     EpisodesService episodesService;
     @Autowired
     WatchFlagRepository watchFlagRepository;
@@ -69,6 +71,10 @@ public class UserServiceImpl implements UserService {
     @Override
     public User getUserById(Long id) {
         return userRepository.findById(id).orElseThrow(()->new ResponseStatusException(HttpStatus.NOT_FOUND));
+    }
+    @Override
+    public List<RatingSummary> getUserRatingsById(Long id) {
+        return ratingRepository.findByUserId(id);
     }
     public Resource getUserImage(Long id){
         byte[] image = userRepository.findById(id).orElseThrow(()->new ResponseStatusException(HttpStatus.NOT_FOUND)).getImageData();

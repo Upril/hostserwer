@@ -6,7 +6,7 @@ import jakarta.persistence.*;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.util.Set;
+import java.util.List;
 
 @Entity
 @Data
@@ -29,7 +29,7 @@ public class User {
     @Basic(fetch = FetchType.LAZY)
     private byte[] imageData;
     @OneToMany(mappedBy = "user")
-    private Set<Rating> userRatings;
+    private List<Rating> userRatings;
     //in the future used for password encription
     @JsonProperty
     public void setPassword(String password){
