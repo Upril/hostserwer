@@ -28,6 +28,11 @@ public class Series {
     @OneToMany(mappedBy = "series")
     @JsonManagedReference
     private Set<Episodes> episodes;
+    //series icon
+    @Lob
+    @Column(name = "imageData", length = 1000)
+    @Basic(fetch = FetchType.LAZY)
+    private byte[] imageData;
     //different constructors needed for dynamic translation of series tags data from db into summaries
     //this constructor apparently not used, may be used in the future
     public Series(String name, String description, Set<SeriesTags> seriesTags) {

@@ -13,6 +13,8 @@ public interface EpisodesService {
     EpisodeSummary getEpisode(Integer id);
     //Episode data streaming
     Mono<Resource> getEpisodeData(String title);
+    //method to retrieve episode icon, not sure if needed
+    //Mono<Resource> getEpisodeImageData();
     //method used by series service to get episode lists
     List<EpisodeSummary> getEpisodesBySeries(Integer seriesId);
     //method saving sent mp4 files to storage, may be replaced by cloud based storage

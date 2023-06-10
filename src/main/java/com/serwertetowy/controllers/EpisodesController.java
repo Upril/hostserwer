@@ -39,6 +39,11 @@ public class EpisodesController {
         EpisodeSummary episodeSummary = episodesService.getEpisode(id);
         return episodesService.getEpisodeData(episodeSummary.getTitle());
     }
+    //Webflux methods to get episodes images, not sure if needed, should work
+//    @GetMapping(value = "/{id}/image", produces = MediaType.IMAGE_JPEG_VALUE)
+//    public Mono<Resource> getEpisodeImage(@PathVariable Integer id){
+//        return episodesService.getEpisodeImageData(id);
+//    }
     //Episode summary information: id, title and languages, may include icon in the future
     @GetMapping("/{id}")
     public ResponseEntity<EpisodeSummary> getEpisodebyId(@PathVariable("id")Integer id){

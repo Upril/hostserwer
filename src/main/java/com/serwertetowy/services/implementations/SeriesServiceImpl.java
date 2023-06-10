@@ -7,11 +7,19 @@ import com.serwertetowy.services.EpisodesService;
 import com.serwertetowy.services.UserService;
 import com.serwertetowy.services.dto.*;
 import com.serwertetowy.services.SeriesService;
+import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.ByteArrayResource;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.ResourceLoader;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
+import reactor.core.publisher.Mono;
 
+import java.io.IOException;
 import java.util.*;
 
 @Service
@@ -24,20 +32,38 @@ public class SeriesServiceImpl implements SeriesService {
     private WatchFlagRepository watchFlagRepository;
     private UserSeriesRepository userSeriesRepository;
     private UserService userService;
-    @Override
-    public Series saveSeries(String name, String description, Set<Tags> tags) {
+    @Autowired
+    private ResourceLoader resourceLoader;
+    private Series seriesAssemble(String name, String description, List<Integer> tagIds){
         //assembling series tag data from request data
         Set<SeriesTags> seriesTagsSet = new HashSet<>();
         Series series = new Series(name,description);
-        for (Tags tag : tags){
-            seriesTagsSet.add(new SeriesTags(series,tag));
+        for (Integer id : tagIds){
+            seriesTagsSet.add(new SeriesTags(series,tagRepository.findById(id).orElseThrow(
+                    ()->new ResponseStatusException(HttpStatus.NOT_FOUND))));
         }
         series.setSeriesTags(seriesTagsSet);
+        return series;
+    }
+    @Override
+    public Series saveSeries(String name, String description, List<Integer> tagIds) throws IOException {
+        //assembling series tag data from request data
+        Series series = seriesAssemble(name,description,tagIds);
+        series.setImageData(resourceLoader.getResource("classpath:/images/banner.jpg").getContentAsByteArray());
         seriesRepository.save(series);
         return series;
     }
 
     @Override
+    public Series saveSeriesWithImage(MultipartFile file, String name, String description, List<Integer> tagIds) throws IOException {
+        Series series = seriesAssemble(name,description,tagIds);
+        series.setImageData(file.getBytes());
+        seriesRepository.save(series);
+        return series;
+    }
+
+    @Override
+    @Transactional
     public List<SeriesSummary> getAllSeries() {
         List<SeriesSummary> seriesSummaries = new ArrayList<>();
         List<SeriesData> data = seriesRepository.findAllData();
@@ -63,6 +89,7 @@ public class SeriesServiceImpl implements SeriesService {
     }
 
     @Override
+    @Transactional
     public SeriesSummary getSeriesById(Integer id) {
         //identical as the previous method, but for only 1 seriesgiven by id
         SeriesSummary summary = new SeriesSummary();
@@ -80,6 +107,15 @@ public class SeriesServiceImpl implements SeriesService {
         summary.setEpisodes(episodesService.getEpisodesBySeries(summary.getId().intValue()));
         return summary;
     }
+
+    @Override
+    @Transactional
+    public Mono<Resource> getSeriesImageData(Integer id) {
+        ByteArrayResource imageData = new ByteArrayResource(seriesRepository.findById(id).orElseThrow
+                (()->new ResponseStatusException(HttpStatus.NOT_FOUND)).getImageData());
+        return Mono.fromSupplier(()->imageData);
+    }
+
 
     //may be changed in the future to allow the user to just ignore a series
     @Override

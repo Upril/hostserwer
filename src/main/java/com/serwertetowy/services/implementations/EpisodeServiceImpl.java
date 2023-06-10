@@ -41,6 +41,13 @@ public class EpisodeServiceImpl implements EpisodesService {
     public Mono<Resource> getEpisodeData(String title){
         return Mono.fromSupplier(()->resourceLoader.getResource(String.format(FORMAT,title)));
     }
+    //not sure if needed, need to consult
+//    @Override
+//    @Transactional
+//    public Mono<Resource> getEpisodeImageData(Integer id) {
+//        ByteArrayResource imageData = new ByteArrayResource(episodesRepository.findById(id).orElseThrow(()->new ResponseStatusException(HttpStatus.NOT_FOUND)).getImageData());
+//        return Mono.fromSupplier(()->imageData);
+//    }
     @Override
     @Transactional
     public List<EpisodeSummary> getEpisodesBySeries(Integer seriesId){

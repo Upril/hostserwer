@@ -1,8 +1,5 @@
 package com.serwertetowy.services.implementations;
-import com.serwertetowy.entities.SeriesTags;
-import com.serwertetowy.entities.Tags;
-import com.serwertetowy.entities.User;
-import com.serwertetowy.entities.WatchFlags;
+import com.serwertetowy.entities.*;
 import com.serwertetowy.exceptions.TagNotFoundException;
 import com.serwertetowy.exceptions.UserNotFoundException;
 import com.serwertetowy.repos.*;
@@ -94,7 +91,20 @@ public class UserServiceImpl implements UserService {
 
                 @Override
                 public SeriesSummary getSeriesSummary() {
-                    return getSeriesById(userSeries.getSeriesId().intValue());
+                    SeriesSummary summary = new SeriesSummary();
+                    Series series = seriesRepository.findById(userSeries.getSeriesId().intValue()).orElseThrow(()->new ResponseStatusException(HttpStatus.NOT_FOUND));
+                    summary.setId(series.getId());
+                    summary.setName(series.getName());
+                    summary.setDescription(series.getDescription());
+                    summary.setEpisodes(episodesService.getEpisodesBySeries(userSeries.getSeriesId().intValue()));
+                    List<Tags> tags = new ArrayList<>();
+                    for(SeriesTags sTag: seriesTagsRepository.findBySeriesId(series.getId())){
+                        Optional<Tags> optionalTags = tagRepository.findById(sTag.getTags().getId().intValue());
+                        if (!optionalTags.isPresent()) throw new TagNotFoundException();
+                        else tags.add(optionalTags.get());
+                    }
+                    summary.setSeriesTags(tags);
+                    return summary;
                 }
 
                 @Override
@@ -117,26 +127,4 @@ public class UserServiceImpl implements UserService {
         user.setImageData(file.getBytes());
         userRepository.save(user);
     }
-    //method to get series summary, since using the one from series service would create a dependency loop, may be
-    // resolved by moving watchlists here or to a separate controller
-    private SeriesSummary getSeriesById(Integer id) {
-        SeriesSummary summary = new SeriesSummary();
-        SeriesData data = seriesRepository.findSeriesDataById(id);
-        //assemble series summary from raw db data
-        summary.setId(data.getId());
-        summary.setName(data.getName());
-        summary.setDescription(data.getDescription());
-        List<Tags> tags = new ArrayList<>();
-        //adding series tags data
-        for(SeriesTags sTag: seriesTagsRepository.findBySeriesId(summary.getId())){
-            Optional<Tags> optionalTags = tagRepository.findById(sTag.getTags().getId().intValue());
-            if (!optionalTags.isPresent()) throw new TagNotFoundException();
-            else tags.add(optionalTags.get());
-        }
-        summary.setSeriesTags(tags);
-        summary.setEpisodes(episodesService.getEpisodesBySeries(summary.getId().intValue()));
-        return summary;
-    }
-
-
 }
