@@ -65,4 +65,8 @@ public class UserController {
         userService.putUserImage(file, id);
         return new ResponseEntity<>(HttpStatus.OK);
     }
+    @PutMapping("/api/v1/user/{id}")
+    ResponseEntity<UserSummary> putUser(@PathVariable Long id, @RequestParam String firstname, @RequestParam String lastname, @RequestParam String email){
+        return new ResponseEntity<>(userService.putUser(id,firstname,lastname,email),HttpStatus.OK);
+    }
 }

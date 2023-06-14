@@ -27,4 +27,5 @@ public interface UserService {
     List<UserSeriesSummary> getWatchlist(Long id);
     //update user profile pic
     void putUserImage(MultipartFile file, Long id)throws IOException;
+    UserSummary putUser(Long id, String firstname, String lastname, String email);
 }

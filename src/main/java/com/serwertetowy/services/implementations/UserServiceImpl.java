@@ -127,4 +127,14 @@ public class UserServiceImpl implements UserService {
         user.setImageData(file.getBytes());
         userRepository.save(user);
     }
+
+    @Override
+    public UserSummary putUser(Long id, String firstname, String lastname, String email) {
+        User user = userRepository.findById(id).orElseThrow(UserNotFoundException::new);
+        user.setFirstname(firstname);
+        user.setLastname(lastname);
+        user.setEmail(email);
+        userRepository.save(user);
+        return userRepository.findByEmail(email);
+    }
 }
