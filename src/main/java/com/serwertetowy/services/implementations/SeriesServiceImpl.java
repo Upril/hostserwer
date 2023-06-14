@@ -124,7 +124,7 @@ public class SeriesServiceImpl implements SeriesService {
         Series series = seriesRepository.findById(seriesId)
                 .orElseThrow(()->new ResponseStatusException(HttpStatus.NOT_FOUND));
         //series added to watchlist by default are set to the "Watching" watchflag
-        UserSeries userSeries = new UserSeries(user,series,watchFlagRepository.findById(1)
+        UserSeries userSeries = new UserSeries(user,series,watchFlagRepository.findById(watchflagId)
                 .orElseThrow(()->new ResponseStatusException(HttpStatus.NOT_FOUND)));
         userSeriesRepository.save(userSeries);
 
