@@ -71,6 +71,7 @@ public class UserServiceImpl implements UserService {
     public List<RatingSummary> getUserRatingsById(Long id) {
         return ratingRepository.findByUserId(id);
     }
+    @Override
     public Resource getUserImage(Long id){
         byte[] image = userRepository.findById(id).orElseThrow(()->
                 new ResponseStatusException(HttpStatus.NOT_FOUND))
@@ -129,7 +130,6 @@ public class UserServiceImpl implements UserService {
         user.setImageData(file.getBytes());
         userRepository.save(user);
     }
-
     @Override
     public UserSummary putUser(Long id, String firstname, String lastname, String email) {
         User user = userRepository.findById(id).orElseThrow(UserNotFoundException::new);
@@ -139,4 +139,5 @@ public class UserServiceImpl implements UserService {
         userRepository.save(user);
         return userRepository.findByEmail(email);
     }
+
 }

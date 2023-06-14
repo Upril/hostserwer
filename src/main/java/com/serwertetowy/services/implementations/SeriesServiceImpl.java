@@ -118,7 +118,7 @@ public class SeriesServiceImpl implements SeriesService {
 
     //may be changed in the future to allow the user to just ignore a series
     @Override
-    public UserSeriesSummary addToWatchlist(Integer seriesId, Integer userId) {
+    public UserSeriesSummary addToWatchlist(Integer seriesId, Integer userId, Integer watchflagId) {
         //adding the series to user watchlist
         User user = userService.getUserById(userId.longValue());
         Series series = seriesRepository.findById(seriesId)
@@ -159,7 +159,7 @@ public class SeriesServiceImpl implements SeriesService {
 
             @Override
             public WatchFlags getWatchflag() {
-                return watchFlagRepository.findById(1).orElseThrow(()->new ResponseStatusException(HttpStatus.NOT_FOUND));
+                return watchFlagRepository.findById(watchflagId).orElseThrow(()->new ResponseStatusException(HttpStatus.NOT_FOUND));
             }
         };
     }

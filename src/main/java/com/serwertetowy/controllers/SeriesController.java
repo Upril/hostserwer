@@ -47,8 +47,8 @@ public class SeriesController {
     }
     //post method allowing the user to add a given series into their watchlist, may move it to the user controller
     @PostMapping("/addToWatchlist")
-    public ResponseEntity<UserSeriesSummary> addSeriesToWatchlist(@RequestParam Integer seriesId, @RequestParam Integer userId){
-        return new ResponseEntity<>(seriesService.addToWatchlist(seriesId,userId), HttpStatus.OK);
+    public ResponseEntity<UserSeriesSummary> addSeriesToWatchlist(@RequestParam Integer seriesId, @RequestParam Integer userId, @RequestParam Integer watchflagId){
+        return new ResponseEntity<>(seriesService.addToWatchlist(seriesId,userId, watchflagId), HttpStatus.OK);
     }
 
 

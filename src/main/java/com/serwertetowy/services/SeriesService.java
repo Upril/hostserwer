@@ -20,6 +20,6 @@ public interface SeriesService {
     //Webflux method to retrieve series icon
     Mono<Resource> getSeriesImageData(Integer id);
     //method allowing the user to add a series into their watchlist, may be moved into user service
-    UserSeriesSummary addToWatchlist(Integer seriesId, Integer userId);
+    UserSeriesSummary addToWatchlist(Integer seriesId, Integer userId, Integer watchflagId);
 
 }
