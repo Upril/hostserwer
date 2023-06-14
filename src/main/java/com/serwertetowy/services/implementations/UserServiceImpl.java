@@ -1,6 +1,5 @@
 package com.serwertetowy.services.implementations;
 import com.serwertetowy.entities.*;
-import com.serwertetowy.exceptions.TagNotFoundException;
 import com.serwertetowy.exceptions.UserNotFoundException;
 import com.serwertetowy.repos.*;
 import com.serwertetowy.services.EpisodesService;
@@ -18,7 +17,6 @@ import org.springframework.web.server.ResponseStatusException;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 @Service
 @AllArgsConstructor
@@ -74,7 +72,9 @@ public class UserServiceImpl implements UserService {
         return ratingRepository.findByUserId(id);
     }
     public Resource getUserImage(Long id){
-        byte[] image = userRepository.findById(id).orElseThrow(()->new ResponseStatusException(HttpStatus.NOT_FOUND)).getImageData();
+        byte[] image = userRepository.findById(id).orElseThrow(()->
+                new ResponseStatusException(HttpStatus.NOT_FOUND))
+                .getImageData();
         return new ByteArrayResource(image);
     }
     @Override
@@ -92,16 +92,17 @@ public class UserServiceImpl implements UserService {
                 @Override
                 public SeriesSummary getSeriesSummary() {
                     SeriesSummary summary = new SeriesSummary();
-                    Series series = seriesRepository.findById(userSeries.getSeriesId().intValue()).orElseThrow(()->new ResponseStatusException(HttpStatus.NOT_FOUND));
+                    Series series = seriesRepository.findById(userSeries.getSeriesId().intValue()).orElseThrow(()->
+                            new ResponseStatusException(HttpStatus.NOT_FOUND));
                     summary.setId(series.getId());
                     summary.setName(series.getName());
                     summary.setDescription(series.getDescription());
                     summary.setEpisodes(episodesService.getEpisodesBySeries(userSeries.getSeriesId().intValue()));
                     List<Tags> tags = new ArrayList<>();
                     for(SeriesTags sTag: seriesTagsRepository.findBySeriesId(series.getId())){
-                        Optional<Tags> optionalTags = tagRepository.findById(sTag.getTags().getId().intValue());
-                        if (!optionalTags.isPresent()) throw new TagNotFoundException();
-                        else tags.add(optionalTags.get());
+                        Tags foundTags = tagRepository.findById(sTag.getTags().getId().intValue()).orElseThrow(()->
+                                new ResponseStatusException(HttpStatus.NOT_FOUND));
+                        tags.add(foundTags);
                     }
                     summary.setSeriesTags(tags);
                     return summary;
@@ -114,7 +115,8 @@ public class UserServiceImpl implements UserService {
 
                 @Override
                 public WatchFlags getWatchflag() {
-                    return watchFlagRepository.findById(userSeries.getWatchFlagsId().intValue()).orElseThrow(()->new ResponseStatusException(HttpStatus.NOT_FOUND));
+                    return watchFlagRepository.findById(userSeries.getWatchFlagsId().intValue()).orElseThrow(()->
+                            new ResponseStatusException(HttpStatus.NOT_FOUND));
                 }
             });
 

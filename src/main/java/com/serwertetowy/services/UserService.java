@@ -25,7 +25,7 @@ public interface UserService {
     Resource getUserImage(Long id);
     //get watchlist info for given user
     List<UserSeriesSummary> getWatchlist(Long id);
-    //update user profile pic
+    //update user profile pic and user data
     void putUserImage(MultipartFile file, Long id)throws IOException;
     UserSummary putUser(Long id, String firstname, String lastname, String email);
 }

@@ -1,7 +1,6 @@
 package com.serwertetowy.services.implementations;
 
 import com.serwertetowy.entities.*;
-import com.serwertetowy.exceptions.TagNotFoundException;
 import com.serwertetowy.repos.*;
 import com.serwertetowy.services.EpisodesService;
 import com.serwertetowy.services.UserService;
@@ -76,9 +75,9 @@ public class SeriesServiceImpl implements SeriesService {
             //tags insert from seriestags-findbyseriesId -> id of tags -> tagrepo-findByid
             List<Tags> tags = new ArrayList<>();
             for(SeriesTags sTag: seriesTagsRepository.findBySeriesId(summary.getId())){
-                Optional<Tags> optionalTags = tagRepository.findById(sTag.getTags().getId().intValue());
-                if (!optionalTags.isPresent()) throw new TagNotFoundException();
-                else tags.add(optionalTags.get());
+                Tags foundTags = tagRepository.findById(sTag.getTags().getId().intValue())
+                        .orElseThrow(()->new ResponseStatusException(HttpStatus.NOT_FOUND));
+                tags.add(foundTags);
             }
             summary.setSeriesTags(tags);
             //assembling the series summary - adding the episode summary data without the video file
@@ -99,9 +98,9 @@ public class SeriesServiceImpl implements SeriesService {
         summary.setDescription(data.getDescription());
         List<Tags> tags = new ArrayList<>();
         for(SeriesTags sTag: seriesTagsRepository.findBySeriesId(summary.getId())){
-            Optional<Tags> optionalTags = tagRepository.findById(sTag.getTags().getId().intValue());
-            if (!optionalTags.isPresent()) throw new TagNotFoundException();
-            else tags.add(optionalTags.get());
+            Tags foundTags = tagRepository.findById(sTag.getTags().getId().intValue())
+                    .orElseThrow(()->new ResponseStatusException(HttpStatus.NOT_FOUND));
+            tags.add(foundTags);
         }
         summary.setSeriesTags(tags);
         summary.setEpisodes(episodesService.getEpisodesBySeries(summary.getId().intValue()));
@@ -122,20 +121,24 @@ public class SeriesServiceImpl implements SeriesService {
     public UserSeriesSummary addToWatchlist(Integer seriesId, Integer userId) {
         //adding the series to user watchlist
         User user = userService.getUserById(userId.longValue());
-        Series series = seriesRepository.findById(seriesId).orElseThrow(()->new ResponseStatusException(HttpStatus.NOT_FOUND));
+        Series series = seriesRepository.findById(seriesId)
+                .orElseThrow(()->new ResponseStatusException(HttpStatus.NOT_FOUND));
         //series added to watchlist by default are set to the "Watching" watchflag
-        UserSeries userSeries = new UserSeries(user,series,watchFlagRepository.findById(1).orElseThrow(()->new ResponseStatusException(HttpStatus.NOT_FOUND)));
+        UserSeries userSeries = new UserSeries(user,series,watchFlagRepository.findById(1)
+                .orElseThrow(()->new ResponseStatusException(HttpStatus.NOT_FOUND)));
         userSeriesRepository.save(userSeries);
+
         SeriesSummary seriesSummary = new SeriesSummary();
         seriesSummary.setId(series.getId());
         seriesSummary.setName(series.getName());
         seriesSummary.setDescription(series.getDescription());
         seriesSummary.setEpisodes(episodesService.getEpisodesBySeries(seriesId));
+
         List<Tags> tags = new ArrayList<>();
         for(SeriesTags sTag: seriesTagsRepository.findBySeriesId(series.getId())){
-            Optional<Tags> optionalTags = tagRepository.findById(sTag.getTags().getId().intValue());
-            if (!optionalTags.isPresent()) throw new TagNotFoundException();
-            else tags.add(optionalTags.get());
+            Tags foundTags = tagRepository.findById(sTag.getTags().getId().intValue())
+                    .orElseThrow(()->new ResponseStatusException(HttpStatus.NOT_FOUND));
+            tags.add(foundTags);
         }
         seriesSummary.setSeriesTags(tags);
         return new UserSeriesSummary() {

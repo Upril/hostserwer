@@ -41,13 +41,6 @@ public class EpisodeServiceImpl implements EpisodesService {
     public Mono<Resource> getEpisodeData(String title){
         return Mono.fromSupplier(()->resourceLoader.getResource(String.format(FORMAT,title)));
     }
-    //not sure if needed, need to consult
-//    @Override
-//    @Transactional
-//    public Mono<Resource> getEpisodeImageData(Integer id) {
-//        ByteArrayResource imageData = new ByteArrayResource(episodesRepository.findById(id).orElseThrow(()->new ResponseStatusException(HttpStatus.NOT_FOUND)).getImageData());
-//        return Mono.fromSupplier(()->imageData);
-//    }
     @Override
     @Transactional
     public List<EpisodeSummary> getEpisodesBySeries(Integer seriesId){
@@ -56,7 +49,8 @@ public class EpisodeServiceImpl implements EpisodesService {
     @Override
     public EpisodeSummary saveEpisode(MultipartFile file, String name, List<String> languagesList, Integer seriesId) throws IOException {
         Path root = Paths.get("target/classes/videos");
-        Series series = seriesRepository.findById(seriesId).orElseThrow(()->new ResponseStatusException(HttpStatus.NOT_FOUND));
+        Series series = seriesRepository.findById(seriesId)
+                .orElseThrow(()->new ResponseStatusException(HttpStatus.NOT_FOUND));
         Episodes newEpisode = new Episodes(name,series,languagesList);
         episodesRepository.save(newEpisode);
         Files.copy(file.getInputStream(), root.resolve(name+".mp4"));
@@ -66,7 +60,8 @@ public class EpisodeServiceImpl implements EpisodesService {
     @Override
     public EpisodeSummary putEpisodeData(Long id, MultipartFile file) throws IOException {
         Path root = Paths.get("target/classes/videos");
-        Episodes episodes = episodesRepository.findById(id.intValue()).orElseThrow(()->new ResponseStatusException(HttpStatus.NOT_FOUND));
+        Episodes episodes = episodesRepository.findById(id.intValue())
+                .orElseThrow(()->new ResponseStatusException(HttpStatus.NOT_FOUND));
         String name = episodes.getTitle();
         if(Files.exists(root.resolve(name+".mp4"))){
             Files.delete(root.resolve(name+".mp4"));
@@ -78,8 +73,10 @@ public class EpisodeServiceImpl implements EpisodesService {
     @Override
     public EpisodeSummary putEpisode(Long id, String name, List<String> languagesList, Integer seriesId) throws IOException {
         Path root = Paths.get("target/classes/videos");
-        Series series = seriesRepository.findById(seriesId).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
-        Episodes episodes = episodesRepository.findById(id.intValue()).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
+        Series series = seriesRepository.findById(seriesId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
+        Episodes episodes = episodesRepository.findById(id.intValue())
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
         if(!Objects.equals(name, episodes.getTitle()) && Files.exists(root.resolve(episodes.getTitle()+".mp4"))){
             Files.copy(root.resolve(episodes.getTitle()+".mp4"),root.resolve(name+".mp4"));
             Files.delete(root.resolve(episodes.getTitle()+".mp4"));
