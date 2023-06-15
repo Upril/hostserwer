@@ -1,20 +1,28 @@
 package com.serwertetowy;
 
+import com.serwertetowy.entities.Episodes;
 import com.serwertetowy.entities.Series;
 import com.serwertetowy.repos.EpisodesRepository;
 import com.serwertetowy.repos.SeriesRepository;
 import org.junit.jupiter.api.Test;
+import org.springframework.test.annotation.DirtiesContext;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.ArrayList;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.*;
 
 public class EpisodeServiceImplTest {
     EpisodesRepository episodesRepository = mock(EpisodesRepository.class);
     SeriesRepository seriesRepository = mock(SeriesRepository.class);
 //    EpisodesService service = new EpisodeServiceImpl(episodesRepository, seriesRepository);
-    Series expSeries = new Series(1L,"tet","tetowa",null,null,null);
+    Series expSeries = new Series(1L,"tet","tetowa",null,null,null,null);
     @Test
     void getEpisode(){
 //        Episodes expected = new Episodes("testName",expSeries,null);
@@ -53,4 +61,19 @@ public class EpisodeServiceImplTest {
 //        service.saveEpisode(file, "Title",expSeries.getId());
 //        verify(episodesRepository, times(1)).save(testEpisode);
     }
+    @Test
+    @DirtiesContext
+    void saveVideo() throws IOException {
+//        if(!seriesRepository.existsById(expSeries.getId().intValue())){
+//            seriesRepository.save(expSeries);
+//            entityManager.flush();
+//        }
+//        MultipartFile file = mock(MultipartFile.class);
+//        Path root = Paths.get("target/classes/videos");
+//        Episodes episode = new Episodes("Title",expSeries,new ArrayList<>(){{add("Polish");add("English");}});
+//        episodesRepository.save(episode);
+//        entityManager.flush();
+//        Files.copy(file.getInputStream(), root.resolve(episode.getTitle()+".mp4"));
+//        assertTrue(episodesRepository.existsById(1));
+//    }
 }
