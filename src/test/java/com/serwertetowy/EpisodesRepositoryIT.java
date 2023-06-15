@@ -65,6 +65,7 @@ public class EpisodesRepositoryIT {
             }
         };
         EpisodeSummary actual = episodesRepository.findEpisodeSummaryById(1);
+        assertTrue(episodesRepository.existsById(1));
         assertTrue(expected.getTitle().equals(actual.getTitle()) && expected.getId().equals(actual.getId()) && expected.getLanguages().get(1).equals(actual.getLanguages().get(1)));
     }
 
