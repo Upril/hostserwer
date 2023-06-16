@@ -1,9 +1,7 @@
-package com.serwertetowy;
+package com.serwertetowy.repos;
 
 import com.serwertetowy.entities.Episodes;
 import com.serwertetowy.entities.Series;
-import com.serwertetowy.repos.EpisodesRepository;
-import com.serwertetowy.repos.SeriesRepository;
 import com.serwertetowy.services.dto.EpisodeSummary;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
@@ -19,7 +17,8 @@ import org.springframework.test.annotation.DirtiesContext;
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @SpringBootTest
 @Transactional

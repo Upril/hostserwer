@@ -1,4 +1,4 @@
-package com.serwertetowy;
+package com.serwertetowy.services;
 
 import com.serwertetowy.entities.Episodes;
 import com.serwertetowy.entities.Series;
