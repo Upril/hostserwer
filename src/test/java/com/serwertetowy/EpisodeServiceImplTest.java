@@ -122,5 +122,23 @@ public class EpisodeServiceImplTest {
         verify(seriesRepository,times(1)).findById(anyInt());
         Files.delete(path);
     }
+    @Test
+    void putEpisodeData() throws IOException {
+        Series series = new Series(1L,"tet","tetowa",null,null,null,null);
+        Episodes episode = new Episodes("tetujemy",series,new ArrayList<>(){{add("Polish");add("English");}});
+        File file = new File("target/classes/tests/videos/tetujemy.mp4");
+        MultipartFile mpfile = new MockMultipartFile("tetujemy.mp4", new FileInputStream(file));
+        when(episodesRepository.findById(anyInt())).thenReturn(Optional.of(episode));
+        Path pathReal = Path.of("target/classes/videos/tetujemy.mp4");
+        if(!Files.exists(pathReal)) Files.copy(mpfile.getInputStream(), pathReal);
+        NullPointerException exception = assertThrows(NullPointerException.class,()-> service.putEpisodeData(1L,mpfile));
+        assertEquals("Cannot invoke \"java.lang.Long.intValue()\" because the return value of" +
+                " \"com.serwertetowy.entities.Episodes.getId()\" is null",exception.getMessage());
+        assertTrue(Files.exists(pathReal));
+        Files.delete(pathReal);
+    }
 
+    @Test
+    void putEpisode() {
+    }
 }
