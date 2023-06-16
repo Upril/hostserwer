@@ -104,7 +104,7 @@ public class EpisodeServiceImplTest {
     }
     @Test
     @DirtiesContext
-    void when_saveEpisode_thenReturn_EpisodeSummary() throws IOException {
+    void when_saveEpisode_thenThow_Nullpointer() throws IOException {
         //to trzeba naprawic
 
         Series series = new Series(1L,"tet","tetowa",null,null,null,null);
@@ -123,7 +123,7 @@ public class EpisodeServiceImplTest {
         Files.delete(path);
     }
     @Test
-    void putEpisodeData() throws IOException {
+    void when_putEpisodeData_thenReturn_EpisodeSummary() throws IOException {
         Series series = new Series(1L,"tet","tetowa",null,null,null,null);
         Episodes episode = new Episodes("tetujemy",series,new ArrayList<>(){{add("Polish");add("English");}});
         File file = new File("target/classes/tests/videos/tetujemy.mp4");
@@ -139,6 +139,33 @@ public class EpisodeServiceImplTest {
     }
 
     @Test
-    void putEpisode() {
+    void when_putEpisode_thenReturn_EpisodeSummary() throws IOException {
+        Series series = new Series(1L,"tet","tetowa",null,null,null,null);
+        Episodes episode = new Episodes(1L,series,"tetujemy",new ArrayList<>(){{add("Polish");add("English");}});
+        when(seriesRepository.findById(anyInt())).thenReturn(Optional.of(series));
+        when(episodesRepository.findById(anyInt())).thenReturn(Optional.of(episode));
+        when(episodesRepository.findEpisodeSummaryById(anyInt())).thenReturn(new EpisodeSummary() {
+            @Override
+            public String getTitle() {
+                return "tetowanko";
+            }
+
+            @Override
+            public Long getId() {
+                return 1L;
+            }
+
+            @Override
+            public List<String> getLanguages() {
+                return new ArrayList<>(){{add("Polish");add("Nyakid");}};
+            }
+        });
+        File file = new File("target/classes/tests/videos/tetujemy.mp4");
+        MultipartFile mpfile = new MockMultipartFile("tetujemy.mp4", new FileInputStream(file));
+        Path pathReal = Path.of("target/classes/videos/tetujemy.mp4");
+        if(!Files.exists(pathReal)) Files.copy(mpfile.getInputStream(), pathReal);
+        EpisodeSummary actual = service.putEpisode(1L, "tetowanko",new ArrayList<>(){{add("Polish");add("Nyakid");}},1);
+        assertTrue(actual.getTitle().equals("tetowanko") && actual.getLanguages().contains("Nyakid"));
+        Files.delete(Path.of("target/classes/videos/tetowanko.mp4"));
     }
 }
