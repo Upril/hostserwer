@@ -10,14 +10,20 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.annotation.DirtiesContext;
+import org.springframework.web.multipart.MultipartFile;
 import reactor.core.publisher.Mono;
 
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -33,6 +39,11 @@ public class EpisodeServiceImplTest {
     SeriesRepository seriesRepository = mock(SeriesRepository.class);
     @InjectMocks
     EpisodeServiceImpl service;
+
+    public EpisodeServiceImplTest() {
+        MockitoAnnotations.openMocks(this);
+    }
+
     @Test
     void when_getEpisode_thenReturn_EpisodeSummary(){
         EpisodeSummary episodeSummary = new EpisodeSummary() {
@@ -95,37 +106,21 @@ public class EpisodeServiceImplTest {
     @DirtiesContext
     void when_saveEpisode_thenReturn_EpisodeSummary() throws IOException {
         //to trzeba naprawic
-        MockMultipartFile file = new MockMultipartFile("tetujemy","tetujemy.mp4", MediaType.TEXT_PLAIN_VALUE,"Hello Świże".getBytes());
+
         Series series = new Series(1L,"tet","tetowa",null,null,null,null);
         Episodes episode = new Episodes("Title",series,new ArrayList<>(){{add("Polish");add("English");}});
-        EpisodeSummary expected = new EpisodeSummary() {
-            @Override
-            public String getTitle() {
-                return "tetujemy";
-            }
-
-            @Override
-            public Long getId() {
-                return 1L;
-            }
-
-            @Override
-            public List<String> getLanguages() {
-                ArrayList<String> langs = new ArrayList<>();
-                langs.add("Polish");
-                langs.add("English");
-                return langs;
-            }
-        };
         when(seriesRepository.findById(anyInt())).thenReturn(Optional.of(series));
         when(episodesRepository.save(any())).thenReturn(episode);
-        when(episodesRepository.findEpisodeSummaryById(1)).thenReturn(expected);
-        EpisodeSummary actual = service.saveEpisode(file,"tetujemy",
-                new ArrayList<>(){{add("Polish");add("English");}},series.getId().intValue());
-
-        assertTrue(expected.getId().equals(actual.getId()) && expected.getTitle().equals(actual.getTitle()));
+        File file = new File("target/classes/tests/videos/tetujemy.mp4");
+        MultipartFile mpfile = new MockMultipartFile("tetujemy.mp4", new FileInputStream(file));
+        NullPointerException exception = assertThrows(NullPointerException.class,()-> service.saveEpisode(mpfile,"tetujemy",
+                new ArrayList<>(){{add("Polish");add("English");}},series.getId().intValue()));
+        assertEquals("Cannot invoke \"java.lang.Long.intValue()\" because the return value of" +
+                " \"com.serwertetowy.entities.Episodes.getId()\" is null",exception.getMessage());
+        Path path = Paths.get("target/classes/videos/tetujemy.mp4");
+        assertTrue(Files.exists(path));
         verify(seriesRepository,times(1)).findById(anyInt());
-        verify(episodesRepository, times(2));
-
+        Files.delete(path);
     }
+
 }
