@@ -248,6 +248,32 @@ public class EpisodesControllerTest {
     }
 
     @Test
-    void getEpisodebyId() {
+    void when_getEpisodebyId_thenReturn_OK_and_EpisodeSummary() throws Exception {
+        Long episodeId = 1L;
+        EpisodeSummary expectedEpisodeSummary = new EpisodeSummary() {
+            @Override
+            public String getTitle() {
+                return "tetujemy";
+            }
+
+            @Override
+            public Long getId() {
+                return 1L;
+            }
+
+            @Override
+            public List<String> getLanguages() {
+                ArrayList<String> langs = new ArrayList<>();
+                langs.add("Polish");
+                langs.add("English");
+                return langs;
+            }
+        };
+        mockMvc.perform(get("/api/v1/episode/{id}",episodeId))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.title").value(expectedEpisodeSummary.getTitle()))
+                .andExpect(jsonPath("$.id").value(1))
+                .andExpect(jsonPath("$.languages").isArray())
+                .andExpect(jsonPath("$.languages", Matchers.containsInAnyOrder("Polish","English")));
     }
 }
