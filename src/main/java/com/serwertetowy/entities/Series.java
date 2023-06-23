@@ -41,6 +41,12 @@ public class Series {
         this.seriesTags = seriesTags;
     }
 
+    public Series(Long id, String name, String description) {
+        this.id = id;
+        this.name = name;
+        this.description = description;
+    }
+
     public Series(String name, String description) {
         this.name = name;
         this.description = description;

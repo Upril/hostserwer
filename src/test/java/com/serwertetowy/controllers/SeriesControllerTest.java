@@ -1,5 +1,6 @@
 package com.serwertetowy.controllers;
-import com.fasterxml.jackson.databind.ObjectMapper;
+
+import com.serwertetowy.entities.Series;
 import com.serwertetowy.services.SeriesService;
 import com.serwertetowy.services.dto.SeriesSummary;
 import org.junit.jupiter.api.Test;
@@ -7,11 +8,14 @@ import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.http.MediaType;
+import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
 import java.util.List;
 
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -40,6 +44,24 @@ public class SeriesControllerTest {
 //                        .param("file", (String) null))
 //                .andExpect(status().isOk())
 //                .andExpect(jsonPath("$.name").value("tetowa"));
+    }
+    @Test
+    void when_SaveSeriesWithfile_thenReturn_SeriesSummary()throws Exception{
+        Series savedSeries = new Series(1L,expected.getName(),expected.getDescription());
+        MockMultipartFile file = new MockMultipartFile("file","test.jpg", MediaType.IMAGE_JPEG_VALUE,
+                "TestFileContent".getBytes());
+        Mockito.when(seriesService.saveSeriesWithImage(file, expected.getName(), expected.getDescription(), List.of(1,2,3))).thenReturn(savedSeries);
+        Mockito.when(seriesService.getSeriesById(anyInt())).thenReturn(expected);
+        mockMvc.perform(MockMvcRequestBuilders.multipart("/api/v1/series")
+                .file(file)
+                .param("name",expected.getName())
+                .param("description",expected.getDescription())
+                        .param("tags","1","2","3")
+                .contentType(MediaType.MULTIPART_FORM_DATA))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id").value(1));
+        Mockito.verify(seriesService).saveSeriesWithImage(file,expected.getName(),expected.getDescription(),List.of(1,2,3));
+
     }
     @Test
     void when_GetAllSeries_thenReturn_Listof_SeriesSummary() throws Exception {
