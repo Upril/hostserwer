@@ -1,8 +1,11 @@
 package com.serwertetowy.controllers;
 
 import com.serwertetowy.entities.Series;
+import com.serwertetowy.entities.WatchFlags;
 import com.serwertetowy.services.SeriesService;
 import com.serwertetowy.services.dto.SeriesSummary;
+import com.serwertetowy.services.dto.UserSeriesSummary;
+import com.serwertetowy.services.dto.UserSummary;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,6 +38,49 @@ public class SeriesControllerTest {
     @Autowired
     private ResourceLoader resourceLoader;
     SeriesSummary expected = new SeriesSummary(1L,"tetowa","seriaTetowa",null,null);
+    UserSummary userSummary = new UserSummary() {
+        @Override
+        public Long getId() {
+            return 1L;
+        }
+
+        @Override
+        public String getFirstname() {
+            return "firstname";
+        }
+
+        @Override
+        public String getLastname() {
+            return "lastname";
+        }
+
+        @Override
+        public String getEmail() {
+            return "email";
+        }
+    };
+    WatchFlags watchFlag = new WatchFlags(1L, "Watching");
+    UserSeriesSummary userSeriesSummary = new UserSeriesSummary() {
+        @Override
+        public Long getId() {
+            return 1L;
+        }
+
+        @Override
+        public SeriesSummary getSeriesSummary() {
+            return expected;
+        }
+
+        @Override
+        public UserSummary getUserSummary() {
+            return userSummary;
+        }
+
+        @Override
+        public WatchFlags getWatchflag() {
+            return watchFlag;
+        }
+    };
     @Test
     void when_SaveSeriesWithoutFile_thenReturn_Series() throws Exception {
 //        Series savedSeries = new Series();
@@ -105,5 +151,18 @@ public class SeriesControllerTest {
                 .expectHeader().contentType(MediaType.IMAGE_JPEG)
                 .expectBody(byte[].class).isEqualTo(imageBytes);
         Mockito.verify(seriesService).getSeriesImageData(1);
+    }
+    @Test
+    void when_addSeriesToWatchlist_thenReturn_UserSeriesSummary() throws Exception {
+        Mockito.when(seriesService.addToWatchlist(expected.getId().intValue(),userSummary.getId().intValue(),watchFlag.getId().intValue())).thenReturn(userSeriesSummary);
+        mockMvc.perform(MockMvcRequestBuilders.post("/api/v1/series/addToWatchlist")
+                .param("seriesId",expected.getId().toString())
+                .param("userId",userSummary.getId().toString())
+                .param("watchflagId",watchFlag.getId().toString())
+                .contentType(MediaType.APPLICATION_FORM_URLENCODED))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id").value(userSeriesSummary.getId()))
+                .andExpect(jsonPath("$.watchflag.name").value(userSeriesSummary.getWatchflag().getName()))
+                .andExpect(jsonPath("$.seriesSummary.name").value(userSeriesSummary.getSeriesSummary().getName()));
     }
 }
