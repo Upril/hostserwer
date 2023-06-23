@@ -172,7 +172,7 @@ public class EpisodesControllerTest {
                 return langs;
             }
         };
-        byte[] fileContent = Files.readAllBytes(Path.of("target/classes/tests/videos/tetujemy.mp4"));
+        byte[] fileContent = Files.readAllBytes(Path.of("src/main/resources/videos/tetujemy.mp4"));
         MockMultipartFile file = new MockMultipartFile("file", "tetujemy.mp4", MediaType.MULTIPART_FORM_DATA_VALUE, fileContent);
         mockMvc.perform(multipart("/api/v1/episode")
                 .file(file)
@@ -190,7 +190,7 @@ public class EpisodesControllerTest {
     void putEpisodeData() throws Exception {
         long episodeId = 1L;
 
-        byte[] fileContent = Files.readAllBytes(Path.of("target/classes/tests/videos/tetujemy.mp4"));
+        byte[] fileContent = Files.readAllBytes(Path.of("src/main/resources/videos/tetujemy.mp4"));
         MockMultipartFile file = new MockMultipartFile("file", "tetujemy.mp4", MediaType.MULTIPART_FORM_DATA_VALUE, fileContent);
         MockMultipartHttpServletRequestBuilder builder = MockMvcRequestBuilders.multipart("/api/v1/episode/{id}/data",episodeId);
         builder.with(request -> {

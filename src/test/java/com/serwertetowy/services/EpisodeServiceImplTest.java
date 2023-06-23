@@ -111,7 +111,7 @@ public class EpisodeServiceImplTest {
         Episodes episode = new Episodes("Title",series,new ArrayList<>(){{add("Polish");add("English");}});
         when(seriesRepository.findById(anyInt())).thenReturn(Optional.of(series));
         when(episodesRepository.save(any())).thenReturn(episode);
-        File file = new File("target/classes/tests/videos/tetujemy.mp4");
+        File file = new File("src/main/resources/videos/tetujemy.mp4");
         MultipartFile mpfile = new MockMultipartFile("tetujemy.mp4", new FileInputStream(file));
         NullPointerException exception = assertThrows(NullPointerException.class,()-> service.saveEpisode(mpfile,"tetujemy",
                 new ArrayList<>(){{add("Polish");add("English");}},series.getId().intValue()));
@@ -126,7 +126,7 @@ public class EpisodeServiceImplTest {
     void when_putEpisodeData_thenReturn_EpisodeSummary() throws IOException {
         Series series = new Series(1L,"tet","tetowa",null,null,null,null);
         Episodes episode = new Episodes("tetujemy",series,new ArrayList<>(){{add("Polish");add("English");}});
-        File file = new File("target/classes/tests/videos/tetujemy.mp4");
+        File file = new File("src/main/resources/videos/tetujemy.mp4");
         MultipartFile mpfile = new MockMultipartFile("tetujemy.mp4", new FileInputStream(file));
         when(episodesRepository.findById(anyInt())).thenReturn(Optional.of(episode));
         Path pathReal = Path.of("target/classes/videos/tetujemy.mp4");
@@ -160,7 +160,7 @@ public class EpisodeServiceImplTest {
                 return new ArrayList<>(){{add("Polish");add("Nyakid");}};
             }
         });
-        File file = new File("target/classes/tests/videos/tetujemy.mp4");
+        File file = new File("src/main/resources/videos/tetujemy.mp4");
         MultipartFile mpfile = new MockMultipartFile("tetujemy.mp4", new FileInputStream(file));
         Path pathReal = Path.of("target/classes/videos/tetujemy.mp4");
         if(!Files.exists(pathReal)) Files.copy(mpfile.getInputStream(), pathReal);
