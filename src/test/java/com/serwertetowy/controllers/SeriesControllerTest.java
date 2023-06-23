@@ -8,10 +8,15 @@ import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.core.io.ByteArrayResource;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.ResourceLoader;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockMultipartFile;
+import org.springframework.test.web.reactive.server.WebTestClient;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
+import reactor.core.publisher.Mono;
 
 import java.util.List;
 
@@ -25,7 +30,10 @@ public class SeriesControllerTest {
     SeriesService seriesService;
     @Autowired
     MockMvc mockMvc;
-    //ObjectMapper objectMapper = new ObjectMapper();
+    @Autowired
+    private WebTestClient webTestClient;
+    @Autowired
+    private ResourceLoader resourceLoader;
     SeriesSummary expected = new SeriesSummary(1L,"tetowa","seriaTetowa",null,null);
     @Test
     void when_SaveSeriesWithoutFile_thenReturn_Series() throws Exception {
@@ -84,5 +92,18 @@ public class SeriesControllerTest {
                 .andExpect(jsonPath("$.description").value("seriaTetowa"));
         Mockito.verify(seriesService).getSeriesById(1);
     }
+    @Test
+    void when_getSeriesImage_thenReturn_ImageMono() throws Exception{
+        byte[] imageBytes = resourceLoader.getResource("classpath:/images/defalt.jpg").getContentAsByteArray();
+        Mono<Resource> imageMono = Mono.just(new ByteArrayResource(imageBytes));
+        Mockito.when(seriesService.getSeriesImageData(1)).thenReturn(imageMono);
 
+        webTestClient.get()
+                .uri("/api/v1/series/{id}/image",1)
+                .exchange()
+                .expectStatus().isOk()
+                .expectHeader().contentType(MediaType.IMAGE_JPEG)
+                .expectBody(byte[].class).isEqualTo(imageBytes);
+        Mockito.verify(seriesService).getSeriesImageData(1);
+    }
 }

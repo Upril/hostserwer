@@ -42,7 +42,7 @@ public class SeriesController {
     }
     @GetMapping(value = "/{id}/image", produces = MediaType.IMAGE_JPEG_VALUE)
     @Transactional
-    public Mono<Resource> getEpisodeImage(@PathVariable Integer id){
+    public Mono<Resource> getSeriesImage(@PathVariable Integer id){
         return seriesService.getSeriesImageData(id);
     }
     //post method allowing the user to add a given series into their watchlist, may move it to the user controller
