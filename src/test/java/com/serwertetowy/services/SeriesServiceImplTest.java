@@ -228,4 +228,90 @@ public class SeriesServiceImplTest {
         Assertions.assertEquals(1, seriesSummary2.getSeriesTags().size());
         Assertions.assertEquals(0, seriesSummary2.getEpisodes().size());
     }
+    @Test
+    void testGetSeriesById() {
+        //mocks
+        SeriesData seriesData = new SeriesData() {
+            @Override
+            public Long getId() {
+                return 1L;
+            }
+
+            @Override
+            public String getName() {
+                return "Series1";
+            }
+
+            @Override
+            public String getDescription() {
+                return "Description1";
+            }
+        };
+        EpisodeSummary episodeSummary1 = new EpisodeSummary() {
+            @Override
+            public String getTitle() {
+                return "Episode 1";
+            }
+
+            @Override
+            public Long getId() {
+                return 1L;
+            }
+
+            @Override
+            public List<String> getLanguages() {
+                return null;
+            }
+        };
+        EpisodeSummary episodeSummary2 = new EpisodeSummary() {
+            @Override
+            public String getTitle() {
+                return "Episode 2";
+            }
+
+            @Override
+            public Long getId() {
+                return 2L;
+            }
+
+            @Override
+            public List<String> getLanguages() {
+                return null;
+            }
+        };
+        Tags tag1 = new Tags();
+        tag1.setId(1L);
+        tag1.setName("Tag 1");
+
+        Tags tag2 = new Tags();
+        tag2.setId(2L);
+        tag2.setName("Tag 2");
+
+        Series series1 = (new Series(seriesData.getId(),seriesData.getName(),seriesData.getDescription()));
+
+        SeriesTags seriesTags1 = new SeriesTags(series1,tag1);
+        SeriesTags seriesTags3 = new SeriesTags(series1,tag2);
+
+        List<EpisodeSummary> episodeSummaries= Arrays.asList(episodeSummary1,episodeSummary2);
+
+        when(seriesRepository.findSeriesDataById(anyInt())).thenReturn(seriesData);
+        when(seriesTagsRepository.findBySeriesId(seriesData.getId())).thenReturn(Arrays.asList(seriesTags1,seriesTags3));
+        when(tagRepository.findById(1)).thenReturn(Optional.of(tag1));
+        when(tagRepository.findById(2)).thenReturn(Optional.of(tag2));
+        when(episodesService.getEpisodesBySeries(seriesData.getId().intValue())).thenReturn(episodeSummaries);
+
+        SeriesSummary result = seriesService.getSeriesById(1);
+
+        verify(seriesRepository, times(1)).findSeriesDataById(1);
+        verify(seriesTagsRepository, times(1)).findBySeriesId(anyLong());
+        verify(tagRepository, times(2)).findById(anyInt());
+        verify(episodesService, times(1)).getEpisodesBySeries(anyInt());
+
+        Assertions.assertEquals(seriesData.getId(), result.getId());
+        Assertions.assertEquals(seriesData.getName(), result.getName());
+        Assertions.assertEquals(seriesData.getDescription(), result.getDescription());
+        Assertions.assertEquals(episodeSummaries, result.getEpisodes());
+
+    }
+
 }
