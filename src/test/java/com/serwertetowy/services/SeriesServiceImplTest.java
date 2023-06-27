@@ -20,10 +20,13 @@ import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.core.io.ByteArrayResource;
+import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
+import reactor.core.publisher.Mono;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -312,6 +315,34 @@ public class SeriesServiceImplTest {
         Assertions.assertEquals(seriesData.getDescription(), result.getDescription());
         Assertions.assertEquals(episodeSummaries, result.getEpisodes());
 
+    }
+    @Test
+    void testGetSeriesImageData() {
+        Long id = 1L;
+        byte[] imageData = "test image data".getBytes();
+
+        Series series = new Series();
+        series.setId(id);
+        series.setImageData(imageData);
+
+        when(seriesRepository.findById(id.intValue())).thenReturn(Optional.of(series));
+
+        Mono<Resource> resultMono = seriesService.getSeriesImageData(id.intValue());
+        Resource result = resultMono.block();
+
+        verify(seriesRepository, times(1)).findById(id.intValue());
+
+        Assertions.assertNotNull(result);
+        Assertions.assertTrue(result instanceof ByteArrayResource);
+        ByteArrayResource byteArrayResource = (ByteArrayResource) result;
+        Assertions.assertArrayEquals(imageData, byteArrayResource.getByteArray());
+    }
+    @Test
+    void testGetSeriesImageDataNotFound() {
+        long id = 1L;
+        when(seriesRepository.findById((int) id)).thenReturn(Optional.empty());
+        Assertions.assertThrows(ResponseStatusException.class, () -> seriesService.getSeriesImageData((int) id));
+        verify(seriesRepository, times(1)).findById((int) id);
     }
 
 }
