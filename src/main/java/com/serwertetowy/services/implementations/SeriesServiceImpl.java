@@ -33,7 +33,7 @@ public class SeriesServiceImpl implements SeriesService {
     private UserService userService;
     @Autowired
     private ResourceLoader resourceLoader;
-    private Series seriesAssemble(String name, String description, List<Integer> tagIds){
+    public Series seriesAssemble(String name, String description, List<Integer> tagIds){
         //assembling series tag data from request data
         Set<SeriesTags> seriesTagsSet = new HashSet<>();
         Series series = new Series(name,description);
