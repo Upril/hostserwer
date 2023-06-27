@@ -1,5 +1,6 @@
 package com.serwertetowy.entities;
 
+import com.serwertetowy.services.dto.RatingSummary;
 import jakarta.persistence.*;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -32,5 +33,48 @@ public class Rating {
         this.graphicsRating = graphicsRating;
         this.charactersRating = charactersRating;
         this.generalRating = generalRating;
+    }
+    public RatingSummary toRatingSummary(){
+        return new RatingSummary() {
+            @Override
+            public Long getId() {
+                return id;
+            }
+
+            @Override
+            public Long getSeriesId() {
+                return series.getId();
+            }
+
+            @Override
+            public Long getUserId() {
+                return user.getId();
+            }
+
+            @Override
+            public short getPlotRating() {
+                return plotRating;
+            }
+
+            @Override
+            public short getMusicRating() {
+                return musicRating;
+            }
+
+            @Override
+            public short getGraphicsRating() {
+                return graphicsRating;
+            }
+
+            @Override
+            public short getCharactersRating() {
+                return charactersRating;
+            }
+
+            @Override
+            public short getGeneralRating() {
+                return generalRating;
+            }
+        };
     }
 }

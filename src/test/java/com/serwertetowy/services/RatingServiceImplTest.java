@@ -1,5 +1,6 @@
 package com.serwertetowy.services;
 
+import com.serwertetowy.entities.Rating;
 import com.serwertetowy.entities.Series;
 import com.serwertetowy.entities.User;
 import com.serwertetowy.repos.RatingRepository;
@@ -13,6 +14,7 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 import java.util.Optional;
@@ -109,5 +111,54 @@ public class RatingServiceImplTest {
         verify(seriesRepository,times(1)).findById(anyInt());
         verify(userService,times(1)).getUserById(anyLong());
         verify(ratingRepository,times(1)).save(any());
+    }
+    @Test
+    void putRating(){
+        Long id = 1L;
+        short plotRating = 4;
+        short musicRating = 3;
+        short graphicsRating = 5;
+        short charactersRating = 2;
+        short generalRating = 4;
+
+        Rating rating = new Rating();
+        rating.setId(id);
+
+        when(ratingRepository.findById(id.intValue())).thenReturn(Optional.of(rating));
+        when(ratingRepository.findById(id)).thenReturn(rating.toRatingSummary());
+        when(ratingRepository.save(rating)).thenReturn(rating);
+
+        RatingSummary actual = ratingService.putRating(id, plotRating, musicRating, graphicsRating, charactersRating, generalRating);
+
+        verify(ratingRepository, times(1)).findById(id.intValue());
+        verify(ratingRepository, times(1)).save(rating);
+        verify(ratingRepository, times(1)).findById(id);
+
+        assertEquals(rating.getId(), actual.getId());
+        assertEquals(plotRating, actual.getPlotRating());
+        assertEquals(musicRating, actual.getMusicRating());
+        assertEquals(graphicsRating, actual.getGraphicsRating());
+        assertEquals(charactersRating, actual.getCharactersRating());
+        assertEquals(generalRating, actual.getGeneralRating());
+    }
+    @Test
+    void testPutRatingNotFound() {
+        // Mock input data
+        Long id = 1L;
+        short plotRating = 4;
+        short musicRating = 3;
+        short graphicsRating = 5;
+        short charactersRating = 2;
+        short generalRating = 4;
+
+        // Mock repository behavior when the rating is not found
+        when(ratingRepository.findById(id.intValue())).thenReturn(Optional.empty());
+
+        // Call the service method and expect a ResponseStatusException
+        assertThrows(ResponseStatusException.class, () -> ratingService.putRating(id, plotRating, musicRating, graphicsRating, charactersRating, generalRating));
+
+        // Verify repository interactions
+        verify(ratingRepository, times(1)).findById(id.intValue());
+        verify(ratingRepository, never()).save(any(Rating.class));
     }
 }
