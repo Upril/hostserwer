@@ -143,7 +143,6 @@ public class RatingServiceImplTest {
     }
     @Test
     void testPutRatingNotFound() {
-        // Mock input data
         Long id = 1L;
         short plotRating = 4;
         short musicRating = 3;
@@ -151,14 +150,36 @@ public class RatingServiceImplTest {
         short charactersRating = 2;
         short generalRating = 4;
 
-        // Mock repository behavior when the rating is not found
         when(ratingRepository.findById(id.intValue())).thenReturn(Optional.empty());
 
-        // Call the service method and expect a ResponseStatusException
         assertThrows(ResponseStatusException.class, () -> ratingService.putRating(id, plotRating, musicRating, graphicsRating, charactersRating, generalRating));
 
-        // Verify repository interactions
         verify(ratingRepository, times(1)).findById(id.intValue());
         verify(ratingRepository, never()).save(any(Rating.class));
+    }
+    @Test
+    void testDeleteRatingById() {
+        Long id = 1L;
+
+        Rating rating = new Rating();
+        rating.setId(id);
+
+        when(ratingRepository.findById(id.intValue())).thenReturn(Optional.of(rating));
+
+        ratingService.deleteRatingById(id);
+
+        verify(ratingRepository, times(1)).findById(id.intValue());
+        verify(ratingRepository, times(1)).delete(rating);
+    }
+    @Test
+    void testDeleteRatingByIdNotFound() {
+        Long id = 1L;
+
+        when(ratingRepository.findById(id.intValue())).thenReturn(Optional.empty());
+
+        assertThrows(ResponseStatusException.class, () -> ratingService.deleteRatingById(id));
+
+        verify(ratingRepository, times(1)).findById(id.intValue());
+        verify(ratingRepository, never()).delete(any(Rating.class));
     }
 }
