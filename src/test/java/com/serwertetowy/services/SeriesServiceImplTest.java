@@ -18,6 +18,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -69,5 +70,37 @@ public class SeriesServiceImplTest {
 
         Assertions.assertEquals(name, result.getName());
         Assertions.assertEquals(description, result.getDescription());
+    }
+    @Test
+    void testSaveSeriesWithImage() throws IOException {
+        String name = "Test Series";
+        String description = "This is a test series";
+        List<Integer> tagIds = Arrays.asList(1, 2, 3);
+        byte[] fileContent = "test image data".getBytes();
+        MockMultipartFile file = new MockMultipartFile("image.jpg", fileContent);
+        when(tagRepository.findById(1)).thenReturn(Optional.of(new Tags(1L, "tet1")));
+        when(tagRepository.findById(2)).thenReturn(Optional.of(new Tags(2L, "tet2")));
+        when(tagRepository.findById(3)).thenReturn(Optional.of(new Tags(3L, "tet3")));
+
+        Series series = seriesService.seriesAssemble(name,description,tagIds);
+        series.setImageData(fileContent);
+
+        when(seriesRepository.save(any(Series.class))).thenReturn(series);
+
+        Series result = seriesService.saveSeriesWithImage(file, name, description, tagIds);
+
+        verify(seriesRepository, times(1)).save(any(Series.class));
+
+        Assertions.assertEquals(name, result.getName());
+        Assertions.assertEquals(description, result.getDescription());
+        Assertions.assertArrayEquals(fileContent, result.getImageData());
+    }
+    @Test
+    void testSaveSeriesWithInvalidTag() {
+        String name = "Test Series";
+        String description = "This is a test series";
+        List<Integer> tagIds = Arrays.asList(1, 2, 3);
+        //test if throws Responsestatusexeption when chooses tag not present in tagrepository
+        Assertions.assertThrows(ResponseStatusException.class,()->seriesService.saveSeries(name,description,tagIds));
     }
 }
