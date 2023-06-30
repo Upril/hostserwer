@@ -47,6 +47,8 @@ public class UserServiceImplTest {
     @Mock
     TagRepository tagRepository;
     @Mock
+    EpisodesService episodesService;
+    @Mock
     WatchFlagRepository watchFlagRepository;
     @Mock
     RatingRepository ratingRepository;
