@@ -67,6 +67,7 @@ public class UserServiceImpl implements UserService {
     public User getUserById(Long id) {
         return userRepository.findById(id).orElseThrow(()->new ResponseStatusException(HttpStatus.NOT_FOUND));
     }
+    //this should probably be in ratings controller
     @Override
     public List<RatingSummary> getUserRatingsById(Long id) {
         return ratingRepository.findByUserId(id);
@@ -78,6 +79,7 @@ public class UserServiceImpl implements UserService {
                 .getImageData();
         return new ByteArrayResource(image);
     }
+    //this should probably be in the watchlistcontroller or sth
     @Override
     public List<UserSeriesSummary> getWatchlist(Long id) {
         List<UserSeriesData> userSeriesList = userSeriesRepository.findByUserId(id);
