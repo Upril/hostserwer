@@ -26,6 +26,10 @@ import java.util.Arrays;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @WebMvcTest(UserController.class)
@@ -269,5 +273,42 @@ public class UserControllerTest {
         mockMvc.perform(builder.file(file))
                         .andExpect(status().isOk());
         Mockito.verify(userService).putUserImage(file, userId);
+    }
+    @Test
+    public void testPutUser() throws Exception {
+        UserSummary expected = new UserSummary() {
+            @Override
+            public Long getId() {
+                return userId;
+            }
+
+            @Override
+            public String getFirstname() {
+                return "Jane";
+            }
+
+            @Override
+            public String getLastname() {
+                return lastname;
+            }
+
+            @Override
+            public String getEmail() {
+                return email;
+            }
+        };
+        Mockito.when(userService.putUser(anyLong(),anyString(),anyString(),anyString())).thenReturn(expected);
+        mockMvc.perform(put("/api/v1/user/{id}",userId)
+                .param("firstname","Jane")
+                .param("lastname", "Darksouls")
+                .param("email","john.darksouls@example.com"))
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id").value(expected.getId()))
+                .andExpect(jsonPath("$.firstname").value(expected.getFirstname()))
+                .andExpect(jsonPath("$.lastname").value(expected.getLastname()))
+                .andExpect(jsonPath("$.email").value(expected.getEmail()));
+
+        Mockito.verify(userService).putUser(userId,"Jane",lastname,email);
     }
 }
