@@ -1,7 +1,10 @@
 package com.serwertetowy.controllers;
 
 import com.serwertetowy.entities.User;
+import com.serwertetowy.entities.WatchFlags;
 import com.serwertetowy.services.UserService;
+import com.serwertetowy.services.dto.SeriesSummary;
+import com.serwertetowy.services.dto.UserSeriesSummary;
 import com.serwertetowy.services.dto.UserSummary;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
@@ -18,6 +21,7 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.InputStream;
+import java.util.Arrays;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -157,5 +161,96 @@ public class UserControllerTest {
         String contentType = response.getContentType();
         assertEquals(MediaType.IMAGE_JPEG_VALUE, contentType);
     }
+    @Test
+    public void testGetUserWatchlist() throws Exception {
+        WatchFlags watchFlag1 = new WatchFlags(1L,"Watching");
+        WatchFlags watchFlag2 = new WatchFlags(2L,"Finished");
+        UserSummary userSummary = new UserSummary() {
+            @Override
+            public Long getId() {
+                return userId;
+            }
 
+            @Override
+            public String getFirstname() {
+                return firstname;
+            }
+
+            @Override
+            public String getLastname() {
+                return lastname;
+            }
+
+            @Override
+            public String getEmail() {
+                return email;
+            }
+        };
+
+        SeriesSummary seriesSummary1 = new SeriesSummary(1L,"Series 1", "Description 1",
+                null,null);
+        SeriesSummary seriesSummary2 = new SeriesSummary(1L,"Series 2", "Description 2",
+                null,null);
+        UserSeriesSummary userSeriesSummary1 = new UserSeriesSummary() {
+            @Override
+            public Long getId() {
+                return 1L;
+            }
+
+            @Override
+            public SeriesSummary getSeriesSummary() {
+                return seriesSummary1;
+            }
+
+            @Override
+            public UserSummary getUserSummary() {
+                return userSummary;
+            }
+
+            @Override
+            public WatchFlags getWatchflag() {
+                return watchFlag1;
+            }
+        };
+        UserSeriesSummary userSeriesSummary2 = new UserSeriesSummary() {
+            @Override
+            public Long getId() {
+                return 2L;
+            }
+
+            @Override
+            public SeriesSummary getSeriesSummary() {
+                return seriesSummary2;
+            }
+
+            @Override
+            public UserSummary getUserSummary() {
+                return userSummary;
+            }
+
+            @Override
+            public WatchFlags getWatchflag() {
+                return watchFlag2;
+            }
+        };
+
+        List<UserSeriesSummary> userSeriesSummaryList = Arrays.asList(userSeriesSummary1,userSeriesSummary2);
+        List<UserController.WatchlistDto> expected = Arrays.asList(
+                new UserController.WatchlistDto(seriesSummary1,watchFlag1.getName()),
+                new UserController.WatchlistDto(seriesSummary2,watchFlag2.getName())
+        );
+        Mockito.when(userService.getWatchlist(userId)).thenReturn(userSeriesSummaryList);
+
+        mockMvc.perform(MockMvcRequestBuilders.get("/api/v1/user/{id}/watchlist", userId)
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.length()").value(expected.size()))
+                .andExpect(jsonPath("$[0].seriesSummary.name").value(expected.get(0).seriesSummary().getName()))
+                .andExpect(jsonPath("$[0].seriesSummary.description").value(expected.get(0).seriesSummary().getDescription()))
+                .andExpect(jsonPath("$[0].watchFlag").value(expected.get(0).watchFlag()))
+                .andExpect(jsonPath("$[1].seriesSummary.name").value(expected.get(1).seriesSummary().getName()))
+                .andExpect(jsonPath("$[1].seriesSummary.description").value(expected.get(1).seriesSummary().getDescription()))
+                .andExpect(jsonPath("$[1].watchFlag").value(expected.get(1).watchFlag()));
+        Mockito.verify(userService).getWatchlist(userId);
+    }
 }
