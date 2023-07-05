@@ -3,6 +3,7 @@ package com.serwertetowy.controllers;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.serwertetowy.entities.User;
 import com.serwertetowy.services.UserService;
+import com.serwertetowy.services.dto.UserSummary;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,6 +16,7 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.InputStream;
+import java.util.List;
 
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -76,5 +78,64 @@ public class UserControllerTest {
                 .andExpect(jsonPath("$.password").value(password));
 
         Mockito.verify(userService).registerUserWithImage(user, imageFile);
+    }
+    @Test
+    public void testGetAllUsers() throws Exception {
+        UserSummary userSummary1 = new UserSummary() {
+            @Override
+            public Long getId() {
+                return 1L;
+            }
+
+            @Override
+            public String getFirstname() {
+                return firstname;
+            }
+
+            @Override
+            public String getLastname() {
+                return lastname;
+            }
+
+            @Override
+            public String getEmail() {
+                return email;
+            }
+        };
+        UserSummary userSummary2 = new UserSummary() {
+            @Override
+            public Long getId() {
+                return 2L;
+            }
+
+            @Override
+            public String getFirstname() {
+                return "Jane";
+            }
+
+            @Override
+            public String getLastname() {
+                return "Fortnite";
+            }
+
+            @Override
+            public String getEmail() {
+                return "jane@fortnite.com";
+            }
+        };
+        List<UserSummary> expected = List.of(userSummary1,userSummary2);
+
+        Mockito.when(userService.getAllUsers()).thenReturn(expected);
+
+        mockMvc.perform(MockMvcRequestBuilders.get("/api/v1/user/all")
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.length()").value(expected.size()))
+                .andExpect(jsonPath("$[0].firstname").value(expected.get(0).getFirstname()))
+                .andExpect(jsonPath("$[0].lastname").value(expected.get(0).getLastname()))
+                .andExpect(jsonPath("$[1].firstname").value(expected.get(1).getFirstname()))
+                .andExpect(jsonPath("$[1].lastname").value(expected.get(1).getLastname()));
+
+        Mockito.verify(userService).getAllUsers();
     }
 }
