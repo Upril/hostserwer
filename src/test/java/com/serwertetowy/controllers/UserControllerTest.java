@@ -17,6 +17,7 @@ import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.request.MockMultipartHttpServletRequestBuilder;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -252,5 +253,21 @@ public class UserControllerTest {
                 .andExpect(jsonPath("$[1].seriesSummary.description").value(expected.get(1).seriesSummary().getDescription()))
                 .andExpect(jsonPath("$[1].watchFlag").value(expected.get(1).watchFlag()));
         Mockito.verify(userService).getWatchlist(userId);
+    }
+    @Test
+    public void testPutUserImage() throws Exception {
+        InputStream imageInputStream = getClass().getResourceAsStream("classpath:/images/defalt.jpg");
+        MockMultipartFile file = new MockMultipartFile("file","defalt.jpg", MediaType.IMAGE_JPEG_VALUE, imageInputStream);
+
+        Mockito.doNothing().when(userService).putUserImage(file, userId);
+
+        MockMultipartHttpServletRequestBuilder builder = MockMvcRequestBuilders.multipart("/api/v1/user/{id}/image",userId);
+        builder.with(request -> {
+            request.setMethod("PUT");
+            return request;
+        });
+        mockMvc.perform(builder.file(file))
+                        .andExpect(status().isOk());
+        Mockito.verify(userService).putUserImage(file, userId);
     }
 }
