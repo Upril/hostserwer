@@ -1,6 +1,5 @@
 package com.serwertetowy.controllers;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.serwertetowy.entities.User;
 import com.serwertetowy.services.UserService;
 import com.serwertetowy.services.dto.UserSummary;
@@ -9,7 +8,10 @@ import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.core.io.ByteArrayResource;
+import org.springframework.core.io.Resource;
 import org.springframework.http.MediaType;
+import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
@@ -18,8 +20,8 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.InputStream;
 import java.util.List;
 
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @WebMvcTest(UserController.class)
 public class UserControllerTest {
@@ -27,7 +29,8 @@ public class UserControllerTest {
     MockMvc mockMvc;
     @MockBean
     UserService userService;
-    ObjectMapper objectMapper = new ObjectMapper();
+    //ObjectMapper objectMapper = new ObjectMapper();
+    private final Long userId = 1L;
     private final String firstname = "John";
     private final String lastname = "Darksouls";
     private final String email = "john.darksouls@example.com";
@@ -138,4 +141,21 @@ public class UserControllerTest {
 
         Mockito.verify(userService).getAllUsers();
     }
+    @Test
+    public void testGetUserImage() throws Exception {
+        byte[] imageBytes = "testImage".getBytes();
+        Resource resource = new ByteArrayResource(imageBytes);
+        Mockito.when(userService.getUserImage(userId)).thenReturn(resource);
+        MockHttpServletResponse response = mockMvc.perform(MockMvcRequestBuilders.get("/api/v1/user/{id}/image", userId)
+                        .contentType(MediaType.IMAGE_JPEG))
+                .andExpect(status().isOk())
+                .andExpect(content().bytes(imageBytes))
+                .andReturn()
+                .getResponse();
+
+        Mockito.verify(userService).getUserImage(userId);
+        String contentType = response.getContentType();
+        assertEquals(MediaType.IMAGE_JPEG_VALUE, contentType);
+    }
+
 }
