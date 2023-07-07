@@ -49,6 +49,7 @@ public class UserController {
         return new ResponseEntity<>(userService.getUserImage(id), HttpStatus.OK);
     }
     //get series from user watchlist with watchflags
+    @Deprecated
     @GetMapping("/api/v1/user/{id}/watchlist")
     public ResponseEntity<List<WatchlistDto>> getUserWatchlist(@PathVariable Long id){
         List<UserSeriesSummary> userSeriesSummaryList = userService.getWatchlist(id);

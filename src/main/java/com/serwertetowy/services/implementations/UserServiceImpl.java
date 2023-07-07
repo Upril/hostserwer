@@ -81,6 +81,7 @@ public class UserServiceImpl implements UserService {
     }
     //this should probably be in the watchlistcontroller or sth
     @Override
+    @Deprecated
     public List<UserSeriesSummary> getWatchlist(Long id) {
         List<UserSeriesData> userSeriesList = userSeriesRepository.findByUserId(id);
         List<UserSeriesSummary> userSeriesSummaryList = new ArrayList<>();
