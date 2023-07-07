@@ -118,6 +118,7 @@ public class SeriesServiceImpl implements SeriesService {
 
     //may be changed in the future to allow the user to just ignore a series
     @Override
+    @Deprecated
     public UserSeriesSummary addToWatchlist(Integer seriesId, Integer userId, Integer watchflagId) {
         //adding the series to user watchlist
         User user = userService.getUserById(userId.longValue());
