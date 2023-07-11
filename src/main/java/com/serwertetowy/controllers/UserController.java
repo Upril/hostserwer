@@ -6,10 +6,12 @@ import com.serwertetowy.services.dto.SeriesSummary;
 import com.serwertetowy.services.dto.UserSeriesSummary;
 import com.serwertetowy.services.dto.UserSummary;
 import lombok.AllArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -20,9 +22,12 @@ import java.util.List;
 @RestController
 @AllArgsConstructor
 public class UserController {
+    @Autowired
+    AuthenticationManager authenticationManager;
     private UserService userService;
     //dto for neat request response data construction, used to add watchflag info to series in watchlist
     record WatchlistDto(SeriesSummary seriesSummary, String watchFlag){}
+    record LoginDTO(String username, String password){}
     //register user, depending on whether the file was sent or not assign a default profile picture
     @PostMapping(value = "/api/v1/user/register")
     public ResponseEntity<User> register(@RequestParam String firstname, @RequestParam String lastname,
@@ -31,6 +36,10 @@ public class UserController {
         User user = new User(firstname, lastname, email, password);
         if(file == null) return new ResponseEntity<>(userService.registerUser(user), HttpStatus.OK);
         else return new ResponseEntity<>(userService.registerUserWithImage(user, file), HttpStatus.OK);
+    }
+    @PostMapping("api/v1/user/login")
+    public ResponseEntity<String> login(@RequestBody LoginDTO loginDTO){
+        return null;
     }
     //get all users with only id, names and email
     @GetMapping("/api/v1/user/all")
