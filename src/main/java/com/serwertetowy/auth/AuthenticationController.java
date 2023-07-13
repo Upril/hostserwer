@@ -1,5 +1,6 @@
 package com.serwertetowy.auth;
 
+import com.serwertetowy.config.Role;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -12,9 +13,9 @@ import org.springframework.web.bind.annotation.RestController;
 @RequiredArgsConstructor
 public class AuthenticationController {
     private final AuthenticationService authenticationService;
-    record AuthenticationResponse(String token){}
-    record RegisterRequest(String firstname, String lastname, String email, String password){}
-    record AuthenticationRequest(String email, String password){}
+    public record AuthenticationResponse(String token){}
+    public record RegisterRequest(String firstname, String lastname, String email, String password, Role role){}
+    public record AuthenticationRequest(String email, String password){}
     @PostMapping("/register")
     public ResponseEntity<AuthenticationResponse> register(@RequestBody RegisterRequest request){
         return ResponseEntity.ok(authenticationService.register(request));

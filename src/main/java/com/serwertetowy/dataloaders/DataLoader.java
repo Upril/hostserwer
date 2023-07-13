@@ -1,5 +1,8 @@
 package com.serwertetowy.dataloaders;
 
+import com.serwertetowy.auth.AuthenticationController;
+import com.serwertetowy.auth.AuthenticationService;
+import com.serwertetowy.config.Role;
 import com.serwertetowy.entities.*;
 import com.serwertetowy.repos.*;
 import com.serwertetowy.services.UserService;
@@ -27,6 +30,8 @@ public class DataLoader implements CommandLineRunner {
     WatchFlagRepository watchFlagRepository;
     @Autowired
     UserSeriesRepository userSeriesRepository;
+    @Autowired
+    AuthenticationService authenticationService;
     @Override
     public void run(String... args) throws Exception {
         loadSeriesData();
@@ -47,6 +52,7 @@ public class DataLoader implements CommandLineRunner {
         System.out.println("Users count: "+users);
         System.out.println("Watchflags count: "+watchflags);
         System.out.println("UserSeries count: "+userSeries);
+
     }
     private void loadSeriesData(){
         if(seriesRepository.count() == 0){
@@ -257,6 +263,23 @@ public class DataLoader implements CommandLineRunner {
             user3.setEmail("darksoulsiseasy@gg.com");
             user3.setPassword("123456");
 
+            var admin = new AuthenticationController.RegisterRequest(
+                    "Admin",
+                    "Admin",
+                    "admin@mail.com",
+                    "admin",
+                    Role.ADMIN);
+
+            System.out.println("Admin token: "+ authenticationService.register(admin).token());
+
+            var manager = new AuthenticationController.RegisterRequest(
+                    "Manager",
+                    "Manager",
+                    "manager@mail.com",
+                    "manager",
+                    Role.MANAGER
+            );
+            System.out.println("Manager token: "+ authenticationService.register(manager).token());
             userService.registerUser(user1);
             userService.registerUser(user2);
             userService.registerUser(user3);

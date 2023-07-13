@@ -1,7 +1,6 @@
 package com.serwertetowy.auth;
 
 import com.serwertetowy.config.JwtService;
-import com.serwertetowy.entities.Role;
 import com.serwertetowy.entities.User;
 import com.serwertetowy.repos.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -23,7 +22,7 @@ public class AuthenticationService {
                 request.lastname(),
                 request.email(),
                 passwordEncoder.encode(request.password()),
-                Role.USER
+                request.role()
         );
         userRepository.save(user);
         var jwtToken = jwtService.generateToken(user);
