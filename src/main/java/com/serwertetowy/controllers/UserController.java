@@ -29,6 +29,7 @@ public class UserController {
     record WatchlistDto(SeriesSummary seriesSummary, String watchFlag){}
     record LoginDTO(String username, String password){}
     //register user, depending on whether the file was sent or not assign a default profile picture
+    @Deprecated
     @PostMapping(value = "/api/v1/user/register")
     public ResponseEntity<User> register(@RequestParam String firstname, @RequestParam String lastname,
                                          @RequestParam String email, @RequestParam String password ,
@@ -38,6 +39,7 @@ public class UserController {
         else return new ResponseEntity<>(userService.registerUserWithImage(user, file), HttpStatus.OK);
     }
     @PostMapping("api/v1/user/login")
+    @Deprecated
     public ResponseEntity<String> login(@RequestBody LoginDTO loginDTO){
         return null;
     }

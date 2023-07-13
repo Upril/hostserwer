@@ -12,6 +12,8 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
+import static com.serwertetowy.config.Role.*;
+
 @Configuration
 @EnableWebSecurity
 @RequiredArgsConstructor
@@ -29,10 +31,15 @@ public class SecurityConfiguration {
                         "/api/v1/auth/**",
                         "/swagger-resources",
                         "/swagger-resources/**",
+                        "/v2/api-docs",
+                        "/v3/api-docs",
+                        "/v3/api-docs/**",
                         "/configuration/ui",
                         "/configuration/security",
                         "/swagger-ui/**",
-                        "/swagger-ui.html"
+                        "/webjars/**",
+                        "/swagger-ui.html",
+                        "/swagger-ui/index.html"
                             )
                     .permitAll()
                 .requestMatchers(HttpMethod.GET,
@@ -43,9 +50,38 @@ public class SecurityConfiguration {
                         "/api/v1/ratings/series/**"
                         )
                     .permitAll()
-                    .anyRequest()
+                .requestMatchers(HttpMethod.GET,
+//                        "/api/v1/user/**/image",
+                        "/api/v1/watchflag",
+                        "/api/v1/watchflag/**",
+                        "/api/v1/watchlist/**",
+                        "/api/v1/episode/**"
+                )
+                    .hasAnyAuthority(ADMIN.name(), MANAGER.name(),USER.name())
+                .requestMatchers(HttpMethod.GET,"/api/v1/user/all")
+                    .hasAnyAuthority(ADMIN.name(), MANAGER.name())
+//                .requestMatchers(HttpMethod.GET, "/api/v1/user/**/image")
+//                    .hasAnyAuthority(ADMIN_READ.name(), MANAGER_READ.name(),USER.name())
+                .requestMatchers(HttpMethod.POST,
+                        "api/v1/series",
+                        "/api/v1/episode",
+                        "/api/v1/tags/",
+                        "/api/v1/watchflag"
+                        )
+                    .hasAnyAuthority(ADMIN.name(), MANAGER.name())
+                .requestMatchers(HttpMethod.PUT,
+                        "/api/v1/episode/**",
+                        "/api/v1/rating/**",
+                        "/api/v1/tag/**"
+                        )
+                    .hasAnyAuthority(ADMIN.name(), MANAGER.name())
+//                .requestMatchers(HttpMethod.PUT,
+//                        "/api/v1/user/**/image").hasAnyAuthority(ADMIN_UPDATE.name(), USER.name())
+                .requestMatchers(HttpMethod.PUT,
+                        "/api/v1/user/**").hasAnyAuthority(USER.name())
+                .anyRequest()
                     .authenticated()
-                    .and()
+                .and()
                 .sessionManagement()
                     .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                     .and()
