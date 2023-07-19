@@ -2,6 +2,8 @@ package com.serwertetowy.services.implementations;
 
 import com.serwertetowy.entities.Episodes;
 import com.serwertetowy.entities.Series;
+import com.serwertetowy.exceptions.FileDownloadException;
+import com.serwertetowy.exceptions.FileUploadException;
 import com.serwertetowy.repos.EpisodesRepository;
 import com.serwertetowy.repos.SeriesRepository;
 import com.serwertetowy.services.dto.EpisodeSummary;
@@ -55,6 +57,21 @@ public class EpisodeServiceImpl implements EpisodesService {
         episodesRepository.save(newEpisode);
         Files.copy(file.getInputStream(), root.resolve(name+".mp4"));
         return episodesRepository.findEpisodeSummaryById(newEpisode.getId().intValue());
+    }
+
+    @Override
+    public EpisodeSummary uploadFile(MultipartFile file) throws FileUploadException, IOException {
+        return null;
+    }
+
+    @Override
+    public Mono<Resource> streamFile(String filename) throws FileDownloadException, IOException {
+        return null;
+    }
+
+    @Override
+    public boolean deleteFile(String filename) {
+        return false;
     }
 
     @Override
