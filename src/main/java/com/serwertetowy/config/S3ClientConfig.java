@@ -16,7 +16,6 @@ public class S3ClientConfig {
     private String accessKey;
     @Value("Xt/cdRhtrNSU1xuRWxiDj7uIQgtp45sf4CE7YXbd")
     private String secretKey;
-
     @Bean
     public AmazonS3 initS3Client(){
         AWSCredentials credentials = new BasicAWSCredentials(this.accessKey, this.secretKey);

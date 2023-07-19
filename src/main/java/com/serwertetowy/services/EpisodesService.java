@@ -19,7 +19,7 @@ public interface EpisodesService {
     List<EpisodeSummary> getEpisodesBySeries(Integer seriesId);
     //method saving sent mp4 files to storage, may be replaced by cloud based storage
     EpisodeSummary saveEpisode(MultipartFile file, String name, List<String> languagesList, Integer seriesId) throws IOException;
-    EpisodeSummary uploadFile(MultipartFile file) throws FileUploadException,IOException;
+    EpisodeSummary uploadFile(MultipartFile multipartFile) throws FileUploadException,IOException;
     Mono<Resource> streamFile(String filename) throws FileDownloadException,IOException;
     boolean deleteFile(String filename);
     EpisodeSummary putEpisodeData(Long id, MultipartFile file) throws IOException;
