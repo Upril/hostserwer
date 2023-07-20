@@ -1,28 +1,26 @@
 package com.serwertetowy.services.implementations;
 
 import com.amazonaws.services.s3.AmazonS3;
-import com.amazonaws.services.s3.model.ObjectMetadata;
-import com.amazonaws.services.s3.model.PutObjectRequest;
-import com.serwertetowy.config.S3ClientConfig;
+import com.amazonaws.services.s3.model.*;
 import com.serwertetowy.entities.Episodes;
 import com.serwertetowy.entities.Series;
 import com.serwertetowy.exceptions.FileDownloadException;
 import com.serwertetowy.exceptions.FileUploadException;
 import com.serwertetowy.repos.EpisodesRepository;
 import com.serwertetowy.repos.SeriesRepository;
-import com.serwertetowy.services.dto.EpisodeSummary;
 import com.serwertetowy.services.EpisodesService;
+import com.serwertetowy.services.dto.EpisodeSummary;
 import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
 import org.apache.commons.io.FilenameUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
+import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBody;
 import reactor.core.publisher.Mono;
 
 import java.io.File;
@@ -39,8 +37,7 @@ import java.util.Objects;
 @AllArgsConstructor
 public class EpisodeServiceImpl implements EpisodesService {
     private static final String FORMAT = "classpath:videos/%s.mp4";
-    @Value("mangusta")
-    private String bucketName;
+    private static final String bucketName = "mangusta";
     private final AmazonS3 s3Client;
     private EpisodesRepository episodesRepository;
     private SeriesRepository seriesRepository;
@@ -72,14 +69,15 @@ public class EpisodeServiceImpl implements EpisodesService {
     }
 
     @Override
-    public EpisodeSummary uploadFile(MultipartFile multipartFile) throws FileUploadException, IOException {
+    public EpisodeSummary uploadFile(MultipartFile multipartFile, String name, List<String> languagesList, Integer seriesId) throws FileUploadException, IOException {
         //multipart file to file
-        File file = new File(multipartFile.getOriginalFilename());
+        File file = new File(name);
         try (FileOutputStream fileOutputStream = new FileOutputStream(file)){
             fileOutputStream.write(multipartFile.getBytes());
         }
         //filename
-        String fileName = new Date().getTime() + "-" + multipartFile.getOriginalFilename().replace(" ", "_");
+        String fileName =generateFileName(multipartFile);
+
         //upload file
         PutObjectRequest request = new PutObjectRequest(bucketName,fileName,file);
         ObjectMetadata metadata = new ObjectMetadata();
@@ -90,32 +88,42 @@ public class EpisodeServiceImpl implements EpisodesService {
         s3Client.putObject(request);
 
         file.delete();
-        //????
-        return new EpisodeSummary() {
-            @Override
-            public String getTitle() {
-                return fileName;
-            }
 
-            @Override
-            public Long getId() {
-                return null;
-            }
+        Series series = seriesRepository.findById(seriesId)
+                .orElseThrow(()->new ResponseStatusException(HttpStatus.NOT_FOUND));
+        Episodes newEpisode = new Episodes(name,series,languagesList);
+        episodesRepository.save(newEpisode);
 
-            @Override
-            public List<String> getLanguages() {
-                return null;
-            }
-        };
+        return episodesRepository.findEpisodeSummaryById(newEpisode.getId().intValue());
     }
 
     @Override
-    public Mono<Resource> streamFile(String filename) throws FileDownloadException, IOException {
-        return null;
+    public StreamingResponseBody streamFile(String filename) throws FileDownloadException, IOException {
+        if(bucketIsEmpty()) throw new FileDownloadException("Requested bucket does not exist or is empty");
+        S3Object object = s3Client.getObject(bucketName, filename);
+        S3ObjectInputStream s3is = object.getObjectContent();
+        final StreamingResponseBody body = outputStream -> {
+            int bytesToWrite = 0;
+            byte[] dataBuffer = new byte[1024];
+            while ((bytesToWrite = s3is.read(dataBuffer,0,dataBuffer.length)) != -1){
+                outputStream.write(dataBuffer,0,bytesToWrite);
+            }
+            s3is.close();
+        };
+        return body;
+//    } catch (Exception e) {
+//        System.err.println("Error "+ e.getMessage());
+//        return new ResponseEntity<StreamingResponseBody>(HttpStatus.BAD_REQUEST);
+//    }
     }
 
     @Override
     public boolean deleteFile(String filename) {
+        File file = Paths.get(filename).toFile();
+        if (file.exists()) {
+            file.delete();
+            return true;
+        }
         return false;
     }
 
@@ -150,6 +158,15 @@ public class EpisodeServiceImpl implements EpisodesService {
         return episodesRepository.findEpisodeSummaryById(episodes.getId().intValue());
     }
 
+    private boolean bucketIsEmpty() {
+        ListObjectsV2Result result = s3Client.listObjectsV2(this.bucketName);
+        if(result == null) return false;
+        List<S3ObjectSummary> objectSummaries = result.getObjectSummaries();
+        return objectSummaries.isEmpty();
+    }
+    private String generateFileName(MultipartFile multiPart) {
+        return new Date().getTime() + "-" + multiPart.getOriginalFilename().replace(" ", "_");
+    }
 
 }
 

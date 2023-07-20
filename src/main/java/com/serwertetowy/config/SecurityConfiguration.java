@@ -39,7 +39,8 @@ public class SecurityConfiguration {
                         "/swagger-ui/**",
                         "/webjars/**",
                         "/swagger-ui.html",
-                        "/swagger-ui/index.html"
+                        "/swagger-ui/index.html",
+                        "/api/v1/episode/upload"
                             )
                     .permitAll()
                 .requestMatchers(HttpMethod.GET,
@@ -47,7 +48,8 @@ public class SecurityConfiguration {
                         "/api/v1/tags/**",
                         "/api/v1/series",
                         "/api/v1/series/**",
-                        "/api/v1/ratings/series/**"
+                        "/api/v1/ratings/series/**",
+                        "/api/v1/episode/stream/**"
                         )
                     .permitAll()
                 .requestMatchers(HttpMethod.GET,
