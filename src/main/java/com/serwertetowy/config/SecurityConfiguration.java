@@ -40,6 +40,8 @@ public class SecurityConfiguration {
                         "/webjars/**",
                         "/swagger-ui.html",
                         "/swagger-ui/index.html",
+                        "/api/v1/episode",
+                        "/api/v1/episode/**",
                         "/api/v1/episode/upload"
                             )
                     .permitAll()
@@ -56,8 +58,7 @@ public class SecurityConfiguration {
 //                        "/api/v1/user/**/image",
                         "/api/v1/watchflag",
                         "/api/v1/watchflag/**",
-                        "/api/v1/watchlist/**",
-                        "/api/v1/episode/**"
+                        "/api/v1/watchlist/**"
                 )
                     .hasAnyAuthority(ADMIN.name(), MANAGER.name(),USER.name())
                 .requestMatchers(HttpMethod.GET,"/api/v1/user/all")
@@ -66,7 +67,6 @@ public class SecurityConfiguration {
 //                    .hasAnyAuthority(ADMIN_READ.name(), MANAGER_READ.name(),USER.name())
                 .requestMatchers(HttpMethod.POST,
                         "api/v1/series",
-                        "/api/v1/episode",
                         "/api/v1/tags/",
                         "/api/v1/watchflag"
                         )
