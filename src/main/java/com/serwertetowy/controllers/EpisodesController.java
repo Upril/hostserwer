@@ -1,4 +1,7 @@
 package com.serwertetowy.controllers;
+import com.amazonaws.services.s3.AmazonS3;
+import com.amazonaws.services.s3.model.S3Object;
+import com.amazonaws.services.s3.model.S3ObjectInputStream;
 import com.serwertetowy.exceptions.FileDownloadException;
 import com.serwertetowy.exceptions.FileEmptyException;
 import com.serwertetowy.exceptions.FileUploadException;
@@ -25,10 +28,20 @@ import java.util.Objects;
 @AllArgsConstructor
 public class EpisodesController {
     private EpisodesService episodesService;
+    private final AmazonS3 s3Client;
     //episode saving in /target/classes/videos, to change to a cloud based file storage
     @PostMapping()
-    public ResponseEntity<EpisodeSummary> saveEpisode(@RequestParam("file")MultipartFile file, @RequestParam("name")String name, @RequestParam("languages")List<String> languagesList, @RequestParam("seriesId")Integer seriesId) throws IOException {
-        return new ResponseEntity<>(episodesService.saveEpisode(file,name,languagesList,seriesId),HttpStatus.OK);
+    public ResponseEntity<EpisodeSummary> saveEpisode(@RequestParam("file")MultipartFile file, @RequestParam("name")String name, @RequestParam("languages")List<String> languagesList, @RequestParam("seriesId")Integer seriesId) throws IOException, FileEmptyException {
+        if (file.isEmpty()){
+            throw new FileEmptyException("File is empty. Cannot save an empty file");
+        }
+        boolean isValidFile = isValidFile(file);
+        List<String> allowedFileExtensions = new ArrayList<>(List.of("mp4","mov"));
+        if (isValidFile && allowedFileExtensions.contains(FilenameUtils.getExtension(file.getOriginalFilename()))){
+            return new ResponseEntity<>(episodesService.saveEpisode(file,name,languagesList,seriesId),HttpStatus.OK);
+        }else {
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
     }
     //method for updating episode video data
     @PutMapping("/{id}/data")
@@ -73,9 +86,12 @@ public class EpisodesController {
         }
     }
     @GetMapping("/stream/{filename}")
-    public ResponseEntity<StreamingResponseBody> streamFromS3(@PathVariable("filename") String filename) throws IOException, FileDownloadException {
-        StreamingResponseBody body = episodesService.streamFile(filename);
-        return new ResponseEntity<>(body,HttpStatus.OK);
+    public ResponseEntity<StreamingResponseBody> streamFromS3(@PathVariable("filename") String filename, @RequestHeader("Range") String range) throws IOException, FileDownloadException {
+//        System.out.println("range in bytes: "+range);
+//        StreamingResponseBody body = episodesService.streamFile(filename);
+//        return new ResponseEntity<>(body,HttpStatus.OK);
+        //This whole thing should be done from cloudflare, need to think about it
+        return null;
     }
 
     private boolean isValidFile(MultipartFile multipartFile){
