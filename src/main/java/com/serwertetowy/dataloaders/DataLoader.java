@@ -267,7 +267,7 @@ public class DataLoader implements CommandLineRunner {
                     "Admin",
                     "Admin",
                     "admin@mail.com",
-                    "admin",
+                    "adminadmin",
                     Role.ADMIN);
 
             System.out.println("Admin token: "+ authenticationService.register(admin).token());
@@ -276,7 +276,7 @@ public class DataLoader implements CommandLineRunner {
                     "Manager",
                     "Manager",
                     "manager@mail.com",
-                    "manager",
+                    "managermanager",
                     Role.MANAGER
             );
             System.out.println("Manager token: "+ authenticationService.register(manager).token());
