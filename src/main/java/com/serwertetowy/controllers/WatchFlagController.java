@@ -2,6 +2,10 @@ package com.serwertetowy.controllers;
 
 import com.serwertetowy.entities.WatchFlags;
 import com.serwertetowy.repos.WatchFlagRepository;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -15,10 +19,10 @@ import java.util.Optional;
 @AllArgsConstructor
 public class WatchFlagController {
     private WatchFlagRepository watchFlagRepository;
-    record WatchFlagRequest(String flag){}
+    public record WatchFlagRequest(@NotBlank(message = "Flag name is mandatory") @Size(min = 1, message = "Flag name can't be empty") String flag){}
     //save new watchflag using the record with flag data
     @PostMapping
-    public ResponseEntity<WatchFlags> saveWatchFlag(@RequestBody WatchFlagRequest request){
+    public ResponseEntity<WatchFlags> saveWatchFlag(@RequestBody @Valid WatchFlagRequest request){
         WatchFlags watchFlag = new WatchFlags();
         watchFlag.setName(request.flag);
         watchFlagRepository.save(watchFlag);
@@ -31,9 +35,10 @@ public class WatchFlagController {
     }
     //get request for specific watchflag
     @GetMapping("/{id}")
-    public ResponseEntity<WatchFlags> getWatchFlag(@PathVariable("id") Integer id){
+    public ResponseEntity<WatchFlags> getWatchFlag(@PathVariable("id") @Min(1) Integer id){
         Optional<WatchFlags> watchFlag = watchFlagRepository.findById(id);
         return watchFlag.map(watchFlags -> new ResponseEntity<>(watchFlags, HttpStatus.OK)).orElseGet(() -> new ResponseEntity<>(HttpStatus.NOT_FOUND));
     }
+
 
 }
