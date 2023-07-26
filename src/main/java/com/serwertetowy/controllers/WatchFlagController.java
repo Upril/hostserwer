@@ -1,6 +1,7 @@
 package com.serwertetowy.controllers;
 
 import com.serwertetowy.entities.WatchFlags;
+import com.serwertetowy.exceptions.WatchflagNotFoundException;
 import com.serwertetowy.repos.WatchFlagRepository;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Min;
@@ -9,9 +10,13 @@ import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.FieldError;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 @RestController
@@ -37,7 +42,27 @@ public class WatchFlagController {
     @GetMapping("/{id}")
     public ResponseEntity<WatchFlags> getWatchFlag(@PathVariable("id") @Min(1) Integer id){
         Optional<WatchFlags> watchFlag = watchFlagRepository.findById(id);
-        return watchFlag.map(watchFlags -> new ResponseEntity<>(watchFlags, HttpStatus.OK)).orElseGet(() -> new ResponseEntity<>(HttpStatus.NOT_FOUND));
+        return watchFlag.map(watchFlags -> new ResponseEntity<>(watchFlags, HttpStatus.OK)).orElseThrow(WatchflagNotFoundException::new);
+    }
+
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    @ExceptionHandler(WatchflagNotFoundException.class)
+    public Map<String,String> handleConstraintExceptions(WatchflagNotFoundException ex){
+        Map<String,String> errors = new HashMap<>();
+        errors.put("error", ex.getMessage());
+        return errors;
+    }
+
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public Map<String,String> handleValidationExceptions(MethodArgumentNotValidException ex){
+        Map<String,String> errors = new HashMap<>();
+        ex.getBindingResult().getAllErrors().forEach((error) -> {
+            String name = ((FieldError) error).getField();
+            String msg = error.getDefaultMessage();
+            errors.put(name,msg);
+        });
+        return errors;
     }
 
 
