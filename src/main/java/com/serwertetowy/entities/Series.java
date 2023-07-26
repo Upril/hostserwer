@@ -2,6 +2,7 @@ package com.serwertetowy.entities;
 
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotBlank;
 import lombok.*;
 
 import java.util.Set;
@@ -16,7 +17,9 @@ public class Series {
     @SequenceGenerator(name = "series_id_sequence", sequenceName = "series_id_sequence")
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "series_id_sequence")
     private Long id;
+    @NotBlank(message = "Name is mandatory")
     private String name;
+    @NotBlank(message = "Description is mandatory")
     private String description;
     //@JsonManagedReference to allow seriestags db info being updated with adding of the series
     @JsonManagedReference

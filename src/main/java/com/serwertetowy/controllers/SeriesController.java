@@ -4,11 +4,15 @@ import com.serwertetowy.services.SeriesService;
 import com.serwertetowy.services.dto.SeriesSummary;
 import com.serwertetowy.services.dto.UserSeriesSummary;
 import jakarta.transaction.Transactional;
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import reactor.core.publisher.Mono;
@@ -18,12 +22,24 @@ import java.util.List;
 
 @RestController
 @AllArgsConstructor
+@Validated
 @RequestMapping("api/v1/series")
 public class SeriesController {
     private SeriesService seriesService;
     //post series method, a series needs to exist before the episode upload
     @PostMapping
-    public ResponseEntity<SeriesSummary> saveSeries(@RequestParam String name,@RequestParam String description,@RequestParam List<Integer> tags, @RequestParam(value = "file", required = false)MultipartFile file) throws IOException {
+    public ResponseEntity<SeriesSummary> saveSeries(@RequestParam
+                                                        @NotBlank(message = "Name is mandatory")
+                                                        @Size(min = 1, message = "Name is mandatory")
+                                                        String name,
+                                                    @RequestParam
+                                                        @NotBlank(message = "Description is mandatory")
+                                                        @Size(min = 1,message = "Description is mandatory")
+                                                        String description,
+                                                    @RequestParam
+                                                        List<Integer> tags,
+                                                    @RequestParam(value = "file", required = false)
+                                                        MultipartFile file) throws IOException {
         Series series;
         if (file == null) series = seriesService.saveSeries(name,description,tags);
         else series = seriesService.saveSeriesWithImage(file,name,description,tags);
@@ -37,12 +53,12 @@ public class SeriesController {
     }
     //get request for given series info without the episode video including detailed tag information
     @GetMapping("/{id}")
-    public ResponseEntity<SeriesSummary> getSeriesById(@PathVariable("id") Integer id){
+    public ResponseEntity<SeriesSummary> getSeriesById(@PathVariable("id") @Min(1) Integer id){
         return new ResponseEntity<>(seriesService.getSeriesById(id), HttpStatus.OK);
     }
     @GetMapping(value = "/{id}/image", produces = MediaType.IMAGE_JPEG_VALUE)
     @Transactional
-    public Mono<Resource> getSeriesImage(@PathVariable Integer id){
+    public Mono<Resource> getSeriesImage(@PathVariable("id") @Min(1) Integer id){
         return seriesService.getSeriesImageData(id);
     }
     //post method allowing the user to add a given series into their watchlist, may move it to the user controller
