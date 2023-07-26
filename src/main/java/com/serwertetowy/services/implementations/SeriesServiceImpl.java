@@ -1,6 +1,7 @@
 package com.serwertetowy.services.implementations;
 
 import com.serwertetowy.entities.*;
+import com.serwertetowy.exceptions.SeriesNotFoundException;
 import com.serwertetowy.repos.*;
 import com.serwertetowy.services.EpisodesService;
 import com.serwertetowy.services.UserService;
@@ -93,6 +94,7 @@ public class SeriesServiceImpl implements SeriesService {
         //identical as the previous method, but for only 1 seriesgiven by id
         SeriesSummary summary = new SeriesSummary();
         SeriesData data = seriesRepository.findSeriesDataById(id);
+        if(data == null) throw new SeriesNotFoundException();
         summary.setId(data.getId());
         summary.setName(data.getName());
         summary.setDescription(data.getDescription());
@@ -110,9 +112,13 @@ public class SeriesServiceImpl implements SeriesService {
     @Override
     @Transactional
     public Mono<Resource> getSeriesImageData(Integer id) {
+        if(seriesRepository.existsById(id)){
         ByteArrayResource imageData = new ByteArrayResource(seriesRepository.findById(id).orElseThrow
                 (()->new ResponseStatusException(HttpStatus.NOT_FOUND)).getImageData());
         return Mono.fromSupplier(()->imageData);
+        } else {
+            throw new SeriesNotFoundException();
+        }
     }
 
 

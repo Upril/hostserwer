@@ -1,9 +1,12 @@
 package com.serwertetowy.controllers;
+
 import com.serwertetowy.entities.Series;
+import com.serwertetowy.exceptions.SeriesNotFoundException;
 import com.serwertetowy.services.SeriesService;
 import com.serwertetowy.services.dto.SeriesSummary;
 import com.serwertetowy.services.dto.UserSeriesSummary;
 import jakarta.transaction.Transactional;
+import jakarta.validation.ConstraintViolationException;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
@@ -13,12 +16,16 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 import org.springframework.web.multipart.MultipartFile;
 import reactor.core.publisher.Mono;
 
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @AllArgsConstructor
@@ -28,18 +35,7 @@ public class SeriesController {
     private SeriesService seriesService;
     //post series method, a series needs to exist before the episode upload
     @PostMapping
-    public ResponseEntity<SeriesSummary> saveSeries(@RequestParam
-                                                        @NotBlank(message = "Name is mandatory")
-                                                        @Size(min = 1, message = "Name is mandatory")
-                                                        String name,
-                                                    @RequestParam
-                                                        @NotBlank(message = "Description is mandatory")
-                                                        @Size(min = 1,message = "Description is mandatory")
-                                                        String description,
-                                                    @RequestParam
-                                                        List<Integer> tags,
-                                                    @RequestParam(value = "file", required = false)
-                                                        MultipartFile file) throws IOException {
+    public ResponseEntity<SeriesSummary> saveSeries(@RequestParam @NotBlank(message = "Name is mandatory") @Size(min = 1, message = "Name is mandatory") String name, @RequestParam @NotBlank(message = "Description is mandatory") @Size(min = 1,message = "Description is mandatory") String description, @RequestParam List<Integer> tags, @RequestParam(value = "file", required = false) MultipartFile file) throws IOException {
         Series series;
         if (file == null) series = seriesService.saveSeries(name,description,tags);
         else series = seriesService.saveSeriesWithImage(file,name,description,tags);
@@ -66,6 +62,39 @@ public class SeriesController {
     @PostMapping("/addToWatchlist")
     public ResponseEntity<UserSeriesSummary> addSeriesToWatchlist(@RequestParam Integer seriesId, @RequestParam Integer userId, @RequestParam Integer watchflagId){
         return new ResponseEntity<>(seriesService.addToWatchlist(seriesId,userId, watchflagId), HttpStatus.OK);
+    }
+
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    @ExceptionHandler(MissingServletRequestParameterException.class)
+    public Map<String,String> handleMissingRequestParameterExceptions(MissingServletRequestParameterException ex){
+        Map<String,String> errors = new HashMap<>();
+        errors.put(ex.getParameterName(),ex.getMessage());
+        return errors;
+    }
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    @ExceptionHandler(ConstraintViolationException.class)
+    public Map<String,String> handleConstraintExceptions(ConstraintViolationException ex){
+        Map<String,String> errors = new HashMap<>();
+        ex.getConstraintViolations().forEach((error) -> {
+            String name = String.valueOf(error.getPropertyPath()).substring(11);
+            String msg =  error.getMessage();
+            errors.put(name,msg);
+        });
+        return errors;
+    }
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    @ExceptionHandler(MethodArgumentTypeMismatchException.class)
+    public Map<String,String> handleMethodArgumentTypeMismatchExceptions(MethodArgumentTypeMismatchException ex){
+        Map<String,String> errors = new HashMap<>();
+        errors.put(ex.getName(), "Id not valid");
+        return errors;
+    }
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    @ExceptionHandler(SeriesNotFoundException.class)
+    public Map<String,String> handleSeriesNotFoundExceptions(SeriesNotFoundException ex){
+        Map<String,String> errors = new HashMap<>();
+        errors.put("error",ex.getMessage());
+        return errors;
     }
 
 
