@@ -5,23 +5,26 @@ import com.amazonaws.services.s3.model.S3ObjectInputStream;
 import com.serwertetowy.exceptions.FileDownloadException;
 import com.serwertetowy.exceptions.FileEmptyException;
 import com.serwertetowy.exceptions.FileUploadException;
+import com.serwertetowy.exceptions.SeriesNotFoundException;
 import com.serwertetowy.services.dto.EpisodeSummary;
 import com.serwertetowy.services.EpisodesService;
+import jakarta.validation.ConstraintViolationException;
+import jakarta.validation.constraints.*;
 import org.apache.commons.io.FilenameUtils;
 import org.springframework.core.io.Resource;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
+import org.springframework.web.multipart.MultipartException;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBody;
 import reactor.core.publisher.Mono;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 
 @RestController
 @RequestMapping("api/v1/episode")
@@ -31,8 +34,11 @@ public class EpisodesController {
     private final AmazonS3 s3Client;
     //episode saving in /target/classes/videos, to change to a cloud based file storage
     @PostMapping()
-    public ResponseEntity<EpisodeSummary> saveEpisode(@RequestParam("file")MultipartFile file, @RequestParam("name")String name, @RequestParam("languages")List<String> languagesList, @RequestParam("seriesId")Integer seriesId) throws IOException, FileEmptyException {
-        if (file.isEmpty()){
+    public ResponseEntity<EpisodeSummary> saveEpisode(@RequestParam(value = "file") @NotNull MultipartFile file,
+                                                      @RequestParam(value = "name") @NotBlank(message = "Name is mandatory") @NotNull(message = "Name is mandatory") @Size(min = 1, message = "Name is mandatory") String name,
+                                                      @RequestParam(value = "languages") @NotNull @NotEmpty List<String> languagesList,
+                                                      @RequestParam(value = "seriesId") @NotNull(message = "Name is mandatory") @Min(1) Integer seriesId) throws IOException, FileEmptyException {
+        if (file == null || file.isEmpty()){
             throw new FileEmptyException("File is empty. Cannot save an empty file");
         }
         boolean isValidFile = isValidFile(file);
@@ -98,5 +104,40 @@ public class EpisodesController {
             return false;
         }
         return !multipartFile.getOriginalFilename().trim().equals("");
+    }
+
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    @ExceptionHandler(FileEmptyException.class)
+    public Map<String,String> handleSeriesNotFoundExceptions(FileEmptyException ex){
+        Map<String,String> errors = new HashMap<>();
+        errors.put("error",ex.getMessage());
+        return errors;
+    }
+
+
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    @ExceptionHandler(MultipartException.class)
+    public Map<String,String> handleMultipartExceptions(MultipartException ex){
+        Map<String,String> errors = new HashMap<>();
+        errors.put("error", "File is mandatory");
+        return errors;
+    }
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    @ExceptionHandler(MissingServletRequestParameterException.class)
+    public Map<String,String> handleMissingRequestParameterExceptions(MissingServletRequestParameterException ex){
+        Map<String,String> errors = new HashMap<>();
+        errors.put(ex.getParameterName(),ex.getMessage());
+        return errors;
+    }
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    @ExceptionHandler(ConstraintViolationException.class)
+    public Map<String,String> handleConstraintExceptions(ConstraintViolationException ex) {
+        Map<String, String> errors = new HashMap<>();
+        ex.getConstraintViolations().forEach((error) -> {
+            String name = String.valueOf(error.getPropertyPath());
+            String msg = error.getMessage();
+            errors.put(name, msg);
+        });
+        return errors;
     }
 }

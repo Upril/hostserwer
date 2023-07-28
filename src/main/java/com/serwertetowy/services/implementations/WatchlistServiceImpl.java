@@ -1,6 +1,9 @@
 package com.serwertetowy.services.implementations;
 
 import com.serwertetowy.entities.*;
+import com.serwertetowy.exceptions.SeriesNotFoundException;
+import com.serwertetowy.exceptions.UserNotFoundException;
+import com.serwertetowy.exceptions.WatchflagNotFoundException;
 import com.serwertetowy.repos.*;
 import com.serwertetowy.services.EpisodesService;
 import com.serwertetowy.services.UserService;
@@ -35,9 +38,12 @@ public class WatchlistServiceImpl implements WatchlistService {
     WatchFlagRepository watchFlagRepository;
     @Autowired
     UserService userService;
+    @Autowired
+    UserRepository userRepository;
 
     @Override
     public List<UserSeriesSummary> getWatchlist(Long id) {
+        if(!userRepository.existsById(id)) throw new UserNotFoundException();
         List<UserSeriesData> userSeriesList = userSeriesRepository.findByUserId(id);
         List<UserSeriesSummary> userSeriesSummaryList = new ArrayList<>();
         //convert userseriesdata, which contains only user and series id, into a proper watchlist dto
@@ -85,6 +91,9 @@ public class WatchlistServiceImpl implements WatchlistService {
 
     @Override
     public UserSeriesSummary addToWatchlist(Integer seriesId, Integer userId, Integer watchflagId) {
+        if(!userRepository.existsById(userId.longValue())) throw new UserNotFoundException();
+        if(!seriesRepository.existsById(seriesId)) throw new SeriesNotFoundException();
+        if(!watchFlagRepository.existsById(watchflagId)) throw new WatchflagNotFoundException();
         User user = userService.getUserById(userId.longValue());
         Series series = seriesRepository.findById(seriesId)
                 .orElseThrow(()->new ResponseStatusException(HttpStatus.NOT_FOUND));
