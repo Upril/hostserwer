@@ -100,7 +100,7 @@ public class EpisodeServiceImplTest {
     }
     @Test
     void when_getEpisodeData_thenReturn_Mono(){
-        assertInstanceOf(Mono.class, service.getEpisodeData("classpath:videos/tetujemy.mp4"));
+        assertInstanceOf(Mono.class, service.getEpisodeData(1));
     }
     @Test
     @DirtiesContext

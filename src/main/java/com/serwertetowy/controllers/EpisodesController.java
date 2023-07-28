@@ -57,8 +57,7 @@ public class EpisodesController {
     @GetMapping(value = "/{id}/play",produces = "video/mp4")
     public Mono<Resource> getEpisodeData(@PathVariable Integer id, @RequestHeader("Range") String range){
         System.out.println("range in bytes: "+range);
-        EpisodeSummary episodeSummary = episodesService.getEpisode(id);
-        return episodesService.getEpisodeData(episodeSummary.getTitle());
+        return episodesService.getEpisodeData(id);
     }
     //Webflux methods to get episodes images, not sure if needed, should work
 //    @GetMapping(value = "/{id}/image", produces = MediaType.IMAGE_JPEG_VALUE)

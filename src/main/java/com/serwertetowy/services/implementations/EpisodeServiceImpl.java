@@ -49,8 +49,8 @@ public class EpisodeServiceImpl implements EpisodesService {
         return episodesRepository.findEpisodeSummaryById(id);
     }
     @Override
-    public Mono<Resource> getEpisodeData(String title){
-        return Mono.fromSupplier(()->resourceLoader.getResource(String.format(FORMAT,title)));
+    public Mono<Resource> getEpisodeData(Integer id){
+        return Mono.fromSupplier(()->resourceLoader.getResource(String.format(FORMAT,id)));
     }
     @Override
     @Transactional
@@ -64,7 +64,7 @@ public class EpisodeServiceImpl implements EpisodesService {
                 .orElseThrow(()->new ResponseStatusException(HttpStatus.NOT_FOUND));
         Episodes newEpisode = new Episodes(name,series,languagesList);
         episodesRepository.save(newEpisode);
-        Files.copy(file.getInputStream(), root.resolve(name+".mp4"));
+        Files.copy(file.getInputStream(), root.resolve(newEpisode.getId()+".mp4"));
         return episodesRepository.findEpisodeSummaryById(newEpisode.getId().intValue());
     }
 

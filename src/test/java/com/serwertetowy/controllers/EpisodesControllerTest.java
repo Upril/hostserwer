@@ -138,7 +138,7 @@ public class EpisodesControllerTest {
 
         when(episodesService.getEpisode(anyInt())).thenReturn(episodeSummary);
         when(episodesService.getEpisodesBySeries(anyInt())).thenReturn(List.of(episodeSummary));
-        when(episodesService.getEpisodeData(anyString())).thenReturn(resourceMono);
+        when(episodesService.getEpisodeData(anyInt())).thenReturn(resourceMono);
         when(episodesService.saveEpisode(any(),anyString(),anyList(),anyInt())).thenReturn(episodeSummary);
         when(episodesService.putEpisodeData(anyLong(),any())).thenReturn(newEpisodeSummary);
         when(episodesService.putEpisode(anyLong(),anyString(), anyList(),anyInt())).thenReturn(newEpisodeSummary);
@@ -237,7 +237,7 @@ public class EpisodesControllerTest {
     @Test
     void when_getEpisodeData_thenReturn_OK_and_data_MonoResource() throws Exception {
         Long episodeId = 1L;
-        StepVerifier.create(episodesService.getEpisodeData("tetujemy"))
+        StepVerifier.create(episodesService.getEpisodeData(1))
                 .assertNext(data -> {
                     assertNotNull(data);
                     assertEquals("teowanko",data.getDescription());

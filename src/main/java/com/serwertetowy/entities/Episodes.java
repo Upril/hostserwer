@@ -2,6 +2,9 @@ package com.serwertetowy.entities;
 
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -20,8 +23,12 @@ public class Episodes{
 
     @ManyToOne
     @JsonManagedReference
+    @NotNull
     private Series series;
+    @NotEmpty
+    @Size(min = 1,max = 255)
     private String title;
+    @NotNull
     private List<String> languages;
     //may add episode icon
 
