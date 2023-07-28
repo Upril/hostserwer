@@ -3,8 +3,12 @@ package com.serwertetowy.services.implementations;
 import com.serwertetowy.entities.Rating;
 import com.serwertetowy.entities.Series;
 import com.serwertetowy.entities.User;
+import com.serwertetowy.exceptions.RatingNotFoundException;
+import com.serwertetowy.exceptions.SeriesNotFoundException;
+import com.serwertetowy.exceptions.UserNotFoundException;
 import com.serwertetowy.repos.RatingRepository;
 import com.serwertetowy.repos.SeriesRepository;
+import com.serwertetowy.repos.UserRepository;
 import com.serwertetowy.services.RatingService;
 import com.serwertetowy.services.dto.RatingSummary;
 import com.serwertetowy.services.UserService;
@@ -21,6 +25,7 @@ public class RatingServiceImpl implements RatingService {
     private RatingRepository ratingRepository;
     private UserService userService;
     private SeriesRepository seriesRepository;
+    private UserRepository userRepository;
     @Override
     public RatingSummary getRating(Long id) {
         return ratingRepository.findById(id);
@@ -28,6 +33,7 @@ public class RatingServiceImpl implements RatingService {
 
     @Override
     public RatingSummary putRating(Long id, short plotRating, short musicRating, short graphicsRating, short charactersRating, short generalRating) {
+        if(!ratingRepository.existsById(id.intValue())) throw new RatingNotFoundException();
         Rating rating = ratingRepository.findById(id.intValue())
                 .orElseThrow(()->new ResponseStatusException(HttpStatus.NOT_FOUND));
         rating.setPlotRating(plotRating);
@@ -41,6 +47,7 @@ public class RatingServiceImpl implements RatingService {
 
     @Override
     public void deleteRatingById(Long id) {
+        if(!ratingRepository.existsById(id.intValue())) throw new RatingNotFoundException();
         Rating rating = ratingRepository.findById(id.intValue())
                 .orElseThrow(()->new ResponseStatusException(HttpStatus.NOT_FOUND));
         ratingRepository.delete(rating);
@@ -48,16 +55,20 @@ public class RatingServiceImpl implements RatingService {
 
     @Override
     public List<RatingSummary> getRatingsBySeries(Long seriesId) {
+        if(!seriesRepository.existsById(seriesId.intValue())) throw new SeriesNotFoundException();
         return ratingRepository.findBySeriesId(seriesId);
     }
 
     @Override
     public List<RatingSummary> getRatingsByUser(Long userId) {
+        if(!userRepository.existsById(userId)) throw new UserNotFoundException();
         return ratingRepository.findByUserId(userId);
     }
 
     @Override
     public void saveRating(Long userId, Long seriesId, short plotRating, short musicRating, short graphicsRating, short charactersRating, short generalRating) {
+        if(!userRepository.existsById(userId)) throw new UserNotFoundException();
+        if(!seriesRepository.existsById(seriesId.intValue())) throw new SeriesNotFoundException();
         User user = userService.getUserById(userId);
         //assemble rating data - get series information
         Series series = seriesRepository.findById(seriesId.intValue())

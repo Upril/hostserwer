@@ -66,6 +66,9 @@ public class SecurityConfiguration {
 //                .requestMatchers(HttpMethod.GET, "/api/v1/user/**/image")
 //                    .hasAnyAuthority(ADMIN_READ.name(), MANAGER_READ.name(),USER.name())
                 .requestMatchers(HttpMethod.POST,
+                        "/api/v1/rating/**")
+                .hasAnyAuthority(ADMIN.name(), MANAGER.name(),USER.name())
+                .requestMatchers(HttpMethod.POST,
                         "api/v1/series",
                         "/api/v1/tags/",
                         "/api/v1/watchflag"
