@@ -59,7 +59,7 @@ public class DataLoader implements CommandLineRunner {
     }
     private void loadSeriesData() throws IOException {
         if(seriesRepository.count() == 0){
-            byte[] image = resourceLoader.getResource("classpath:/images/defalt.jpg").getContentAsByteArray();
+            byte[] image = resourceLoader.getResource("classpath:/images/banner.jpg").getContentAsByteArray();
             Series series1 = new Series(1L, "Haikyuu!!", "The series revolves around a fairly large ensemble consisting of a high school volleyball team.",null,null,null,image);
             Series series2 = new Series(2L, "Dragon Ball Z", "Revolves around superhuman martial artist Goku and his friends testing their mettle against an increasingly powerful and outlandish series of foes.",null,null,null,image);
             Series series3 = new Series(3L, "My Hero Academia", "focusing on Izuku Midoriya, a hero who was born without powers (but is determined to save people regardless) in a world full of folks with abilities. MHA constantly finds ways to challenge Midoriya's traditional hero's journey",null,null,null,image);
@@ -250,23 +250,28 @@ public class DataLoader implements CommandLineRunner {
     }
     private void loadUserData() throws IOException {
         if(userRepository.count() == 0) {
+            byte[] image = resourceLoader.getResource("classpath:/images/banner.jpg").getContentAsByteArray();
+
             User user1 = new User();
             user1.setFirstname("John");
             user1.setLastname("Doe");
             user1.setEmail("john@doe.com");
             user1.setPassword("123456");
+            user1.setImageData(image);
 
             User user2 = new User();
             user2.setFirstname("Baba");
             user2.setLastname("Booey");
             user2.setEmail("baba@booey.com");
             user2.setPassword("123456");
+            user2.setImageData(image);
 
             User user3 = new User();
             user3.setFirstname("John");
             user3.setLastname("Darksouls");
             user3.setEmail("darksoulsiseasy@gg.com");
             user3.setPassword("123456");
+            user3.setImageData(image);
 
             var admin = new AuthenticationController.RegisterRequest(
                     "Admin",
@@ -285,6 +290,16 @@ public class DataLoader implements CommandLineRunner {
                     Role.MANAGER
             );
             System.out.println("Manager token: "+ authenticationService.register(manager).token());
+
+            var user = new AuthenticationController.RegisterRequest(
+                    "User",
+                    "User",
+                    "user@mail.com",
+                    "useruser",
+                    Role.USER
+            );
+            System.out.println("User token: "+ authenticationService.register(user).token());
+
             userService.registerUser(user1);
             userService.registerUser(user2);
             userService.registerUser(user3);

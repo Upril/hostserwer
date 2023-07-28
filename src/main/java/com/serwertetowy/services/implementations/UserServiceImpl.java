@@ -1,5 +1,6 @@
 package com.serwertetowy.services.implementations;
 import com.serwertetowy.entities.*;
+import com.serwertetowy.exceptions.FileEmptyException;
 import com.serwertetowy.exceptions.UserNotFoundException;
 import com.serwertetowy.repos.*;
 import com.serwertetowy.services.EpisodesService;
@@ -74,6 +75,7 @@ public class UserServiceImpl implements UserService {
     }
     @Override
     public Resource getUserImage(Long id){
+        if(!userRepository.existsById(id)) throw new UserNotFoundException();
         byte[] image = userRepository.findById(id).orElseThrow(()->
                 new ResponseStatusException(HttpStatus.NOT_FOUND))
                 .getImageData();
@@ -128,7 +130,8 @@ public class UserServiceImpl implements UserService {
         return userSeriesSummaryList;
     }
     @Override
-    public void putUserImage(MultipartFile file, Long id) throws IOException {
+    public void putUserImage(MultipartFile file, Long id) throws IOException, FileEmptyException {
+        if (file.isEmpty()) throw new FileEmptyException("Image file is mandatory");
         User user = userRepository.findById(id).orElseThrow(UserNotFoundException::new);
         user.setImageData(file.getBytes());
         userRepository.save(user);

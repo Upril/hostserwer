@@ -1,10 +1,14 @@
 package com.serwertetowy.controllers;
 
-import com.serwertetowy.entities.User;
+import com.serwertetowy.exceptions.FileEmptyException;
+import com.serwertetowy.exceptions.UserNotFoundException;
 import com.serwertetowy.services.UserService;
 import com.serwertetowy.services.dto.SeriesSummary;
-import com.serwertetowy.services.dto.UserSeriesSummary;
 import com.serwertetowy.services.dto.UserSummary;
+import jakarta.validation.ConstraintViolationException;
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.Resource;
@@ -13,11 +17,13 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartException;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
-import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @AllArgsConstructor
@@ -27,58 +33,56 @@ public class UserController {
     private UserService userService;
     //dto for neat request response data construction, used to add watchflag info to series in watchlist
     record WatchlistDto(SeriesSummary seriesSummary, String watchFlag){}
-    record LoginDTO(String username, String password){}
-    //register user, depending on whether the file was sent or not assign a default profile picture
-    @Deprecated
-    @PostMapping(value = "/api/v1/user/register")
-    public ResponseEntity<User> register(@RequestParam String firstname, @RequestParam String lastname,
-                                         @RequestParam String email, @RequestParam String password ,
-                                         @RequestParam(required = false) MultipartFile file) throws IOException {
-        User user = new User(firstname, lastname, email, password);
-        if(file == null) return new ResponseEntity<>(userService.registerUser(user), HttpStatus.OK);
-        else return new ResponseEntity<>(userService.registerUserWithImage(user, file), HttpStatus.OK);
-    }
-    @PostMapping("api/v1/user/login")
-    @Deprecated
-    public ResponseEntity<String> login(@RequestBody LoginDTO loginDTO){
-        return null;
-    }
     //get all users with only id, names and email
     @GetMapping("/api/v1/user/all")
     public ResponseEntity<List<UserSummary>> getAllUsers(){
         return new ResponseEntity<>(userService.getAllUsers(), HttpStatus.OK);
     }
-    //get speific user with profile picture? and ratings
-//    @GetMapping("/api/v1/user/{id}")
-//    public ResponseEntity<User> getUserById(@PathVariable("id") Integer id){
-//        Long i = Long.valueOf(id);
-//        return new ResponseEntity<>(userService.getUserById(i), HttpStatus.OK);
-//    }
     //get image for given user
     @GetMapping(value = "/api/v1/user/{id}/image", produces = MediaType.IMAGE_JPEG_VALUE)
-    ResponseEntity<Resource> getUserImage(@PathVariable Long id){
+    ResponseEntity<Resource> getUserImage(@PathVariable @Min(1) Long id){
         return new ResponseEntity<>(userService.getUserImage(id), HttpStatus.OK);
-    }
-    //get series from user watchlist with watchflags
-    @Deprecated
-    @GetMapping("/api/v1/user/{id}/watchlist")
-    public ResponseEntity<List<WatchlistDto>> getUserWatchlist(@PathVariable Long id){
-        List<UserSeriesSummary> userSeriesSummaryList = userService.getWatchlist(id);
-        List<WatchlistDto> watchlistDtoList = new ArrayList<>();
-        //assembling watchlistdto from userseries data
-        for(UserSeriesSummary userSeriesSummary: userSeriesSummaryList){
-            watchlistDtoList.add(new WatchlistDto(userSeriesSummary.getSeriesSummary(), userSeriesSummary.getWatchflag().getName()));
-        }
-        return new ResponseEntity<>(watchlistDtoList, HttpStatus.OK);
     }
     //put request to change user profile picture
     @PutMapping("/api/v1/user/{id}/image")
-    ResponseEntity<Void> putUserImage(@PathVariable Long id, @RequestParam MultipartFile file) throws IOException {
+    ResponseEntity<Void> putUserImage(@PathVariable @Min(1) Long id, @RequestParam @NotBlank @NotNull MultipartFile file) throws IOException, FileEmptyException {
         userService.putUserImage(file, id);
         return new ResponseEntity<>(HttpStatus.OK);
     }
     @PutMapping("/api/v1/user/{id}")
-    ResponseEntity<UserSummary> putUser(@PathVariable Long id, @RequestParam String firstname, @RequestParam String lastname, @RequestParam String email){
+    ResponseEntity<UserSummary> putUser(@PathVariable @Min(1) Long id, @RequestParam(required = false) @NotNull String firstname, @RequestParam(required = false) @NotNull String lastname, @RequestParam(required = false) @NotNull String email){
         return new ResponseEntity<>(userService.putUser(id,firstname,lastname,email),HttpStatus.OK);
+    }
+
+    private Map<String,String> messageCreator(Exception ex){
+        Map<String,String> errors = new HashMap<>();
+        errors.put("error",ex.getMessage());
+        return errors;
+    }
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    @ExceptionHandler(UserNotFoundException.class)
+    public Map<String,String> handleUserNotFoundExceptions(UserNotFoundException ex){
+        return messageCreator(ex);
+    }
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    @ExceptionHandler(MultipartException.class)
+    public Map<String,String> handleMultipartExceptions(MultipartException ex){
+        return messageCreator(ex);
+    }
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    @ExceptionHandler(FileEmptyException.class)
+    public Map<String,String> handleFileEmptyExceptions(FileEmptyException ex){
+        return messageCreator(ex);
+    }
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    @ExceptionHandler(ConstraintViolationException.class)
+    public Map<String,String> handleConstraintExceptions(ConstraintViolationException ex){
+        Map<String,String> errors = new HashMap<>();
+        ex.getConstraintViolations().forEach((error) -> {
+            String name = String.valueOf(error.getPropertyPath());
+            String msg =  error.getMessage();
+            errors.put(name,msg);
+        });
+        return errors;
     }
 }

@@ -35,7 +35,7 @@ public class SeriesController {
     private SeriesService seriesService;
     //post series method, a series needs to exist before the episode upload
     @PostMapping
-    public ResponseEntity<SeriesSummary> saveSeries(@RequestParam @NotBlank(message = "Name is mandatory") @Size(min = 1, message = "Name is mandatory") String name, @RequestParam @NotBlank(message = "Description is mandatory") @Size(min = 1,message = "Description is mandatory") String description, @RequestParam List<Integer> tags, @RequestParam(value = "file", required = false) MultipartFile file) throws IOException {
+    public ResponseEntity<SeriesSummary> saveSeries(@RequestParam(required = false) @NotBlank(message = "Name is mandatory") @Size(min = 1, message = "Name is mandatory") String name, @RequestParam(required = false) @NotBlank(message = "Description is mandatory") @Size(min = 1,message = "Description is mandatory") String description, @RequestParam(required = false) List<Integer> tags, @RequestParam(value = "file", required = false) MultipartFile file) throws IOException {
         Series series;
         if (file == null) series = seriesService.saveSeries(name,description,tags);
         else series = seriesService.saveSeriesWithImage(file,name,description,tags);

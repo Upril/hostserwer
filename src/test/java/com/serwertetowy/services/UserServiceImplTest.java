@@ -1,6 +1,7 @@
 package com.serwertetowy.services;
 
 import com.serwertetowy.entities.*;
+import com.serwertetowy.exceptions.FileEmptyException;
 import com.serwertetowy.repos.*;
 import com.serwertetowy.services.dto.RatingSummary;
 import com.serwertetowy.services.dto.UserSeriesData;
@@ -464,7 +465,7 @@ public class UserServiceImplTest {
         Assertions.assertNotNull(userSeriesSummary2.getWatchflag());
     }
     @Test
-    void testPutUserImage() throws IOException {
+    void testPutUserImage() throws IOException, FileEmptyException {
         // Mock input data
         Long userId = 1L;
         byte[] imageData = "test image data".getBytes();

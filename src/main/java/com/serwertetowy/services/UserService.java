@@ -1,6 +1,7 @@
 package com.serwertetowy.services;
 
 import com.serwertetowy.entities.User;
+import com.serwertetowy.exceptions.FileEmptyException;
 import com.serwertetowy.services.dto.RatingSummary;
 import com.serwertetowy.services.dto.UserSeriesSummary;
 import com.serwertetowy.services.dto.UserSummary;
@@ -26,6 +27,6 @@ public interface UserService {
     //get watchlist info for given user
     List<UserSeriesSummary> getWatchlist(Long id);
     //update user profile pic and user data
-    void putUserImage(MultipartFile file, Long id)throws IOException;
+    void putUserImage(MultipartFile file, Long id) throws IOException, FileEmptyException;
     UserSummary putUser(Long id, String firstname, String lastname, String email);
 }
