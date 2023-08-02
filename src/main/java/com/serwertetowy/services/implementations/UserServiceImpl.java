@@ -1,6 +1,8 @@
 package com.serwertetowy.services.implementations;
 import com.serwertetowy.entities.*;
 import com.serwertetowy.exceptions.FileEmptyException;
+import com.serwertetowy.exceptions.UserDeletedException;
+import com.serwertetowy.exceptions.UserNotDeletedException;
 import com.serwertetowy.exceptions.UserNotFoundException;
 import com.serwertetowy.repos.*;
 import com.serwertetowy.services.EpisodesService;
@@ -71,6 +73,7 @@ public class UserServiceImpl implements UserService {
     //this should probably be in ratings controller
     @Override
     public List<RatingSummary> getUserRatingsById(Long id) {
+        if(userRepository.findById(id).orElseThrow(UserNotFoundException::new).isDeleted()) throw new UserDeletedException();
         return ratingRepository.findByUserId(id);
     }
     @Override
@@ -85,6 +88,7 @@ public class UserServiceImpl implements UserService {
     @Override
     @Deprecated
     public List<UserSeriesSummary> getWatchlist(Long id) {
+        if(userRepository.findById(id).orElseThrow(UserNotFoundException::new).isDeleted()) throw new UserDeletedException();
         List<UserSeriesData> userSeriesList = userSeriesRepository.findByUserId(id);
         List<UserSeriesSummary> userSeriesSummaryList = new ArrayList<>();
         //convert userseriesdata, which contains only user and series id, into a proper watchlist dto
@@ -131,6 +135,7 @@ public class UserServiceImpl implements UserService {
     }
     @Override
     public void putUserImage(MultipartFile file, Long id) throws IOException, FileEmptyException {
+        if(userRepository.findById(id).orElseThrow(UserNotFoundException::new).isDeleted()) throw new UserDeletedException();
         if (file.isEmpty()) throw new FileEmptyException("Image file is mandatory");
         User user = userRepository.findById(id).orElseThrow(UserNotFoundException::new);
         user.setImageData(file.getBytes());
@@ -138,12 +143,32 @@ public class UserServiceImpl implements UserService {
     }
     @Override
     public UserSummary putUser(Long id, String firstname, String lastname, String email) {
+        if(userRepository.findById(id).orElseThrow(UserNotFoundException::new).isDeleted()) throw new UserDeletedException();
         User user = userRepository.findById(id).orElseThrow(UserNotFoundException::new);
         user.setFirstname(firstname);
         user.setLastname(lastname);
         user.setEmail(email);
         userRepository.save(user);
         return userRepository.findByEmail(email);
+    }
+
+    @Override
+    public void deleteUser(Long id) {
+        if(userRepository.findById(id).orElseThrow(UserNotFoundException::new).isDeleted()) throw new UserDeletedException();
+        User user = userRepository.findById(id).orElseThrow(UserNotFoundException::new);
+        user.setDeleted(true);
+        userRepository.save(user);
+    }
+
+    @Override
+    public void restoreUser(Long id) {
+        if(userRepository.findById(id).orElseThrow(UserNotFoundException::new).isDeleted()){
+            User user = userRepository.findById(id).orElseThrow(UserNotFoundException::new);
+            user.setDeleted(false);
+            userRepository.save(user);
+        } else {
+            throw new UserNotDeletedException();
+        }
     }
 
 }

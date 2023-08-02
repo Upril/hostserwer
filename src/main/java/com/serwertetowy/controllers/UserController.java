@@ -1,6 +1,8 @@
 package com.serwertetowy.controllers;
 
 import com.serwertetowy.exceptions.FileEmptyException;
+import com.serwertetowy.exceptions.UserDeletedException;
+import com.serwertetowy.exceptions.UserNotDeletedException;
 import com.serwertetowy.exceptions.UserNotFoundException;
 import com.serwertetowy.services.UserService;
 import com.serwertetowy.services.dto.SeriesSummary;
@@ -53,7 +55,16 @@ public class UserController {
     ResponseEntity<UserSummary> putUser(@PathVariable @Min(1) Long id, @RequestParam(required = false) @NotNull String firstname, @RequestParam(required = false) @NotNull String lastname, @RequestParam(required = false) @NotNull String email){
         return new ResponseEntity<>(userService.putUser(id,firstname,lastname,email),HttpStatus.OK);
     }
-
+    @DeleteMapping("/api/v1/user/delete/{id}")
+    ResponseEntity<Void> deleteUser(@PathVariable @Min(1) Long id){
+        userService.deleteUser(id);
+        return new ResponseEntity<>(HttpStatus.OK);
+    }
+    @PutMapping("/api/v1/user/restore/{id}")
+    ResponseEntity<Void> restoreUser(@PathVariable @Min(1) Long id){
+        userService.restoreUser(id);
+        return new ResponseEntity<>(HttpStatus.OK);
+    }
     private Map<String,String> messageCreator(Exception ex){
         Map<String,String> errors = new HashMap<>();
         errors.put("error",ex.getMessage());
@@ -62,6 +73,16 @@ public class UserController {
     @ResponseStatus(HttpStatus.NOT_FOUND)
     @ExceptionHandler(UserNotFoundException.class)
     public Map<String,String> handleUserNotFoundExceptions(UserNotFoundException ex){
+        return messageCreator(ex);
+    }
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    @ExceptionHandler(UserNotDeletedException.class)
+    public Map<String,String> handleUserNotFoundExceptions(UserNotDeletedException ex){
+        return messageCreator(ex);
+    }
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    @ExceptionHandler(UserDeletedException.class)
+    public Map<String,String> handleUserDeletedExceptions(UserDeletedException ex){
         return messageCreator(ex);
     }
     @ResponseStatus(HttpStatus.BAD_REQUEST)

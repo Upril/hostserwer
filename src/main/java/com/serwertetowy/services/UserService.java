@@ -29,4 +29,6 @@ public interface UserService {
     //update user profile pic and user data
     void putUserImage(MultipartFile file, Long id) throws IOException, FileEmptyException;
     UserSummary putUser(Long id, String firstname, String lastname, String email);
+    void deleteUser(Long id);
+    void restoreUser(Long id);
 }

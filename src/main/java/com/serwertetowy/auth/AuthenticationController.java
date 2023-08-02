@@ -1,6 +1,8 @@
 package com.serwertetowy.auth;
 
 import com.serwertetowy.config.Role;
+import com.serwertetowy.exceptions.UserDeletedException;
+import com.serwertetowy.exceptions.UserNotFoundException;
 import jakarta.validation.ConstraintViolationException;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Email;
@@ -33,6 +35,21 @@ public class AuthenticationController {
     public ResponseEntity<AuthenticationResponse> authenticate (@Valid @RequestBody AuthenticationRequest request){
         return ResponseEntity.ok(authenticationService.authenticate(request));
     }
+    private Map<String,String> messageCreator(Exception ex){
+        Map<String,String> errors = new HashMap<>();
+        errors.put("error",ex.getMessage());
+        return errors;
+    }
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    @ExceptionHandler(UserNotFoundException.class)
+    public Map<String,String> handleUserNotFoundExceptions(UserNotFoundException ex){
+        return messageCreator(ex);
+    }
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    @ExceptionHandler(UserDeletedException.class)
+    public Map<String,String> handleUserDeletedExceptions(UserDeletedException ex){
+        return messageCreator(ex);
+    }
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public Map<String,String> handleValidationExceptions(MethodArgumentNotValidException ex){
@@ -44,7 +61,6 @@ public class AuthenticationController {
         });
         return errors;
     }
-
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     @ExceptionHandler(ConstraintViolationException.class)
     public Map<String,String> handleConstraintExceptions(ConstraintViolationException ex){

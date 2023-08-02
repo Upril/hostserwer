@@ -2,6 +2,7 @@ package com.serwertetowy.services.implementations;
 
 import com.serwertetowy.entities.*;
 import com.serwertetowy.exceptions.SeriesNotFoundException;
+import com.serwertetowy.exceptions.UserDeletedException;
 import com.serwertetowy.exceptions.UserNotFoundException;
 import com.serwertetowy.exceptions.WatchflagNotFoundException;
 import com.serwertetowy.repos.*;
@@ -95,6 +96,7 @@ public class WatchlistServiceImpl implements WatchlistService {
         if(!seriesRepository.existsById(seriesId)) throw new SeriesNotFoundException();
         if(!watchFlagRepository.existsById(watchflagId)) throw new WatchflagNotFoundException();
         User user = userService.getUserById(userId.longValue());
+        if(user.isDeleted()) throw new UserDeletedException();
         Series series = seriesRepository.findById(seriesId)
                 .orElseThrow(()->new ResponseStatusException(HttpStatus.NOT_FOUND));
         //series added to watchlist by default are set to the "Watching" watchflag

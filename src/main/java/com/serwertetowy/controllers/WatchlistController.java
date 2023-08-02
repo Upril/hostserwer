@@ -1,6 +1,7 @@
 package com.serwertetowy.controllers;
 
 import com.serwertetowy.exceptions.SeriesNotFoundException;
+import com.serwertetowy.exceptions.UserDeletedException;
 import com.serwertetowy.exceptions.UserNotFoundException;
 import com.serwertetowy.exceptions.WatchflagNotFoundException;
 import com.serwertetowy.services.WatchlistService;
@@ -39,7 +40,7 @@ public class WatchlistController {
         return new ResponseEntity<>(watchlistDtoList, HttpStatus.OK);
     }
     @PostMapping("/addToWatchlist")
-    public ResponseEntity<UserSeriesSummary> addSeriesToWatchlist(@Valid @RequestBody WatchlistPostRequest request){
+    public ResponseEntity<UserSeriesSummary> addSeriesToWatchlist(@Valid @RequestBody WatchlistPostRequest request) throws UserDeletedException {
         return new ResponseEntity<>(watchlistService.addToWatchlist(request.seriesId, request.userId, request.watchflagId), HttpStatus.OK);
     }
     private Map<String,String> createMessage(Exception ex){
@@ -50,6 +51,11 @@ public class WatchlistController {
     @ResponseStatus(HttpStatus.NOT_FOUND)
     @ExceptionHandler(UserNotFoundException.class)
     public Map<String,String> handleUserNotFoundExceptions(UserNotFoundException ex){
+        return createMessage(ex);
+    }
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    @ExceptionHandler(UserDeletedException.class)
+    public Map<String,String> handleUserNotFoundExceptions(UserDeletedException ex){
         return createMessage(ex);
     }
     @ResponseStatus(HttpStatus.NOT_FOUND)

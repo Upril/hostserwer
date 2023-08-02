@@ -36,6 +36,7 @@ public class User implements UserDetails {
     @NotBlank(message = "Password is mandatory")
     @JsonIgnore
     private String password;
+    private boolean deleted;
     @Lob
     @Column(name = "imageData", length = 1000)
     @Basic(fetch = FetchType.LAZY)
@@ -50,6 +51,7 @@ public class User implements UserDetails {
         this.lastname = lastname;
         this.email = email;
         this.password = password;
+        this.deleted = false;
     }
     public User(String firstname, String lastname, String email, String password, Role role) {
         this.firstname = firstname;
@@ -57,6 +59,7 @@ public class User implements UserDetails {
         this.email = email;
         this.password = password;
         this.role = role;
+        this.deleted = false;
     }
 
     public User(Long id, String firstname, String lastname, String email, String password) {
@@ -65,8 +68,8 @@ public class User implements UserDetails {
         this.lastname = lastname;
         this.email = email;
         this.password = password;
+        this.deleted = false;
     }
-    //in the future used for password encription
     @JsonProperty
     public void setPassword(String password){
         this.password = password;

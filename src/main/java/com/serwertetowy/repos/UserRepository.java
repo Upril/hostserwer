@@ -10,12 +10,11 @@ import java.util.List;
 public interface UserRepository extends JpaRepository<User, Long> {
     //selective db data retrieval without watchlists and pictures
     UserSummary findByEmail(String email);
+    Boolean existsByEmail(String email);
     @Query(nativeQuery = true, value = """
             select
-                id, first_name as firstname, last_name as lastname, email
+                id, first_name as firstname, last_name as lastname, email, deleted
             from users
             order by id""")
     List<UserSummary> findAllUserData();
-    //may be used for logins
-    User findByEmailAndPassword(String email, String password);
 }

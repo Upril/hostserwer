@@ -5,4 +5,5 @@ public interface UserSummary {
     String getFirstname();
     String getLastname();
     String getEmail();
+    Boolean getDeleted();
 }

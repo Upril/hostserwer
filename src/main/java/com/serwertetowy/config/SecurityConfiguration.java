@@ -63,6 +63,8 @@ public class SecurityConfiguration {
                     .hasAnyAuthority(ADMIN.name(), MANAGER.name(),USER.name())
                 .requestMatchers(HttpMethod.GET,"/api/v1/user/all")
                     .hasAnyAuthority(ADMIN.name(), MANAGER.name())
+                .requestMatchers(HttpMethod.DELETE, "/api/v1/user/**")
+                    .hasAnyAuthority(ADMIN.name(), MANAGER.name())
 //                .requestMatchers(HttpMethod.GET, "/api/v1/user/**/image")
 //                    .hasAnyAuthority(ADMIN_READ.name(), MANAGER_READ.name(),USER.name())
                 .requestMatchers(HttpMethod.POST,
@@ -83,7 +85,7 @@ public class SecurityConfiguration {
 //                .requestMatchers(HttpMethod.PUT,
 //                        "/api/v1/user/**/image").hasAnyAuthority(ADMIN_UPDATE.name(), USER.name())
                 .requestMatchers(HttpMethod.PUT,
-                        "/api/v1/user/**").hasAnyAuthority(USER.name())
+                        "/api/v1/user/**").hasAnyAuthority(USER.name(), ADMIN.name(),MANAGER.name())
                 .anyRequest()
                     .authenticated()
                 .and()

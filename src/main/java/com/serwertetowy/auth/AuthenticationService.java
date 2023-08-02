@@ -2,6 +2,8 @@ package com.serwertetowy.auth;
 
 import com.serwertetowy.config.JwtService;
 import com.serwertetowy.entities.User;
+import com.serwertetowy.exceptions.UserDeletedException;
+import com.serwertetowy.exceptions.UserNotFoundException;
 import com.serwertetowy.repos.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -30,6 +32,8 @@ public class AuthenticationService {
     }
 
     public AuthenticationController.AuthenticationResponse authenticate(AuthenticationController.AuthenticationRequest request) {
+        if(!userRepository.existsByEmail(request.email())) throw new UserNotFoundException();
+        if(userRepository.findByEmail(request.email()).getDeleted()) throw new UserDeletedException();
         authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(request.email(),request.password()));
         var user = userRepository.findById(userRepository.findByEmail(request.email()).getId()).orElseThrow();
         var jwtToken = jwtService.generateToken(user);

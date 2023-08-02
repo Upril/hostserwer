@@ -2,6 +2,7 @@ package com.serwertetowy.services;
 
 import com.serwertetowy.entities.*;
 import com.serwertetowy.exceptions.FileEmptyException;
+import com.serwertetowy.exceptions.UserDeletedException;
 import com.serwertetowy.repos.*;
 import com.serwertetowy.services.dto.RatingSummary;
 import com.serwertetowy.services.dto.UserSeriesData;
@@ -120,6 +121,11 @@ public class UserServiceImplTest {
             public String getEmail() {
                 return "darksouls@gmail.com";
             }
+
+            @Override
+            public Boolean getDeleted() {
+                return false;
+            }
         };
         UserSummary userSummary2 = new UserSummary() {
             @Override
@@ -141,6 +147,11 @@ public class UserServiceImplTest {
             public String getEmail() {
                 return "bloodborne@gmail.com";
             }
+
+            @Override
+            public Boolean getDeleted() {
+                return false;
+            }
         };
 
         List<UserSummary> expected = new ArrayList<>();
@@ -155,7 +166,7 @@ public class UserServiceImplTest {
         Assertions.assertEquals(expected,result);
     }
     @Test
-    void testGetUserByEmail() {
+    void testGetUserByEmail() throws UserDeletedException {
         UserSummary expected = new UserSummary() {
             @Override
             public Long getId() {
@@ -175,6 +186,11 @@ public class UserServiceImplTest {
             @Override
             public String getEmail() {
                 return "darksouls@gmail.com";
+            }
+
+            @Override
+            public Boolean getDeleted() {
+                return false;
             }
         };
 
@@ -518,6 +534,11 @@ public class UserServiceImplTest {
             @Override
             public String getEmail() {
                 return email;
+            }
+
+            @Override
+            public Boolean getDeleted() {
+                return false;
             }
         };
 
