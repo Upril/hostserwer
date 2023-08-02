@@ -4,8 +4,10 @@ import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.model.*;
 import com.serwertetowy.entities.Episodes;
 import com.serwertetowy.entities.Series;
+import com.serwertetowy.exceptions.EpisodeNotFoundException;
 import com.serwertetowy.exceptions.FileDownloadException;
 import com.serwertetowy.exceptions.FileUploadException;
+import com.serwertetowy.exceptions.SeriesNotFoundException;
 import com.serwertetowy.repos.EpisodesRepository;
 import com.serwertetowy.repos.SeriesRepository;
 import com.serwertetowy.services.EpisodesService;
@@ -98,11 +100,11 @@ public class EpisodeServiceImpl implements EpisodesService {
     }
 
     @Override
-    public StreamingResponseBody streamFile(String filename) throws FileDownloadException, IOException {
+    public StreamingResponseBody streamFile(String filename) throws FileDownloadException {
         if(bucketIsEmpty()) throw new FileDownloadException("Requested bucket does not exist or is empty");
         S3Object object = s3Client.getObject(bucketName, filename);
         S3ObjectInputStream s3is = object.getObjectContent();
-        final StreamingResponseBody body = outputStream -> {
+        return outputStream -> {
             int bytesToWrite = 0;
             byte[] dataBuffer = new byte[1024];
             while ((bytesToWrite = s3is.read(dataBuffer,0,dataBuffer.length)) != -1){
@@ -110,7 +112,6 @@ public class EpisodeServiceImpl implements EpisodesService {
             }
             s3is.close();
         };
-        return body;
 //    } catch (Exception e) {
 //        System.err.println("Error "+ e.getMessage());
 //        return new ResponseEntity<StreamingResponseBody>(HttpStatus.BAD_REQUEST);
@@ -142,6 +143,8 @@ public class EpisodeServiceImpl implements EpisodesService {
     }
     @Override
     public EpisodeSummary putEpisode(Long id, String name, List<String> languagesList, Integer seriesId) throws IOException {
+        if(!seriesRepository.existsById(seriesId)) throw new SeriesNotFoundException();
+        if(!episodesRepository.existsById(id.intValue())) throw new EpisodeNotFoundException();
         Path root = Paths.get("target/classes/videos");
         Series series = seriesRepository.findById(seriesId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));

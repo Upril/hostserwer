@@ -2,22 +2,21 @@ package com.serwertetowy.controllers;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.model.S3Object;
 import com.amazonaws.services.s3.model.S3ObjectInputStream;
-import com.serwertetowy.exceptions.FileDownloadException;
-import com.serwertetowy.exceptions.FileEmptyException;
-import com.serwertetowy.exceptions.FileUploadException;
-import com.serwertetowy.exceptions.SeriesNotFoundException;
+import com.serwertetowy.exceptions.*;
 import com.serwertetowy.services.dto.EpisodeSummary;
 import com.serwertetowy.services.EpisodesService;
 import jakarta.validation.ConstraintViolationException;
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.*;
 import org.apache.commons.io.FilenameUtils;
 import org.springframework.core.io.Resource;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.FieldError;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 import org.springframework.web.multipart.MultipartException;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBody;
@@ -33,6 +32,7 @@ public class EpisodesController {
     private EpisodesService episodesService;
     private final AmazonS3 s3Client;
     //episode saving in /target/classes/videos, to change to a cloud based file storage
+    record EpisodesPutRequest(@Size(min = 1, max = 256) @NotBlank String name, @NotNull @NotEmpty List<String> languagesList, @Min(1) @NotNull Integer seriesId){}
     @PostMapping()
     public ResponseEntity<EpisodeSummary> saveEpisode(@RequestParam(value = "file") @NotNull MultipartFile file,
                                                       @RequestParam(value = "name") @NotBlank(message = "Name is mandatory") @NotNull(message = "Name is mandatory") @Size(min = 1, message = "Name is mandatory") String name,
@@ -56,8 +56,8 @@ public class EpisodesController {
     }
     //method for updating episode data without the video
     @PutMapping("/{id}")
-    public ResponseEntity<EpisodeSummary>putEpisode(@PathVariable("id") Long id, @RequestParam("name")String name, @RequestParam("languages")List<String> languagesList, @RequestParam("seriesId")Integer seriesId) throws IOException {
-        return new ResponseEntity<>(episodesService.putEpisode(id,name,languagesList,seriesId),HttpStatus.OK);
+    public ResponseEntity<EpisodeSummary>putEpisode(@PathVariable("id") Long id,@RequestBody @Valid EpisodesPutRequest request) throws IOException {
+        return new ResponseEntity<>(episodesService.putEpisode(id, request.name, request.languagesList, request.seriesId),HttpStatus.OK);
     }
     //Webflux method for video streaming in ranges of bytes, ensuring fast video load times
     @GetMapping(value = "/{id}/play",produces = "video/mp4")
@@ -108,12 +108,25 @@ public class EpisodesController {
 
     @ResponseStatus(HttpStatus.NOT_FOUND)
     @ExceptionHandler(FileEmptyException.class)
-    public Map<String,String> handleSeriesNotFoundExceptions(FileEmptyException ex){
+    public Map<String,String> handleFileEmptyExceptions(FileEmptyException ex){
         Map<String,String> errors = new HashMap<>();
         errors.put("error",ex.getMessage());
         return errors;
     }
-
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    @ExceptionHandler(EpisodeNotFoundException.class)
+    public Map<String,String> handleEpisodenotFoundExceptions(EpisodeNotFoundException ex){
+        Map<String,String> errors = new HashMap<>();
+        errors.put("error",ex.getMessage());
+        return errors;
+    }
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    @ExceptionHandler(SeriesNotFoundException.class)
+    public Map<String,String> handleEpisodenotFoundExceptions(SeriesNotFoundException ex){
+        Map<String,String> errors = new HashMap<>();
+        errors.put("error",ex.getMessage());
+        return errors;
+    }
 
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     @ExceptionHandler(MultipartException.class)
@@ -137,6 +150,17 @@ public class EpisodesController {
             String name = String.valueOf(error.getPropertyPath());
             String msg = error.getMessage();
             errors.put(name, msg);
+        });
+        return errors;
+    }
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public Map<String,String> handleValidationExceptions(MethodArgumentNotValidException ex){
+        Map<String,String> errors = new HashMap<>();
+        ex.getBindingResult().getAllErrors().forEach((error) -> {
+            String name = ((FieldError) error).getField();
+            String msg = error.getDefaultMessage();
+            errors.put(name,msg);
         });
         return errors;
     }
