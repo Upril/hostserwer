@@ -1,16 +1,18 @@
 package com.serwertetowy.controllers;
+
 import com.amazonaws.services.s3.AmazonS3;
-import com.amazonaws.services.s3.model.S3Object;
-import com.amazonaws.services.s3.model.S3ObjectInputStream;
-import com.serwertetowy.exceptions.*;
-import com.serwertetowy.services.dto.EpisodeSummary;
+import com.serwertetowy.exceptions.EpisodeNotFoundException;
+import com.serwertetowy.exceptions.FileEmptyException;
+import com.serwertetowy.exceptions.FileUploadException;
+import com.serwertetowy.exceptions.SeriesNotFoundException;
 import com.serwertetowy.services.EpisodesService;
+import com.serwertetowy.services.dto.EpisodeSummary;
 import jakarta.validation.ConstraintViolationException;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.*;
+import lombok.AllArgsConstructor;
 import org.apache.commons.io.FilenameUtils;
 import org.springframework.core.io.Resource;
-import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.FieldError;
@@ -65,12 +67,7 @@ public class EpisodesController {
         System.out.println("range in bytes: "+range);
         return episodesService.getEpisodeData(id);
     }
-    //Webflux methods to get episodes images, not sure if needed, should work
-//    @GetMapping(value = "/{id}/image", produces = MediaType.IMAGE_JPEG_VALUE)
-//    public Mono<Resource> getEpisodeImage(@PathVariable Integer id){
-//        return episodesService.getEpisodeImageData(id);
-//    }
-    //Episode summary information: id, title and languages, may include icon in the future
+    //Episode summary information: id, title and languages
     @GetMapping("/{id}")
     public ResponseEntity<EpisodeSummary> getEpisodebyId(@PathVariable("id")Integer id){
         EpisodeSummary episode = episodesService.getEpisode(id);
@@ -91,11 +88,8 @@ public class EpisodesController {
         }
     }
     @GetMapping("/stream/{filename}")
-    public ResponseEntity<StreamingResponseBody> streamFromS3(@PathVariable("filename") String filename, @RequestHeader("Range") String range) throws IOException, FileDownloadException {
-//        System.out.println("range in bytes: "+range);
-//        StreamingResponseBody body = episodesService.streamFile(filename);
-//        return new ResponseEntity<>(body,HttpStatus.OK);
-        //This whole thing should be done from cloudflare, need to think about it
+    public ResponseEntity<StreamingResponseBody> streamFromS3(@PathVariable("filename") String filename, @RequestHeader("Range") String range){
+        //This whole thing should be done from cloudflare
         return null;
     }
 
@@ -106,26 +100,26 @@ public class EpisodesController {
         return !multipartFile.getOriginalFilename().trim().equals("");
     }
 
-    @ResponseStatus(HttpStatus.NOT_FOUND)
-    @ExceptionHandler(FileEmptyException.class)
-    public Map<String,String> handleFileEmptyExceptions(FileEmptyException ex){
+    private Map<String,String> createMessage(Exception ex){
         Map<String,String> errors = new HashMap<>();
         errors.put("error",ex.getMessage());
         return errors;
+    }
+
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    @ExceptionHandler(FileEmptyException.class)
+    public Map<String,String> handleFileEmptyExceptions(FileEmptyException ex){
+        return createMessage(ex);
     }
     @ResponseStatus(HttpStatus.NOT_FOUND)
     @ExceptionHandler(EpisodeNotFoundException.class)
     public Map<String,String> handleEpisodenotFoundExceptions(EpisodeNotFoundException ex){
-        Map<String,String> errors = new HashMap<>();
-        errors.put("error",ex.getMessage());
-        return errors;
+        return createMessage(ex);
     }
     @ResponseStatus(HttpStatus.NOT_FOUND)
     @ExceptionHandler(SeriesNotFoundException.class)
     public Map<String,String> handleEpisodenotFoundExceptions(SeriesNotFoundException ex){
-        Map<String,String> errors = new HashMap<>();
-        errors.put("error",ex.getMessage());
-        return errors;
+        return createMessage(ex);
     }
 
     @ResponseStatus(HttpStatus.BAD_REQUEST)
