@@ -53,23 +53,23 @@ public class EpisodesController {
     }
     //method for updating episode video data
     @PutMapping("/{id}/data")
-    public ResponseEntity<EpisodeSummary>putEpisodeData(@PathVariable("id") Long id, @RequestParam("file")MultipartFile file) throws IOException {
+    public ResponseEntity<EpisodeSummary>putEpisodeData(@PathVariable("id") @Min(1) Long id, @RequestParam("file")MultipartFile file) throws IOException {
         return new ResponseEntity<>(episodesService.putEpisodeData(id,file),HttpStatus.OK);
     }
     //method for updating episode data without the video
     @PutMapping("/{id}")
-    public ResponseEntity<EpisodeSummary>putEpisode(@PathVariable("id") Long id,@RequestBody @Valid EpisodesPutRequest request) throws IOException {
+    public ResponseEntity<EpisodeSummary>putEpisode(@PathVariable("id") @Min(1) Long id,@RequestBody @Valid EpisodesPutRequest request) throws IOException {
         return new ResponseEntity<>(episodesService.putEpisode(id, request.name, request.languagesList, request.seriesId),HttpStatus.OK);
     }
     //Webflux method for video streaming in ranges of bytes, ensuring fast video load times
     @GetMapping(value = "/{id}/play",produces = "video/mp4")
-    public Mono<Resource> getEpisodeData(@PathVariable Integer id, @RequestHeader("Range") String range){
+    public Mono<Resource> getEpisodeData(@PathVariable @Min(1) Integer id, @RequestHeader("Range") String range){
         System.out.println("range in bytes: "+range);
         return episodesService.getEpisodeData(id);
     }
     //Episode summary information: id, title and languages
     @GetMapping("/{id}")
-    public ResponseEntity<EpisodeSummary> getEpisodebyId(@PathVariable("id")Integer id){
+    public ResponseEntity<EpisodeSummary> getEpisodebyId(@PathVariable("id") @Min(1) Integer id){
         EpisodeSummary episode = episodesService.getEpisode(id);
         return new ResponseEntity<>(episode, HttpStatus.OK);
     }
@@ -92,6 +92,13 @@ public class EpisodesController {
         //This whole thing should be done from cloudflare
         return null;
     }
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteEpisode(@PathVariable("id") @Min(1) Integer id){
+        episodesService.deleteEpisode(id);
+        return new ResponseEntity<>(HttpStatus.OK);
+    }
+
+
 
     private boolean isValidFile(MultipartFile multipartFile){
         if (Objects.isNull(multipartFile.getOriginalFilename())){
@@ -99,13 +106,11 @@ public class EpisodesController {
         }
         return !multipartFile.getOriginalFilename().trim().equals("");
     }
-
     private Map<String,String> createMessage(Exception ex){
         Map<String,String> errors = new HashMap<>();
         errors.put("error",ex.getMessage());
         return errors;
     }
-
     @ResponseStatus(HttpStatus.NOT_FOUND)
     @ExceptionHandler(FileEmptyException.class)
     public Map<String,String> handleFileEmptyExceptions(FileEmptyException ex){

@@ -25,4 +25,5 @@ public interface EpisodesService {
     boolean deleteFile(String filename);
     EpisodeSummary putEpisodeData(Long id, MultipartFile file) throws IOException;
     EpisodeSummary putEpisode(Long id, String name, List<String> languagesList, Integer seriesId) throws IOException;
+    void deleteEpisode(Integer episodeId);
 }

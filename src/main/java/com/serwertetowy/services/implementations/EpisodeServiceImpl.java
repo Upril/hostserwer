@@ -48,10 +48,12 @@ public class EpisodeServiceImpl implements EpisodesService {
     @Override
     @Transactional
     public EpisodeSummary getEpisode(Integer id){
+        if(!episodesRepository.existsById(id)) throw new EpisodeNotFoundException();
         return episodesRepository.findEpisodeSummaryById(id);
     }
     @Override
     public Mono<Resource> getEpisodeData(Integer id){
+        if(!episodesRepository.existsById(id)) throw new EpisodeNotFoundException();
         return Mono.fromSupplier(()->resourceLoader.getResource(String.format(FORMAT,id)));
     }
     @Override
@@ -127,6 +129,14 @@ public class EpisodeServiceImpl implements EpisodesService {
         }
         return false;
     }
+    public boolean controllerDeleteFile(Integer id) {
+        File file = Paths.get("target/classes/videos/"+id+".mp4").toFile();
+        if (file.exists()) {
+            file.delete();
+            return true;
+        }
+        return false;
+    }
 
     @Override
     public EpisodeSummary putEpisodeData(Long id, MultipartFile file) throws IOException {
@@ -159,6 +169,14 @@ public class EpisodeServiceImpl implements EpisodesService {
         episodes.setSeries(series);
         episodesRepository.save(episodes);
         return episodesRepository.findEpisodeSummaryById(episodes.getId().intValue());
+    }
+
+    @Override
+    public void deleteEpisode(Integer episodeId) {
+        if(!episodesRepository.existsById(episodeId)) throw new EpisodeNotFoundException();
+        Episodes episode = episodesRepository.findById(episodeId).orElseThrow();
+        controllerDeleteFile(episodeId);
+        episodesRepository.delete(episode);
     }
 
     private boolean bucketIsEmpty() {
