@@ -88,7 +88,9 @@ public class SecurityConfiguration {
 //                .requestMatchers(HttpMethod.PUT,
 //                        "/api/v1/user/**/image").hasAnyAuthority(ADMIN_UPDATE.name(), USER.name())
                 .requestMatchers(HttpMethod.PUT,
-                        "/api/v1/user/**").hasAnyAuthority(USER.name(), ADMIN.name(),MANAGER.name())
+                        "/api/v1/user/**",
+                        "/api/v1/watchlist/**")
+                    .hasAnyAuthority(USER.name(), ADMIN.name(),MANAGER.name())
                 .anyRequest()
                     .authenticated()
                 .and()

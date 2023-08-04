@@ -1,10 +1,7 @@
 package com.serwertetowy.services.implementations;
 
 import com.serwertetowy.entities.*;
-import com.serwertetowy.exceptions.SeriesNotFoundException;
-import com.serwertetowy.exceptions.UserDeletedException;
-import com.serwertetowy.exceptions.UserNotFoundException;
-import com.serwertetowy.exceptions.WatchflagNotFoundException;
+import com.serwertetowy.exceptions.*;
 import com.serwertetowy.repos.*;
 import com.serwertetowy.services.EpisodesService;
 import com.serwertetowy.services.UserService;
@@ -138,5 +135,16 @@ public class WatchlistServiceImpl implements WatchlistService {
                 return watchFlagRepository.findById(watchflagId).orElseThrow(()->new ResponseStatusException(HttpStatus.NOT_FOUND));
             }
         };
+    }
+
+    @Override
+    public void putWatchlistItem(Long id, Integer seriesId, Integer watchflagId) {
+        if(!seriesRepository.existsById(seriesId)) throw new SeriesNotFoundException();
+        if(!watchFlagRepository.existsById(watchflagId)) throw new WatchflagNotFoundException();
+        if(!userSeriesRepository.existsById(id)) throw new UserSeriesNotFoundException();
+        UserSeries userSeries = userSeriesRepository.findById(id).orElseThrow(UserSeriesNotFoundException::new);
+        userSeries.setSeries(seriesRepository.findById(seriesId).orElseThrow(SeriesNotFoundException::new));
+        userSeries.setWatchFlags(watchFlagRepository.findById(watchflagId).orElseThrow(WatchflagNotFoundException::new));
+        userSeriesRepository.save(userSeries);
     }
 }

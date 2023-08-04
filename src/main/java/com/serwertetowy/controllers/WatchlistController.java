@@ -5,6 +5,7 @@ import com.serwertetowy.exceptions.UserDeletedException;
 import com.serwertetowy.exceptions.UserNotFoundException;
 import com.serwertetowy.exceptions.WatchflagNotFoundException;
 import com.serwertetowy.services.WatchlistService;
+import com.serwertetowy.services.dto.SeriesSummary;
 import com.serwertetowy.services.dto.UserSeriesSummary;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Min;
@@ -26,22 +27,31 @@ import java.util.Map;
 @RequestMapping("/api/v1/watchlist")
 public class WatchlistController {
     private WatchlistService watchlistService;
+    record WatchlistDto(Long id ,SeriesSummary seriesSummary, String watchFlag){}
     private record WatchlistPostRequest(@Min(1) @NotNull(message = "Series id is mandatory") Integer seriesId,
                                         @Min(1) @NotNull(message = "User id is mandatory")Integer userId,
                                         @Min(1) @NotNull(message = "Watchflag id is mandatory")Integer watchflagId){}
+
+    private record WatchlistPutRequest(@Min(value = 1, message = "Invalid series id") @NotNull(message = "Series id is mandatory") Integer seriesId,
+                                        @Min(value = 1,message = "Invalid watchflag id") @NotNull(message = "Watchflag id is mandatory")Integer watchflagId){}
     @GetMapping("/{id}")
-    public ResponseEntity<List<UserController.WatchlistDto>> getUserWatchlist(@PathVariable @Min(1) Long id){
+    public ResponseEntity<List<WatchlistController.WatchlistDto>> getUserWatchlist(@PathVariable("id") @Min(1) Long id){
         List<UserSeriesSummary> userSeriesSummaryList = watchlistService.getWatchlist(id);
-        List<UserController.WatchlistDto> watchlistDtoList = new ArrayList<>();
+        List<WatchlistDto> watchlistDtoList = new ArrayList<>();
         //assembling watchlistdto from userseries data
         for(UserSeriesSummary userSeriesSummary: userSeriesSummaryList){
-            watchlistDtoList.add(new UserController.WatchlistDto(userSeriesSummary.getSeriesSummary(), userSeriesSummary.getWatchflag().getName()));
+            watchlistDtoList.add(new WatchlistDto(userSeriesSummary.getId() ,userSeriesSummary.getSeriesSummary(), userSeriesSummary.getWatchflag().getName()));
         }
         return new ResponseEntity<>(watchlistDtoList, HttpStatus.OK);
     }
     @PostMapping("/addToWatchlist")
     public ResponseEntity<UserSeriesSummary> addSeriesToWatchlist(@Valid @RequestBody WatchlistPostRequest request) throws UserDeletedException {
         return new ResponseEntity<>(watchlistService.addToWatchlist(request.seriesId, request.userId, request.watchflagId), HttpStatus.OK);
+    }
+    @PutMapping("/{id}")
+    public ResponseEntity<WatchlistController.WatchlistDto> putWatchlistItem(@PathVariable("id") @Min(1) Long id, @Valid @RequestBody WatchlistPutRequest request){
+        watchlistService.putWatchlistItem(id,request.seriesId,request.watchflagId);
+        return new ResponseEntity<>(HttpStatus.OK);
     }
     private Map<String,String> createMessage(Exception ex){
         Map<String,String> errors = new HashMap<>();
