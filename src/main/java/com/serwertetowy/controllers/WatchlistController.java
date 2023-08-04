@@ -33,7 +33,8 @@ public class WatchlistController {
                                         @Min(1) @NotNull(message = "Watchflag id is mandatory")Integer watchflagId){}
 
     private record WatchlistPutRequest(@Min(value = 1, message = "Invalid series id") @NotNull(message = "Series id is mandatory") Integer seriesId,
-                                        @Min(value = 1,message = "Invalid watchflag id") @NotNull(message = "Watchflag id is mandatory")Integer watchflagId){}
+                                        @Min(value = 1,message = "Invalid watchflag id") @NotNull(message = "Watchflag id is mandatory")Integer watchflagId,
+                                        @NotNull(message = "isFavourite information is mandatory") Boolean isFavourite){}
     @GetMapping("/{id}")
     public ResponseEntity<List<WatchlistController.WatchlistDto>> getUserWatchlist(@PathVariable("id") @Min(1) Long id){
         List<UserSeriesSummary> userSeriesSummaryList = watchlistService.getWatchlist(id);
@@ -50,7 +51,12 @@ public class WatchlistController {
     }
     @PutMapping("/{id}")
     public ResponseEntity<WatchlistController.WatchlistDto> putWatchlistItem(@PathVariable("id") @Min(1) Long id, @Valid @RequestBody WatchlistPutRequest request){
-        watchlistService.putWatchlistItem(id,request.seriesId,request.watchflagId);
+        watchlistService.putWatchlistItem(id,request.seriesId,request.watchflagId, request.isFavourite);
+        return new ResponseEntity<>(HttpStatus.OK);
+    }
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteWatchlistItem(@PathVariable("id") @Min(1) Long id){
+        watchlistService.deleteWatchlistItem(id);
         return new ResponseEntity<>(HttpStatus.OK);
     }
     private Map<String,String> createMessage(Exception ex){

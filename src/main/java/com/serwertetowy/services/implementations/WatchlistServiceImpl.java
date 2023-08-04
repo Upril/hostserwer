@@ -138,13 +138,21 @@ public class WatchlistServiceImpl implements WatchlistService {
     }
 
     @Override
-    public void putWatchlistItem(Long id, Integer seriesId, Integer watchflagId) {
+    public void putWatchlistItem(Long id, Integer seriesId, Integer watchflagId, Boolean isFavourite) {
         if(!seriesRepository.existsById(seriesId)) throw new SeriesNotFoundException();
         if(!watchFlagRepository.existsById(watchflagId)) throw new WatchflagNotFoundException();
         if(!userSeriesRepository.existsById(id)) throw new UserSeriesNotFoundException();
         UserSeries userSeries = userSeriesRepository.findById(id).orElseThrow(UserSeriesNotFoundException::new);
         userSeries.setSeries(seriesRepository.findById(seriesId).orElseThrow(SeriesNotFoundException::new));
         userSeries.setWatchFlags(watchFlagRepository.findById(watchflagId).orElseThrow(WatchflagNotFoundException::new));
+        userSeries.setFavourite(isFavourite);
         userSeriesRepository.save(userSeries);
+    }
+
+    @Override
+    public void deleteWatchlistItem(Long id) {
+        if(!userSeriesRepository.existsById(id)) throw new UserSeriesNotFoundException();
+        UserSeries userSeries = userSeriesRepository.findById(id).orElseThrow(UserSeriesNotFoundException::new);
+        userSeriesRepository.delete(userSeries);
     }
 }
