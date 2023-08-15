@@ -20,6 +20,7 @@ import org.springframework.web.server.ResponseStatusException;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 @Service
 @AllArgsConstructor
@@ -169,6 +170,39 @@ public class UserServiceImpl implements UserService {
         } else {
             throw new UserNotDeletedException();
         }
+    }
+
+    @Override
+    public UserSummary getUser(Long id, String authIdentity) {
+        if(userRepository.findById(id).orElseThrow(UserNotFoundException::new).isDeleted()) throw new UserDeletedException();
+        User user = userRepository.findById(id).orElseThrow(UserNotFoundException::new);
+        if(!Objects.equals(user.getEmail(), authIdentity)) throw new UserNotFoundException();
+        return new UserSummary() {
+            @Override
+            public Long getId() {
+                return user.getId();
+            }
+
+            @Override
+            public String getFirstname() {
+                return user.getFirstname();
+            }
+
+            @Override
+            public String getLastname() {
+                return user.getLastname();
+            }
+
+            @Override
+            public String getEmail() {
+                return user.getEmail();
+            }
+
+            @Override
+            public Boolean getDeleted() {
+                return user.isDeleted();
+            }
+        };
     }
 
 }

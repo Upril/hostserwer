@@ -55,13 +55,18 @@ public class SecurityConfiguration {
                         )
                     .permitAll()
                 .requestMatchers(HttpMethod.GET,
+                        "/api/v1/user/**")
+                .hasAuthority(USER.name())
+                .requestMatchers(HttpMethod.GET,
 //                        "/api/v1/user/**/image",
                         "/api/v1/watchflag",
                         "/api/v1/watchflag/**",
                         "/api/v1/watchlist/**"
                 )
                     .hasAnyAuthority(ADMIN.name(), MANAGER.name(),USER.name())
-                .requestMatchers(HttpMethod.GET,"/api/v1/user/all")
+                .requestMatchers(HttpMethod.GET,
+                        "/api/v1/user/all"
+                        )
                     .hasAnyAuthority(ADMIN.name(), MANAGER.name())
                 .requestMatchers(HttpMethod.DELETE,
                         "/api/v1/user/**",

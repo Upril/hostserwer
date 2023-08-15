@@ -18,6 +18,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartException;
 import org.springframework.web.multipart.MultipartFile;
@@ -39,6 +40,15 @@ public class UserController {
     @GetMapping("/api/v1/user/all")
     public ResponseEntity<List<UserSummary>> getAllUsers(){
         return new ResponseEntity<>(userService.getAllUsers(), HttpStatus.OK);
+    }
+    @GetMapping("/api/v1/user/{id}")
+    ResponseEntity<UserSummary> getUser(@PathVariable @Min(1) Long id){
+        var auth = SecurityContextHolder.getContext().getAuthentication();
+        String authIdentity = null;
+        if (auth != null){
+            authIdentity = auth.getName();
+        }
+        return new ResponseEntity<>(userService.getUser(id,authIdentity), HttpStatus.OK);
     }
     //get image for given user
     @GetMapping(value = "/api/v1/user/{id}/image", produces = MediaType.IMAGE_JPEG_VALUE)
