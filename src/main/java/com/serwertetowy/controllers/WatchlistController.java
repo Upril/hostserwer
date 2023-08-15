@@ -87,11 +87,6 @@ public class WatchlistController {
     public Map<String,String> handleWatchflagNotFoundExceptions(WatchflagNotFoundException ex){
         return createMessage(ex);
     }
-    @ResponseStatus(HttpStatus.NOT_FOUND)
-    @ExceptionHandler(UserDeletedException.class)
-    public Map<String,String> handleUserDeletedExceptions(UserDeletedException ex){
-        return createMessage(ex);
-    }
     @ResponseStatus(HttpStatus.FORBIDDEN)
     @ExceptionHandler(FailedToAuthenticateException.class)
     public Map<String,String> handleFailedToAuthException(FailedToAuthenticateException ex){
