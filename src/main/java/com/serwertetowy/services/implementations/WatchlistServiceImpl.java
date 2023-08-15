@@ -18,6 +18,7 @@ import org.springframework.web.server.ResponseStatusException;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 @Service
 @AllArgsConstructor
@@ -40,8 +41,11 @@ public class WatchlistServiceImpl implements WatchlistService {
     UserRepository userRepository;
 
     @Override
-    public List<UserSeriesSummary> getWatchlist(Long id) {
+    public List<UserSeriesSummary> getWatchlist(Long id, String authIdentity) {
         if(!userRepository.existsById(id)) throw new UserNotFoundException();
+        if(userRepository.findById(id).orElseThrow(UserNotFoundException::new).isDeleted()) throw new UserDeletedException();
+        User user = userRepository.findById(id).orElseThrow(UserNotFoundException::new);
+        if(!Objects.equals(user.getEmail(), authIdentity)) throw new FailedToAuthenticateException();
         List<UserSeriesData> userSeriesList = userSeriesRepository.findByUserId(id);
         List<UserSeriesSummary> userSeriesSummaryList = new ArrayList<>();
         //convert userseriesdata, which contains only user and series id, into a proper watchlist dto
@@ -88,12 +92,16 @@ public class WatchlistServiceImpl implements WatchlistService {
     }
 
     @Override
-    public UserSeriesSummary addToWatchlist(Integer seriesId, Integer userId, Integer watchflagId) {
+    public UserSeriesSummary addToWatchlist(Integer seriesId, Integer userId, Integer watchflagId, String authIdentity) {
         if(!userRepository.existsById(userId.longValue())) throw new UserNotFoundException();
         if(!seriesRepository.existsById(seriesId)) throw new SeriesNotFoundException();
         if(!watchFlagRepository.existsById(watchflagId)) throw new WatchflagNotFoundException();
+        if(!userRepository.existsById(userId.longValue())) throw new UserNotFoundException();
+        if(userRepository.findById(userId.longValue()).orElseThrow(UserNotFoundException::new).isDeleted()) throw new UserDeletedException();
         User user = userService.getUserById(userId.longValue());
+        if(!Objects.equals(user.getEmail(), authIdentity)) throw new FailedToAuthenticateException();
         if(user.isDeleted()) throw new UserDeletedException();
+
         Series series = seriesRepository.findById(seriesId)
                 .orElseThrow(()->new ResponseStatusException(HttpStatus.NOT_FOUND));
         //series added to watchlist by default are set to the "Watching" watchflag
@@ -138,11 +146,14 @@ public class WatchlistServiceImpl implements WatchlistService {
     }
 
     @Override
-    public void putWatchlistItem(Long id, Integer seriesId, Integer watchflagId, Boolean isFavourite) {
+    public void putWatchlistItem(Long id, Integer seriesId, Integer watchflagId, Boolean isFavourite, String authIdentity) {
         if(!seriesRepository.existsById(seriesId)) throw new SeriesNotFoundException();
         if(!watchFlagRepository.existsById(watchflagId)) throw new WatchflagNotFoundException();
         if(!userSeriesRepository.existsById(id)) throw new UserSeriesNotFoundException();
         UserSeries userSeries = userSeriesRepository.findById(id).orElseThrow(UserSeriesNotFoundException::new);
+        User user = userSeries.getUser();
+        if(!Objects.equals(user.getEmail(), authIdentity)) throw new FailedToAuthenticateException();
+        if(user.isDeleted()) throw new UserDeletedException();
         userSeries.setSeries(seriesRepository.findById(seriesId).orElseThrow(SeriesNotFoundException::new));
         userSeries.setWatchFlags(watchFlagRepository.findById(watchflagId).orElseThrow(WatchflagNotFoundException::new));
         userSeries.setFavourite(isFavourite);
@@ -150,8 +161,11 @@ public class WatchlistServiceImpl implements WatchlistService {
     }
 
     @Override
-    public void deleteWatchlistItem(Long id) {
+    public void deleteWatchlistItem(Long id, String authIdentity) {
         if(!userSeriesRepository.existsById(id)) throw new UserSeriesNotFoundException();
+        User user = userService.getUserById(id);
+        if(!Objects.equals(user.getEmail(), authIdentity)) throw new FailedToAuthenticateException();
+        if(user.isDeleted()) throw new UserDeletedException();
         UserSeries userSeries = userSeriesRepository.findById(id).orElseThrow(UserSeriesNotFoundException::new);
         userSeriesRepository.delete(userSeries);
     }

@@ -6,8 +6,8 @@ import com.serwertetowy.services.dto.UserSeriesSummary;
 import java.util.List;
 
 public interface WatchlistService {
-    List<UserSeriesSummary> getWatchlist(Long id);
-    UserSeriesSummary addToWatchlist(Integer seriesId, Integer userId, Integer watchflagId) throws UserDeletedException;
-    void putWatchlistItem(Long id, Integer seriesId, Integer watchflagId, Boolean isFavourite);
-    void deleteWatchlistItem(Long id);
+    List<UserSeriesSummary> getWatchlist(Long id, String authIdentity);
+    UserSeriesSummary addToWatchlist(Integer seriesId, Integer userId, Integer watchflagId, String authIdentity) throws UserDeletedException;
+    void putWatchlistItem(Long id, Integer seriesId, Integer watchflagId, Boolean isFavourite, String authIdentity);
+    void deleteWatchlistItem(Long id, String authIdentity);
 }
