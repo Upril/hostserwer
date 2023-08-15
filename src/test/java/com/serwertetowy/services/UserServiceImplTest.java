@@ -547,7 +547,7 @@ public class UserServiceImplTest {
         when(userRepository.findByEmail(email)).thenReturn(expected);
 
         // Call the service method
-        UserSummary result = userService.putUser(userId, firstname, lastname, email);
+        UserSummary result = userService.putUser(userId, firstname, lastname, email,"authidentity");
 
         // Verify that the user data was updated
         verify(userRepository, times(1)).findById(userId);

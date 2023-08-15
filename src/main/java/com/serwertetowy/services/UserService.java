@@ -27,9 +27,9 @@ public interface UserService {
     //get watchlist info for given user
     List<UserSeriesSummary> getWatchlist(Long id);
     //update user profile pic and user data
-    void putUserImage(MultipartFile file, Long id) throws IOException, FileEmptyException;
-    UserSummary putUser(Long id, String firstname, String lastname, String email);
+    void putUserImage(MultipartFile file, Long id, String authIdentity) throws IOException, FileEmptyException;
+    UserSummary putUser(Long id, String firstname, String lastname, String email,String authIdentity);
     void deleteUser(Long id);
     void restoreUser(Long id);
-    UserSummary getUser(Long id,String authIdentity);
+    UserSummary getUserSummaryById(Long id,String authIdentity);
 }

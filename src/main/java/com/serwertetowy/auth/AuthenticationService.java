@@ -2,12 +2,14 @@ package com.serwertetowy.auth;
 
 import com.serwertetowy.config.JwtService;
 import com.serwertetowy.entities.User;
+import com.serwertetowy.exceptions.FailedToAuthenticateException;
 import com.serwertetowy.exceptions.UserDeletedException;
 import com.serwertetowy.exceptions.UserNotFoundException;
 import com.serwertetowy.repos.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -38,5 +40,16 @@ public class AuthenticationService {
         var user = userRepository.findById(userRepository.findByEmail(request.email()).getId()).orElseThrow();
         var jwtToken = jwtService.generateToken(user);
         return new AuthenticationController.AuthenticationResponse(jwtToken);
+    }
+    public static String getIdentity(){
+        var auth = SecurityContextHolder.getContext().getAuthentication();
+        String authIdentity = null;
+        if (auth != null){
+            authIdentity = auth.getName();
+        }
+        else {
+            throw new FailedToAuthenticateException();
+        }
+        return authIdentity;
     }
 }

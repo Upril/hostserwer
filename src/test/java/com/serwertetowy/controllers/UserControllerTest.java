@@ -113,6 +113,11 @@ public class UserControllerTest {
             public String getEmail() {
                 return email;
             }
+
+            @Override
+            public Boolean getDeleted() {
+                return null;
+            }
         };
         UserSummary userSummary2 = new UserSummary() {
             @Override
@@ -133,6 +138,11 @@ public class UserControllerTest {
             @Override
             public String getEmail() {
                 return "jane@fortnite.com";
+            }
+
+            @Override
+            public Boolean getDeleted() {
+                return null;
             }
         };
         List<UserSummary> expected = List.of(userSummary1,userSummary2);
@@ -189,6 +199,11 @@ public class UserControllerTest {
             @Override
             public String getEmail() {
                 return email;
+            }
+
+            @Override
+            public Boolean getDeleted() {
+                return null;
             }
         };
 
@@ -296,8 +311,13 @@ public class UserControllerTest {
             public String getEmail() {
                 return email;
             }
+
+            @Override
+            public Boolean getDeleted() {
+                return false;
+            }
         };
-        Mockito.when(userService.putUser(anyLong(),anyString(),anyString(),anyString())).thenReturn(expected);
+        Mockito.when(userService.putUser(anyLong(),anyString(),anyString(),anyString(),anyString())).thenReturn(expected);
         mockMvc.perform(put("/api/v1/user/{id}",userId)
                 .param("firstname","Jane")
                 .param("lastname", "Darksouls")
@@ -309,6 +329,6 @@ public class UserControllerTest {
                 .andExpect(jsonPath("$.lastname").value(expected.getLastname()))
                 .andExpect(jsonPath("$.email").value(expected.getEmail()));
 
-        Mockito.verify(userService).putUser(userId,"Jane",lastname,email);
+        Mockito.verify(userService).putUser(userId,"Jane",lastname,email,anyString());
     }
 }
