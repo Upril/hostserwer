@@ -3,6 +3,7 @@ package com.serwertetowy.services.implementations;
 import com.serwertetowy.entities.Rating;
 import com.serwertetowy.entities.Series;
 import com.serwertetowy.entities.User;
+import com.serwertetowy.exceptions.FailedToAuthenticateException;
 import com.serwertetowy.exceptions.RatingNotFoundException;
 import com.serwertetowy.exceptions.SeriesNotFoundException;
 import com.serwertetowy.exceptions.UserNotFoundException;
@@ -18,6 +19,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
+import java.util.Objects;
 
 @Service
 @AllArgsConstructor
@@ -32,10 +34,12 @@ public class RatingServiceImpl implements RatingService {
     }
 
     @Override
-    public RatingSummary putRating(Long id, short plotRating, short musicRating, short graphicsRating, short charactersRating, short generalRating) {
+    public RatingSummary putRating(Long id, short plotRating, short musicRating, short graphicsRating, short charactersRating, short generalRating, String auth) {
         if(!ratingRepository.existsById(id.intValue())) throw new RatingNotFoundException();
         Rating rating = ratingRepository.findById(id.intValue())
                 .orElseThrow(()->new ResponseStatusException(HttpStatus.NOT_FOUND));
+        User user = rating.getUser();
+        if(!Objects.equals(user.getEmail(), auth)) throw new FailedToAuthenticateException();
         rating.setPlotRating(plotRating);
         rating.setMusicRating(musicRating);
         rating.setGraphicsRating(graphicsRating);
@@ -46,10 +50,12 @@ public class RatingServiceImpl implements RatingService {
     }
 
     @Override
-    public void deleteRatingById(Long id) {
+    public void deleteRatingById(Long id, String auth) {
         if(!ratingRepository.existsById(id.intValue())) throw new RatingNotFoundException();
         Rating rating = ratingRepository.findById(id.intValue())
                 .orElseThrow(()->new ResponseStatusException(HttpStatus.NOT_FOUND));
+        User user = rating.getUser();
+        if(!Objects.equals(user.getEmail(), auth)) throw new FailedToAuthenticateException();
         ratingRepository.delete(rating);
     }
 
@@ -66,10 +72,11 @@ public class RatingServiceImpl implements RatingService {
     }
 
     @Override
-    public void saveRating(Long userId, Long seriesId, short plotRating, short musicRating, short graphicsRating, short charactersRating, short generalRating) {
+    public void saveRating(Long userId, Long seriesId, short plotRating, short musicRating, short graphicsRating, short charactersRating, short generalRating, String auth) {
         if(!userRepository.existsById(userId)) throw new UserNotFoundException();
         if(!seriesRepository.existsById(seriesId.intValue())) throw new SeriesNotFoundException();
         User user = userService.getUserById(userId);
+        if(!Objects.equals(user.getEmail(), auth)) throw new FailedToAuthenticateException();
         //assemble rating data - get series information
         Series series = seriesRepository.findById(seriesId.intValue())
                 .orElseThrow(()->new ResponseStatusException(HttpStatus.NOT_FOUND));

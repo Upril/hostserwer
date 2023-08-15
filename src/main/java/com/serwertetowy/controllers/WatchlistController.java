@@ -74,7 +74,7 @@ public class WatchlistController {
     }
     @ResponseStatus(HttpStatus.NOT_FOUND)
     @ExceptionHandler(UserDeletedException.class)
-    public Map<String,String> handleUserNotFoundExceptions(UserDeletedException ex){
+    public Map<String,String> handleUserDeletedExceptions(UserDeletedException ex){
         return createMessage(ex);
     }
     @ResponseStatus(HttpStatus.NOT_FOUND)
