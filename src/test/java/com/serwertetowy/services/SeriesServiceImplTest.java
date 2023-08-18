@@ -1,6 +1,7 @@
 package com.serwertetowy.services;
 
 import com.serwertetowy.entities.*;
+import com.serwertetowy.exceptions.SeriesNotFoundException;
 import com.serwertetowy.repos.*;
 import com.serwertetowy.services.dto.*;
 import com.serwertetowy.services.implementations.SeriesServiceImpl;
@@ -326,6 +327,7 @@ public class SeriesServiceImplTest {
         series.setImageData(imageData);
 
         when(seriesRepository.findById(id.intValue())).thenReturn(Optional.of(series));
+        when(seriesRepository.existsById(anyInt())).thenReturn(true);
 
         Mono<Resource> resultMono = seriesService.getSeriesImageData(id.intValue());
         Resource result = resultMono.block();
@@ -340,9 +342,8 @@ public class SeriesServiceImplTest {
     @Test
     void testGetSeriesImageDataNotFound() {
         long id = 1L;
-        when(seriesRepository.findById((int) id)).thenReturn(Optional.empty());
-        Assertions.assertThrows(ResponseStatusException.class, () -> seriesService.getSeriesImageData((int) id));
-        verify(seriesRepository, times(1)).findById((int) id);
+        Assertions.assertThrows(SeriesNotFoundException.class, () -> seriesService.getSeriesImageData((int) id));
+        verify(seriesRepository, times(1)).existsById((int) id);
     }
     @Test
     void testAddToWatchlist() {
@@ -387,6 +388,11 @@ public class SeriesServiceImplTest {
             @Override
             public String getEmail() {
                 return user.getEmail();
+            }
+
+            @Override
+            public Boolean getDeleted() {
+                return false;
             }
         });
 

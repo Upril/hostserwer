@@ -3,8 +3,10 @@ package com.serwertetowy.services;
 import com.serwertetowy.entities.Rating;
 import com.serwertetowy.entities.Series;
 import com.serwertetowy.entities.User;
+import com.serwertetowy.exceptions.RatingNotFoundException;
 import com.serwertetowy.repos.RatingRepository;
 import com.serwertetowy.repos.SeriesRepository;
+import com.serwertetowy.repos.UserRepository;
 import com.serwertetowy.services.dto.RatingSummary;
 import com.serwertetowy.services.implementations.RatingServiceImpl;
 import org.junit.jupiter.api.Test;
@@ -30,6 +32,8 @@ public class RatingServiceImplTest {
     RatingRepository ratingRepository;
     @Mock
     SeriesRepository seriesRepository;
+    @Mock
+    UserRepository userRepository;
     @Mock
     UserService userService;
     @InjectMocks
@@ -90,6 +94,7 @@ public class RatingServiceImplTest {
     @Test
     void when_getRatingsBySeries_thenReturn_Listof_RatingSummary() {
         when(ratingRepository.findBySeriesId(anyLong())).thenReturn(List.of(expected));
+        when(seriesRepository.existsById(anyInt())).thenReturn(true);
         List<RatingSummary> actual = ratingService.getRatingsBySeries(1L);
         assertEquals(actual.get(0).getGraphicsRating(), expected.getGraphicsRating());
         assertEquals(actual.get(0).getGeneralRating(), expected.getGeneralRating());
@@ -98,6 +103,7 @@ public class RatingServiceImplTest {
     @Test
     void when_getRatingsByUser_thenReturn_Listof_RatingSummary() {
         when(ratingRepository.findByUserId(anyLong())).thenReturn(List.of(expected));
+        when(userRepository.existsById(anyLong())).thenReturn(true);
         List<RatingSummary> actual = ratingService.getRatingsByUser(1L);
         assertEquals(actual.get(0).getGraphicsRating(), expected.getGraphicsRating());
         assertEquals(actual.get(0).getGeneralRating(), expected.getGeneralRating());
@@ -106,8 +112,10 @@ public class RatingServiceImplTest {
     @Test
     void saveRating() {
         when(userService.getUserById(anyLong())).thenReturn(expUser);
+        when(userRepository.existsById(anyLong())).thenReturn(true);
+        when(seriesRepository.existsById(anyInt())).thenReturn(true);
         when(seriesRepository.findById(anyInt())).thenReturn(Optional.of(expSeries));
-        ratingService.saveRating(expUser.getId(),expSeries.getId(),(short)1,(short)1,(short)1,(short)1,(short)1);
+        ratingService.saveRating(expUser.getId(),expSeries.getId(),(short)1,(short)1,(short)1,(short)1,(short)1, expUser.getEmail());
         verify(seriesRepository,times(1)).findById(anyInt());
         verify(userService,times(1)).getUserById(anyLong());
         verify(ratingRepository,times(1)).save(any());
@@ -123,12 +131,14 @@ public class RatingServiceImplTest {
 
         Rating rating = new Rating();
         rating.setId(id);
+        rating.setUser(expUser);
 
         when(ratingRepository.findById(id.intValue())).thenReturn(Optional.of(rating));
         when(ratingRepository.findById(id)).thenReturn(rating.toRatingSummary());
         when(ratingRepository.save(rating)).thenReturn(rating);
+        when(ratingRepository.existsById(anyInt())).thenReturn(true);
 
-        RatingSummary actual = ratingService.putRating(id, plotRating, musicRating, graphicsRating, charactersRating, generalRating);
+        RatingSummary actual = ratingService.putRating(id, plotRating, musicRating, graphicsRating, charactersRating, generalRating, expUser.getEmail());
 
         verify(ratingRepository, times(1)).findById(id.intValue());
         verify(ratingRepository, times(1)).save(rating);
@@ -150,11 +160,9 @@ public class RatingServiceImplTest {
         short charactersRating = 2;
         short generalRating = 4;
 
-        when(ratingRepository.findById(id.intValue())).thenReturn(Optional.empty());
+        assertThrows(RatingNotFoundException.class, () -> ratingService.putRating(id, plotRating, musicRating, graphicsRating, charactersRating, generalRating,expUser.getEmail()));
 
-        assertThrows(ResponseStatusException.class, () -> ratingService.putRating(id, plotRating, musicRating, graphicsRating, charactersRating, generalRating));
-
-        verify(ratingRepository, times(1)).findById(id.intValue());
+        verify(ratingRepository, times(1)).existsById(id.intValue());
         verify(ratingRepository, never()).save(any(Rating.class));
     }
     @Test
@@ -163,10 +171,12 @@ public class RatingServiceImplTest {
 
         Rating rating = new Rating();
         rating.setId(id);
+        rating.setUser(expUser);
 
         when(ratingRepository.findById(id.intValue())).thenReturn(Optional.of(rating));
+        when(ratingRepository.existsById(anyInt())).thenReturn(true);
 
-        ratingService.deleteRatingById(id);
+        ratingService.deleteRatingById(id,expUser.getEmail());
 
         verify(ratingRepository, times(1)).findById(id.intValue());
         verify(ratingRepository, times(1)).delete(rating);
@@ -174,12 +184,9 @@ public class RatingServiceImplTest {
     @Test
     void testDeleteRatingByIdNotFound() {
         Long id = 1L;
+        assertThrows(RatingNotFoundException.class, () -> ratingService.deleteRatingById(id,expUser.getEmail()));
 
-        when(ratingRepository.findById(id.intValue())).thenReturn(Optional.empty());
-
-        assertThrows(ResponseStatusException.class, () -> ratingService.deleteRatingById(id));
-
-        verify(ratingRepository, times(1)).findById(id.intValue());
+        verify(ratingRepository, times(1)).existsById(id.intValue());
         verify(ratingRepository, never()).delete(any(Rating.class));
     }
 }

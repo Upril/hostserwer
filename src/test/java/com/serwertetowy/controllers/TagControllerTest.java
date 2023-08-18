@@ -1,14 +1,18 @@
 package com.serwertetowy.controllers;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.serwertetowy.config.JWTAuthFilter;
+import com.serwertetowy.config.JwtService;
 import com.serwertetowy.entities.Tags;
 import com.serwertetowy.repos.TagRepository;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
+import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
@@ -19,6 +23,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(TagController.class)
+@ContextConfiguration(classes = {JwtService.class, JWTAuthFilter.class})
+@AutoConfigureMockMvc
 public class TagControllerTest {
     @Autowired
     MockMvc mockMvc;

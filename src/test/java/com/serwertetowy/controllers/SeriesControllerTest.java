@@ -1,5 +1,7 @@
 package com.serwertetowy.controllers;
 
+import com.serwertetowy.config.JWTAuthFilter;
+import com.serwertetowy.config.JwtService;
 import com.serwertetowy.entities.Series;
 import com.serwertetowy.entities.WatchFlags;
 import com.serwertetowy.services.SeriesService;
@@ -9,6 +11,7 @@ import com.serwertetowy.services.dto.UserSummary;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.core.io.ByteArrayResource;
@@ -16,6 +19,7 @@ import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockMultipartFile;
+import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.web.reactive.server.WebTestClient;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
@@ -28,6 +32,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(SeriesController.class)
+@ContextConfiguration(classes = {JwtService.class, JWTAuthFilter.class})
+@AutoConfigureMockMvc
 public class SeriesControllerTest {
     @MockBean
     SeriesService seriesService;
@@ -57,6 +63,11 @@ public class SeriesControllerTest {
         @Override
         public String getEmail() {
             return "email";
+        }
+
+        @Override
+        public Boolean getDeleted() {
+            return false;
         }
     };
     WatchFlags watchFlag = new WatchFlags(1L, "Watching");
