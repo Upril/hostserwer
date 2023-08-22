@@ -24,22 +24,23 @@ import java.util.Objects;
 @AllArgsConstructor
 public class WatchlistServiceImpl implements WatchlistService {
     @Autowired
-    UserSeriesRepository userSeriesRepository;
+    private UserSeriesRepository userSeriesRepository;
     @Autowired
-    SeriesRepository seriesRepository;
+    private SeriesRepository seriesRepository;
     @Autowired
-    EpisodesService episodesService;
+    private EpisodesService episodesService;
     @Autowired
-    SeriesTagsRepository seriesTagsRepository;
+    private SeriesTagsRepository seriesTagsRepository;
     @Autowired
-    TagRepository tagRepository;
+    private TagRepository tagRepository;
     @Autowired
-    WatchFlagRepository watchFlagRepository;
+    private WatchFlagRepository watchFlagRepository;
     @Autowired
-    UserService userService;
+    private UserService userService;
     @Autowired
-    UserRepository userRepository;
+    private UserRepository userRepository;
 
+    // method for constructing watchlist from userseries with details about series, episodes, tags and watchflags
     @Override
     public List<UserSeriesSummary> getWatchlist(Long id, String authIdentity) {
         if(!userRepository.existsById(id)) throw new UserNotFoundException();
@@ -58,6 +59,7 @@ public class WatchlistServiceImpl implements WatchlistService {
 
                 @Override
                 public SeriesSummary getSeriesSummary() {
+                    //SeriesSummary needs to be constructed from series and tag info
                     SeriesSummary summary = new SeriesSummary();
                     Series series = seriesRepository.findById(userSeries.getSeriesId().intValue()).orElseThrow(()->
                             new ResponseStatusException(HttpStatus.NOT_FOUND));
@@ -91,6 +93,7 @@ public class WatchlistServiceImpl implements WatchlistService {
         return userSeriesSummaryList;
     }
 
+    //method for
     @Override
     public UserSeriesSummary addToWatchlist(Integer seriesId, Integer userId, Integer watchflagId, String authIdentity) {
         if(!userRepository.existsById(userId.longValue())) throw new UserNotFoundException();
