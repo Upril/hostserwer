@@ -26,8 +26,6 @@ public class DataLoader implements CommandLineRunner {
     @Autowired
     UserRepository userRepository;
     @Autowired
-    UserService userService;
-    @Autowired
     WatchFlagRepository watchFlagRepository;
     @Autowired
     UserSeriesRepository userSeriesRepository;
@@ -300,9 +298,29 @@ public class DataLoader implements CommandLineRunner {
             );
             System.out.println("User token: "+ authenticationService.register(user).token());
 
-            userService.registerUser(user1);
-            userService.registerUser(user2);
-            userService.registerUser(user3);
+            var userReq1 = new AuthenticationController.RegisterRequest(
+                    user1.getFirstname(),
+                    user1.getLastname(),
+                    user1.getEmail(),
+                    user1.getPassword(),
+                    Role.USER);
+            authenticationService.register(userReq1);
+
+            var userReq2 = new AuthenticationController.RegisterRequest(
+                    user2.getFirstname(),
+                    user2.getLastname(),
+                    user2.getEmail(),
+                    user2.getPassword(),
+                    Role.USER);
+            authenticationService.register(userReq2);
+
+            var userReq3 = new AuthenticationController.RegisterRequest(
+                    user3.getFirstname(),
+                    user3.getLastname(),
+                    user3.getEmail(),
+                    user3.getPassword(),
+                    Role.USER);
+            authenticationService.register(userReq3);
         }
     }
     private void loadWatchFlagsData(){

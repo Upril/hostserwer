@@ -15,7 +15,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartException;
 import org.springframework.web.multipart.MultipartFile;
@@ -32,24 +31,31 @@ import static com.serwertetowy.auth.AuthenticationService.getIdentity;
 public class UserController {
     @Autowired
     AuthenticationManager authenticationManager;
+
     private UserService userService;
+
     //dto for neat request response data construction, used to add watchflag info to series in watchlist
     record WatchlistDto(SeriesSummary seriesSummary, String watchFlag){}
-    //get all users with only id, names and email
+
+    //get all users with only id, names and email, has to be authenticated as an admin or manager
     @GetMapping("/api/v1/user/all")
     public ResponseEntity<List<UserSummary>> getAllUsers(){
         return new ResponseEntity<>(userService.getAllUsers(), HttpStatus.OK);
     }
+
+    //get user with only id, name and email, has to be authenticated
     @GetMapping("/api/v1/user/{id}")
     ResponseEntity<UserSummary> getUser(@PathVariable @Min(1) Long id){
         String authIdentity = getIdentity();
         return new ResponseEntity<>(userService.getUserSummaryById(id,authIdentity), HttpStatus.OK);
     }
+
     //get image for given user
     @GetMapping(value = "/api/v1/user/{id}/image", produces = MediaType.IMAGE_JPEG_VALUE)
     ResponseEntity<Resource> getUserImage(@PathVariable @Min(1) Long id){
         return new ResponseEntity<>(userService.getUserImage(id), HttpStatus.OK);
     }
+
     //put request to change user profile picture
     @PutMapping("/api/v1/user/{id}/image")
     ResponseEntity<Void> putUserImage(@PathVariable @Min(1) Long id, @RequestParam @NotBlank @NotNull MultipartFile file) throws IOException, FileEmptyException {
@@ -57,54 +63,46 @@ public class UserController {
         userService.putUserImage(file, id, authIdentity);
         return new ResponseEntity<>(HttpStatus.OK);
     }
+
+    //put request to change user data, has to be authenticated
     @PutMapping("/api/v1/user/{id}")
     ResponseEntity<UserSummary> putUser(@PathVariable @Min(1) Long id, @RequestParam(required = false) @NotNull String firstname, @RequestParam(required = false) @NotNull String lastname, @RequestParam(required = false) @NotNull String email){
         String authIdentity = getIdentity();
         return new ResponseEntity<>(userService.putUser(id,firstname,lastname,email,authIdentity),HttpStatus.OK);
     }
+
+    //mark a user as deleted - ban a user, user cant be changed and access server features
     @DeleteMapping("/api/v1/user/delete/{id}")
     ResponseEntity<Void> deleteUser(@PathVariable @Min(1) Long id){
         userService.deleteUser(id);
         return new ResponseEntity<>(HttpStatus.OK);
     }
+
+    //unban the user, must be a manager or admin
     @PutMapping("/api/v1/user/restore/{id}")
     ResponseEntity<Void> restoreUser(@PathVariable @Min(1) Long id){
         userService.restoreUser(id);
         return new ResponseEntity<>(HttpStatus.OK);
     }
+
+    //method used to construct error messages to be returned in a response
     private Map<String,String> messageCreator(Exception ex){
         Map<String,String> errors = new HashMap<>();
         errors.put("error",ex.getMessage());
         return errors;
     }
-    @ResponseStatus(HttpStatus.NOT_FOUND)
-    @ExceptionHandler(UserNotFoundException.class)
-    public Map<String,String> handleUserNotFoundExceptions(UserNotFoundException ex){
-        return messageCreator(ex);
-    }
+
+    //exception handlers for capturing input errors and returning error messages
     @ResponseStatus(HttpStatus.BAD_REQUEST)
-    @ExceptionHandler(UserNotDeletedException.class)
-    public Map<String,String> handleUserNotFoundExceptions(UserNotDeletedException ex){
-        return messageCreator(ex);
-    }
-    @ResponseStatus(HttpStatus.BAD_REQUEST)
-    @ExceptionHandler(UserDeletedException.class)
-    public Map<String,String> handleUserDeletedExceptions(UserDeletedException ex){
-        return messageCreator(ex);
-    }
-    @ResponseStatus(HttpStatus.BAD_REQUEST)
-    @ExceptionHandler(MultipartException.class)
-    public Map<String,String> handleMultipartExceptions(MultipartException ex){
-        return messageCreator(ex);
-    }
-    @ResponseStatus(HttpStatus.BAD_REQUEST)
-    @ExceptionHandler(FileEmptyException.class)
-    public Map<String,String> handleFileEmptyExceptions(FileEmptyException ex){
-        return messageCreator(ex);
-    }
-    @ResponseStatus(HttpStatus.FORBIDDEN)
-    @ExceptionHandler(FailedToAuthenticateException.class)
-    public Map<String,String> handleFailedToAuthException(FailedToAuthenticateException ex){
+    @ExceptionHandler({
+            UserNotFoundException.class,
+            UserNotDeletedException.class,
+            UserDeletedException.class,
+            MultipartException.class,
+            FileEmptyException.class,
+            FailedToAuthenticateException.class,
+    })
+    public Map<String,String> handleExceptions(Exception ex){
         return messageCreator(ex);
     }
     @ResponseStatus(HttpStatus.BAD_REQUEST)

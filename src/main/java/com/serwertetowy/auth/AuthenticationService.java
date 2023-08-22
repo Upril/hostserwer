@@ -7,11 +7,15 @@ import com.serwertetowy.exceptions.UserDeletedException;
 import com.serwertetowy.exceptions.UserNotFoundException;
 import com.serwertetowy.repos.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.ResourceLoader;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+
+import java.io.IOException;
 
 @Service
 @RequiredArgsConstructor
@@ -20,7 +24,9 @@ public class AuthenticationService {
     private final PasswordEncoder passwordEncoder;
     private final JwtService jwtService;
     private final AuthenticationManager authenticationManager;
-    public AuthenticationController.AuthenticationResponse register(AuthenticationController.RegisterRequest request) {
+    @Autowired
+    private ResourceLoader resourceLoader;
+    public AuthenticationController.AuthenticationResponse register(AuthenticationController.RegisterRequest request) throws IOException {
         var user = new User(
                 request.firstname(),
                 request.lastname(),
@@ -28,6 +34,7 @@ public class AuthenticationService {
                 passwordEncoder.encode(request.password()),
                 request.role()
         );
+        user.setImageData(resourceLoader.getResource("classpath:/images/defalt.jpg").getContentAsByteArray());
         userRepository.save(user);
         var jwtToken = jwtService.generateToken(user);
         return new AuthenticationController.AuthenticationResponse(jwtToken);
