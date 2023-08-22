@@ -1,9 +1,6 @@
 package com.serwertetowy.services.implementations;
 import com.serwertetowy.entities.*;
-import com.serwertetowy.exceptions.FileEmptyException;
-import com.serwertetowy.exceptions.UserDeletedException;
-import com.serwertetowy.exceptions.UserNotDeletedException;
-import com.serwertetowy.exceptions.UserNotFoundException;
+import com.serwertetowy.exceptions.*;
 import com.serwertetowy.repos.*;
 import com.serwertetowy.services.EpisodesService;
 import com.serwertetowy.services.UserService;
@@ -135,17 +132,19 @@ public class UserServiceImpl implements UserService {
         return userSeriesSummaryList;
     }
     @Override
-    public void putUserImage(MultipartFile file, Long id) throws IOException, FileEmptyException {
+    public void putUserImage(MultipartFile file, Long id, String authIdentity) throws IOException, FileEmptyException {
         if(userRepository.findById(id).orElseThrow(UserNotFoundException::new).isDeleted()) throw new UserDeletedException();
         if (file.isEmpty()) throw new FileEmptyException("Image file is mandatory");
         User user = userRepository.findById(id).orElseThrow(UserNotFoundException::new);
+        if(!Objects.equals(user.getEmail(), authIdentity)) throw new FailedToAuthenticateException();
         user.setImageData(file.getBytes());
         userRepository.save(user);
     }
     @Override
-    public UserSummary putUser(Long id, String firstname, String lastname, String email) {
+    public UserSummary putUser(Long id, String firstname, String lastname, String email,String authIdentity) {
         if(userRepository.findById(id).orElseThrow(UserNotFoundException::new).isDeleted()) throw new UserDeletedException();
         User user = userRepository.findById(id).orElseThrow(UserNotFoundException::new);
+        if(!Objects.equals(user.getEmail(), authIdentity)) throw new FailedToAuthenticateException();
         user.setFirstname(firstname);
         user.setLastname(lastname);
         user.setEmail(email);
@@ -173,10 +172,10 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public UserSummary getUser(Long id, String authIdentity) {
+    public UserSummary getUserSummaryById(Long id, String authIdentity) {
         if(userRepository.findById(id).orElseThrow(UserNotFoundException::new).isDeleted()) throw new UserDeletedException();
         User user = userRepository.findById(id).orElseThrow(UserNotFoundException::new);
-        if(!Objects.equals(user.getEmail(), authIdentity)) throw new UserNotFoundException();
+        if(!Objects.equals(user.getEmail(), authIdentity)) throw new FailedToAuthenticateException();
         return new UserSummary() {
             @Override
             public Long getId() {

@@ -1,5 +1,7 @@
 package com.serwertetowy.controllers;
 
+import com.serwertetowy.config.JWTAuthFilter;
+import com.serwertetowy.config.JwtService;
 import com.serwertetowy.services.EpisodesService;
 import com.serwertetowy.services.dto.EpisodeSummary;
 import org.hamcrest.Matchers;
@@ -7,11 +9,13 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.core.io.Resource;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockMultipartFile;
+import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMultipartHttpServletRequestBuilder;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
@@ -38,6 +42,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(EpisodesController.class)
+@ContextConfiguration(classes = {JwtService.class, JWTAuthFilter.class})
+@AutoConfigureMockMvc
 public class EpisodesControllerTest {
     @MockBean
     EpisodesService episodesService;

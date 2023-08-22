@@ -1,5 +1,7 @@
 package com.serwertetowy.controllers;
 
+import com.serwertetowy.config.JWTAuthFilter;
+import com.serwertetowy.config.JwtService;
 import com.serwertetowy.entities.User;
 import com.serwertetowy.entities.WatchFlags;
 import com.serwertetowy.services.UserService;
@@ -9,6 +11,7 @@ import com.serwertetowy.services.dto.UserSummary;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.core.io.ByteArrayResource;
@@ -16,6 +19,7 @@ import org.springframework.core.io.Resource;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.mock.web.MockMultipartFile;
+import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMultipartHttpServletRequestBuilder;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
@@ -33,6 +37,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @WebMvcTest(UserController.class)
+@ContextConfiguration(classes = {JwtService.class, JWTAuthFilter.class})
+@AutoConfigureMockMvc
 public class UserControllerTest {
     @Autowired
     MockMvc mockMvc;
@@ -113,6 +119,11 @@ public class UserControllerTest {
             public String getEmail() {
                 return email;
             }
+
+            @Override
+            public Boolean getDeleted() {
+                return null;
+            }
         };
         UserSummary userSummary2 = new UserSummary() {
             @Override
@@ -133,6 +144,11 @@ public class UserControllerTest {
             @Override
             public String getEmail() {
                 return "jane@fortnite.com";
+            }
+
+            @Override
+            public Boolean getDeleted() {
+                return null;
             }
         };
         List<UserSummary> expected = List.of(userSummary1,userSummary2);
@@ -189,6 +205,11 @@ public class UserControllerTest {
             @Override
             public String getEmail() {
                 return email;
+            }
+
+            @Override
+            public Boolean getDeleted() {
+                return null;
             }
         };
 
@@ -263,7 +284,7 @@ public class UserControllerTest {
         InputStream imageInputStream = getClass().getResourceAsStream("classpath:/images/defalt.jpg");
         MockMultipartFile file = new MockMultipartFile("file","defalt.jpg", MediaType.IMAGE_JPEG_VALUE, imageInputStream);
 
-        Mockito.doNothing().when(userService).putUserImage(file, userId);
+        Mockito.doNothing().when(userService).putUserImage(file, userId,"temp@mail.com");
 
         MockMultipartHttpServletRequestBuilder builder = MockMvcRequestBuilders.multipart("/api/v1/user/{id}/image",userId);
         builder.with(request -> {
@@ -272,7 +293,7 @@ public class UserControllerTest {
         });
         mockMvc.perform(builder.file(file))
                         .andExpect(status().isOk());
-        Mockito.verify(userService).putUserImage(file, userId);
+        Mockito.verify(userService).putUserImage(file, userId,"temp@mail.com");
     }
     @Test
     public void testPutUser() throws Exception {
@@ -296,8 +317,13 @@ public class UserControllerTest {
             public String getEmail() {
                 return email;
             }
+
+            @Override
+            public Boolean getDeleted() {
+                return false;
+            }
         };
-        Mockito.when(userService.putUser(anyLong(),anyString(),anyString(),anyString())).thenReturn(expected);
+        Mockito.when(userService.putUser(anyLong(),anyString(),anyString(),anyString(),anyString())).thenReturn(expected);
         mockMvc.perform(put("/api/v1/user/{id}",userId)
                 .param("firstname","Jane")
                 .param("lastname", "Darksouls")
@@ -309,6 +335,6 @@ public class UserControllerTest {
                 .andExpect(jsonPath("$.lastname").value(expected.getLastname()))
                 .andExpect(jsonPath("$.email").value(expected.getEmail()));
 
-        Mockito.verify(userService).putUser(userId,"Jane",lastname,email);
+        Mockito.verify(userService).putUser(userId,"Jane",lastname,email,anyString());
     }
 }

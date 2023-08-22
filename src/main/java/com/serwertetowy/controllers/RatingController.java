@@ -1,9 +1,7 @@
 package com.serwertetowy.controllers;
 
 import com.serwertetowy.entities.Rating;
-import com.serwertetowy.exceptions.RatingNotFoundException;
-import com.serwertetowy.exceptions.SeriesNotFoundException;
-import com.serwertetowy.exceptions.UserNotFoundException;
+import com.serwertetowy.exceptions.*;
 import com.serwertetowy.services.RatingService;
 import com.serwertetowy.services.dto.RatingSummary;
 import jakarta.validation.ConstraintViolationException;
@@ -19,6 +17,8 @@ import org.springframework.web.bind.annotation.*;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import static com.serwertetowy.auth.AuthenticationService.getIdentity;
 
 @RestController
 @RequestMapping("api/v1/ratings")
@@ -60,21 +60,24 @@ public class RatingController {
     //saving ratings with post requests
     @PostMapping
     public ResponseEntity<Rating> saveRating(@RequestBody @Valid PostRatingRequest request){
+        String auth = getIdentity();
         ratingService.saveRating(request.userId, request.seriesId, request.plotRating,
                                 request.musicRating, request.graphicsRating,
-                                request.charactersRating, request.generalRating);
+                                request.charactersRating, request.generalRating, auth);
         return new ResponseEntity<>(HttpStatus.OK);
     }
     //update rating data
     @PutMapping("/{id}")
     public ResponseEntity<RatingSummary> putRating(@PathVariable("id") @Min(1) Long id, @RequestBody @Valid PutRatingRequest request){
+        String auth = getIdentity();
         return new ResponseEntity<>(ratingService.putRating(id, request.plotRating,
                 request.musicRating, request.graphicsRating,
-                request.charactersRating, request.generalRating),HttpStatus.OK);
+                request.charactersRating, request.generalRating, auth),HttpStatus.OK);
     }
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteRating(@PathVariable("id") @Min(1) Long id){
-        ratingService.deleteRatingById(id);
+        String auth = getIdentity();
+        ratingService.deleteRatingById(id,auth);
         return new ResponseEntity<>(HttpStatus.OK);
     }
     //GET request for the ratings of given user
@@ -131,5 +134,15 @@ public class RatingController {
     @ResponseStatus(HttpStatus.NOT_FOUND)
     @ExceptionHandler(RatingNotFoundException.class)
     public Map<String,String> handleRatingNotFoundExceptions(RatingNotFoundException ex){return messageCreator(ex);}
+    @ResponseStatus(HttpStatus.FORBIDDEN)
+    @ExceptionHandler(FailedToAuthenticateException.class)
+    public Map<String,String> handleFailedToAuthException(FailedToAuthenticateException ex){
+        return messageCreator(ex);
+    }
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    @ExceptionHandler(UserDeletedException.class)
+    public Map<String,String> handleUserDeletedExceptions(UserDeletedException ex){
+        return messageCreator(ex);
+    }
 
 }

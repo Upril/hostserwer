@@ -1,9 +1,6 @@
 package com.serwertetowy.controllers;
 
-import com.serwertetowy.exceptions.SeriesNotFoundException;
-import com.serwertetowy.exceptions.UserDeletedException;
-import com.serwertetowy.exceptions.UserNotFoundException;
-import com.serwertetowy.exceptions.WatchflagNotFoundException;
+import com.serwertetowy.exceptions.*;
 import com.serwertetowy.services.WatchlistService;
 import com.serwertetowy.services.dto.SeriesSummary;
 import com.serwertetowy.services.dto.UserSeriesSummary;
@@ -22,6 +19,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import static com.serwertetowy.auth.AuthenticationService.getIdentity;
+
 @RestController
 @AllArgsConstructor
 @RequestMapping("/api/v1/watchlist")
@@ -37,7 +36,8 @@ public class WatchlistController {
                                         @NotNull(message = "isFavourite information is mandatory") Boolean isFavourite){}
     @GetMapping("/{id}")
     public ResponseEntity<List<WatchlistController.WatchlistDto>> getUserWatchlist(@PathVariable("id") @Min(1) Long id){
-        List<UserSeriesSummary> userSeriesSummaryList = watchlistService.getWatchlist(id);
+        String auth = getIdentity();
+        List<UserSeriesSummary> userSeriesSummaryList = watchlistService.getWatchlist(id, auth);
         List<WatchlistDto> watchlistDtoList = new ArrayList<>();
         //assembling watchlistdto from userseries data
         for(UserSeriesSummary userSeriesSummary: userSeriesSummaryList){
@@ -47,16 +47,19 @@ public class WatchlistController {
     }
     @PostMapping("/addToWatchlist")
     public ResponseEntity<UserSeriesSummary> addSeriesToWatchlist(@Valid @RequestBody WatchlistPostRequest request) throws UserDeletedException {
-        return new ResponseEntity<>(watchlistService.addToWatchlist(request.seriesId, request.userId, request.watchflagId), HttpStatus.OK);
+        String auth = getIdentity();
+        return new ResponseEntity<>(watchlistService.addToWatchlist(request.seriesId, request.userId, request.watchflagId, auth), HttpStatus.OK);
     }
     @PutMapping("/{id}")
     public ResponseEntity<WatchlistController.WatchlistDto> putWatchlistItem(@PathVariable("id") @Min(1) Long id, @Valid @RequestBody WatchlistPutRequest request){
-        watchlistService.putWatchlistItem(id,request.seriesId,request.watchflagId, request.isFavourite);
+        String auth = getIdentity();
+        watchlistService.putWatchlistItem(id,request.seriesId,request.watchflagId, request.isFavourite, auth);
         return new ResponseEntity<>(HttpStatus.OK);
     }
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteWatchlistItem(@PathVariable("id") @Min(1) Long id){
-        watchlistService.deleteWatchlistItem(id);
+        String auth = getIdentity();
+        watchlistService.deleteWatchlistItem(id, auth);
         return new ResponseEntity<>(HttpStatus.OK);
     }
     private Map<String,String> createMessage(Exception ex){
@@ -71,7 +74,7 @@ public class WatchlistController {
     }
     @ResponseStatus(HttpStatus.NOT_FOUND)
     @ExceptionHandler(UserDeletedException.class)
-    public Map<String,String> handleUserNotFoundExceptions(UserDeletedException ex){
+    public Map<String,String> handleUserDeletedExceptions(UserDeletedException ex){
         return createMessage(ex);
     }
     @ResponseStatus(HttpStatus.NOT_FOUND)
@@ -82,6 +85,11 @@ public class WatchlistController {
     @ResponseStatus(HttpStatus.NOT_FOUND)
     @ExceptionHandler(WatchflagNotFoundException.class)
     public Map<String,String> handleWatchflagNotFoundExceptions(WatchflagNotFoundException ex){
+        return createMessage(ex);
+    }
+    @ResponseStatus(HttpStatus.FORBIDDEN)
+    @ExceptionHandler(FailedToAuthenticateException.class)
+    public Map<String,String> handleFailedToAuthException(FailedToAuthenticateException ex){
         return createMessage(ex);
     }
     @ResponseStatus(HttpStatus.BAD_REQUEST)

@@ -1,14 +1,18 @@
 package com.serwertetowy.controllers;
 
+import com.serwertetowy.config.JWTAuthFilter;
+import com.serwertetowy.config.JwtService;
 import com.serwertetowy.services.RatingService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.serwertetowy.services.dto.RatingSummary;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
+import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
@@ -18,6 +22,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(RatingController.class)
+@ContextConfiguration(classes = {JwtService.class, JWTAuthFilter.class})
+@AutoConfigureMockMvc
 public class RatingControllerTest {
     @MockBean
     RatingService ratingService;
@@ -69,9 +75,9 @@ public class RatingControllerTest {
     void when_saveRating_thenReturn_OK() throws Exception {
         record PostRatingRequest(Long userId, Long seriesId,
                                  short plotRating, short musicRating, short graphicsRating,
-                                 short charactersRating, short generalRating){}
-        PostRatingRequest request = new PostRatingRequest(1L,1L,(short)1,(short)2,(short)3,(short)4,(short)5);
-        Mockito.doNothing().when(ratingService).saveRating(1L,1L,(short)1,(short)2,(short)3,(short)4,(short)5);
+                                 short charactersRating, short generalRating, String authIdentity){}
+        PostRatingRequest request = new PostRatingRequest(1L,1L,(short)1,(short)2,(short)3,(short)4,(short)5,"temp@mail.com");
+        Mockito.doNothing().when(ratingService).saveRating(1L,1L,(short)1,(short)2,(short)3,(short)4,(short)5,"temp@mail.com");
 
         mockMvc.perform(MockMvcRequestBuilders.post("/api/v1/ratings")
                 .contentType(MediaType.APPLICATION_JSON)
@@ -84,7 +90,7 @@ public class RatingControllerTest {
                                 short charactersRating, short generalRating){}
         PutRatingRequest request = new PutRatingRequest((short)1,(short)2,(short)3,(short)4,(short)5);
 
-        Mockito.when(ratingService.putRating(1L,(short)1,(short)2,(short)3,(short)4,(short)5)).thenReturn(expected);
+        Mockito.when(ratingService.putRating(1L,(short)1,(short)2,(short)3,(short)4,(short)5,"temp@mail.com")).thenReturn(expected);
         mockMvc.perform(MockMvcRequestBuilders.put("/api/v1/ratings/{id}",1)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(request)))
@@ -99,7 +105,7 @@ public class RatingControllerTest {
     void when_deleteRating_thenReturn_Ok() throws Exception {
         mockMvc.perform(MockMvcRequestBuilders.delete("/api/v1/ratings/{id}",1))
                 .andExpect(status().isOk());
-        Mockito.verify(ratingService).deleteRatingById(1L);
+        Mockito.verify(ratingService).deleteRatingById(1L,"temp@mail.com");
     }
     @Test
     void when_GetRatingsByUser_thenReturn_ListOfratingSummary() throws Exception {

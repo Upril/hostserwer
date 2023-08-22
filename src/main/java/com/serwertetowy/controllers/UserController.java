@@ -1,9 +1,6 @@
 package com.serwertetowy.controllers;
 
-import com.serwertetowy.exceptions.FileEmptyException;
-import com.serwertetowy.exceptions.UserDeletedException;
-import com.serwertetowy.exceptions.UserNotDeletedException;
-import com.serwertetowy.exceptions.UserNotFoundException;
+import com.serwertetowy.exceptions.*;
 import com.serwertetowy.services.UserService;
 import com.serwertetowy.services.dto.SeriesSummary;
 import com.serwertetowy.services.dto.UserSummary;
@@ -28,6 +25,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import static com.serwertetowy.auth.AuthenticationService.getIdentity;
+
 @RestController
 @AllArgsConstructor
 public class UserController {
@@ -43,12 +42,8 @@ public class UserController {
     }
     @GetMapping("/api/v1/user/{id}")
     ResponseEntity<UserSummary> getUser(@PathVariable @Min(1) Long id){
-        var auth = SecurityContextHolder.getContext().getAuthentication();
-        String authIdentity = null;
-        if (auth != null){
-            authIdentity = auth.getName();
-        }
-        return new ResponseEntity<>(userService.getUser(id,authIdentity), HttpStatus.OK);
+        String authIdentity = getIdentity();
+        return new ResponseEntity<>(userService.getUserSummaryById(id,authIdentity), HttpStatus.OK);
     }
     //get image for given user
     @GetMapping(value = "/api/v1/user/{id}/image", produces = MediaType.IMAGE_JPEG_VALUE)
@@ -58,12 +53,14 @@ public class UserController {
     //put request to change user profile picture
     @PutMapping("/api/v1/user/{id}/image")
     ResponseEntity<Void> putUserImage(@PathVariable @Min(1) Long id, @RequestParam @NotBlank @NotNull MultipartFile file) throws IOException, FileEmptyException {
-        userService.putUserImage(file, id);
+        String authIdentity = getIdentity();
+        userService.putUserImage(file, id, authIdentity);
         return new ResponseEntity<>(HttpStatus.OK);
     }
     @PutMapping("/api/v1/user/{id}")
     ResponseEntity<UserSummary> putUser(@PathVariable @Min(1) Long id, @RequestParam(required = false) @NotNull String firstname, @RequestParam(required = false) @NotNull String lastname, @RequestParam(required = false) @NotNull String email){
-        return new ResponseEntity<>(userService.putUser(id,firstname,lastname,email),HttpStatus.OK);
+        String authIdentity = getIdentity();
+        return new ResponseEntity<>(userService.putUser(id,firstname,lastname,email,authIdentity),HttpStatus.OK);
     }
     @DeleteMapping("/api/v1/user/delete/{id}")
     ResponseEntity<Void> deleteUser(@PathVariable @Min(1) Long id){
@@ -103,6 +100,11 @@ public class UserController {
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     @ExceptionHandler(FileEmptyException.class)
     public Map<String,String> handleFileEmptyExceptions(FileEmptyException ex){
+        return messageCreator(ex);
+    }
+    @ResponseStatus(HttpStatus.FORBIDDEN)
+    @ExceptionHandler(FailedToAuthenticateException.class)
+    public Map<String,String> handleFailedToAuthException(FailedToAuthenticateException ex){
         return messageCreator(ex);
     }
     @ResponseStatus(HttpStatus.BAD_REQUEST)

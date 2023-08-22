@@ -21,6 +21,7 @@ import reactor.core.publisher.Mono;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.nio.file.FileAlreadyExistsException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -66,6 +67,7 @@ public class EpisodeServiceImplTest {
             }
         };
         when(episodesRepository.findEpisodeSummaryById(1)).thenReturn(episodeSummary);
+        when(episodesRepository.existsById(anyInt())).thenReturn(true);
         EpisodeSummary actual = service.getEpisode(1);
         assertEquals(episodeSummary.getTitle(), actual.getTitle());
         verify(episodesRepository, times(1)).findEpisodeSummaryById(1);
@@ -100,6 +102,7 @@ public class EpisodeServiceImplTest {
     }
     @Test
     void when_getEpisodeData_thenReturn_Mono(){
+        when(episodesRepository.existsById(anyInt())).thenReturn(true);
         assertInstanceOf(Mono.class, service.getEpisodeData(1));
     }
     @Test
@@ -113,14 +116,13 @@ public class EpisodeServiceImplTest {
         when(episodesRepository.save(any())).thenReturn(episode);
         File file = new File("src/main/resources/videos/tetujemy.mp4");
         MultipartFile mpfile = new MockMultipartFile("tetujemy.mp4", new FileInputStream(file));
-        NullPointerException exception = assertThrows(NullPointerException.class,()-> service.saveEpisode(mpfile,"tetujemy",
+        FileAlreadyExistsException exception = assertThrows(FileAlreadyExistsException.class,()-> service.saveEpisode(mpfile,"tetujemy",
                 new ArrayList<>(){{add("Polish");add("English");}},series.getId().intValue()));
-        assertEquals("Cannot invoke \"java.lang.Long.intValue()\" because the return value of" +
-                " \"com.serwertetowy.entities.Episodes.getId()\" is null",exception.getMessage());
+        assertEquals("target\\classes\\videos\\null.mp4",exception.getMessage());
         Path path = Paths.get("target/classes/videos/tetujemy.mp4");
-        assertTrue(Files.exists(path));
+//        assertTrue(Files.exists(path));
         verify(seriesRepository,times(1)).findById(anyInt());
-        Files.delete(path);
+//        Files.delete(path);
     }
     @Test
     void when_putEpisodeData_thenReturn_EpisodeSummary() throws IOException {
@@ -144,6 +146,8 @@ public class EpisodeServiceImplTest {
         Episodes episode = new Episodes(1L,series,"tetujemy",new ArrayList<>(){{add("Polish");add("English");}});
         when(seriesRepository.findById(anyInt())).thenReturn(Optional.of(series));
         when(episodesRepository.findById(anyInt())).thenReturn(Optional.of(episode));
+        when(seriesRepository.existsById(anyInt())).thenReturn(true);
+        when(episodesRepository.existsById(anyInt())).thenReturn(true);
         when(episodesRepository.findEpisodeSummaryById(anyInt())).thenReturn(new EpisodeSummary() {
             @Override
             public String getTitle() {

@@ -9,9 +9,9 @@ public interface RatingService {
     RatingSummary getRating(Long id);
     //method to update rating data
     RatingSummary putRating(Long id, short plotRating, short musicRating, short graphicsRating,
-                            short charactersRating, short generalRating);
+                            short charactersRating, short generalRating, String authIdentity);
     //method to delete a rating
-    void deleteRatingById(Long id);
+    void deleteRatingById(Long id, String authIdentity);
     //method that returns a list of ratings of given series
     List<RatingSummary> getRatingsBySeries(Long seriesId);
     //method that returns a list of ratings of given user
@@ -19,5 +19,5 @@ public interface RatingService {
     //method for saving ratings in the db
     void saveRating(Long userId, Long seriesId,
                     short plotRating, short musicRating, short graphicsRating,
-                    short charactersRating, short generalRating);
+                    short charactersRating, short generalRating, String authIdentity);
 }
