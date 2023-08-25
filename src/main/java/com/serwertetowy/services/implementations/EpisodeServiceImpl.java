@@ -38,8 +38,8 @@ import java.util.Objects;
 @Service
 @AllArgsConstructor
 public class EpisodeServiceImpl implements EpisodesService {
-    private static final String FORMAT = "classpath:videos/%s.mp4";
-    private static final String bucketName = "mangusta";
+    private static final String VIDEO_FORMAT = "classpath:videos/%s.mp4";
+    private static final String S3_BUCKET_NAME = "mangusta";
     private final AmazonS3 s3Client;
     private EpisodesRepository episodesRepository;
     private SeriesRepository seriesRepository;
@@ -54,7 +54,7 @@ public class EpisodeServiceImpl implements EpisodesService {
     @Override
     public Mono<Resource> getEpisodeData(Integer id){
         if(!episodesRepository.existsById(id)) throw new EpisodeNotFoundException();
-        return Mono.fromSupplier(()->resourceLoader.getResource(String.format(FORMAT,id)));
+        return Mono.fromSupplier(()->resourceLoader.getResource(String.format(VIDEO_FORMAT,id)));
     }
     @Override
     @Transactional
@@ -73,7 +73,7 @@ public class EpisodeServiceImpl implements EpisodesService {
     }
 
     @Override
-    public EpisodeSummary uploadFile(MultipartFile multipartFile, String name, List<String> languagesList, Integer seriesId) throws FileUploadException, IOException {
+    public EpisodeSummary uploadFile(MultipartFile multipartFile, String name, List<String> languagesList, Integer seriesId) throws IOException {
         //multipart file to file
         File file = new File(name);
         try (FileOutputStream fileOutputStream = new FileOutputStream(file)){
@@ -83,7 +83,7 @@ public class EpisodeServiceImpl implements EpisodesService {
         String fileName =generateFileName(multipartFile);
 
         //upload file
-        PutObjectRequest request = new PutObjectRequest(bucketName,fileName,file);
+        PutObjectRequest request = new PutObjectRequest(S3_BUCKET_NAME,fileName,file);
         ObjectMetadata metadata = new ObjectMetadata();
         metadata.setContentType("plain/"+ FilenameUtils.getExtension(multipartFile.getOriginalFilename()));
         metadata.addUserMetadata("Title","File Upload - " + fileName);
@@ -104,7 +104,7 @@ public class EpisodeServiceImpl implements EpisodesService {
     @Override
     public StreamingResponseBody streamFile(String filename) throws FileDownloadException {
         if(bucketIsEmpty()) throw new FileDownloadException("Requested bucket does not exist or is empty");
-        S3Object object = s3Client.getObject(bucketName, filename);
+        S3Object object = s3Client.getObject(S3_BUCKET_NAME, filename);
         S3ObjectInputStream s3is = object.getObjectContent();
         return outputStream -> {
             int bytesToWrite = 0;
@@ -143,10 +143,11 @@ public class EpisodeServiceImpl implements EpisodesService {
         Path root = Paths.get("target/classes/videos");
         Episodes episodes = episodesRepository.findById(id.intValue())
                 .orElseThrow(()->new ResponseStatusException(HttpStatus.NOT_FOUND));
-        String name = episodes.getTitle();
-        if(Files.exists(root.resolve(name+".mp4"))){
-            Files.delete(root.resolve(name+".mp4"));
-            Files.copy(file.getInputStream(), root.resolve(name+".mp4"));
+        String fileName = episodes.getTitle()+".mp4";
+        Path episodePath = root.resolve(fileName);
+        if(Files.exists(episodePath)){
+            Files.delete(episodePath);
+            Files.copy(file.getInputStream(), episodePath);
         }
         else throw new ResponseStatusException(HttpStatus.NOT_FOUND);
         return episodesRepository.findEpisodeSummaryById(episodes.getId().intValue());
@@ -160,9 +161,11 @@ public class EpisodeServiceImpl implements EpisodesService {
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
         Episodes episodes = episodesRepository.findById(id.intValue())
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
-        if(!Objects.equals(name, episodes.getTitle()) && Files.exists(root.resolve(episodes.getTitle()+".mp4"))){
-            Files.copy(root.resolve(episodes.getTitle()+".mp4"),root.resolve(name+".mp4"));
-            Files.delete(root.resolve(episodes.getTitle()+".mp4"));
+        String fileName = episodes.getTitle()+".mp4";
+        Path episodePath = root.resolve(fileName);
+        if(!Objects.equals(name, episodes.getTitle()) && Files.exists(episodePath)){
+            Files.copy(episodePath,root.resolve(name+".mp4"));
+            Files.delete(episodePath);
         }
         episodes.setTitle(name);
         episodes.setLanguages(languagesList);
@@ -180,7 +183,7 @@ public class EpisodeServiceImpl implements EpisodesService {
     }
 
     private boolean bucketIsEmpty() {
-        ListObjectsV2Result result = s3Client.listObjectsV2(this.bucketName);
+        ListObjectsV2Result result = s3Client.listObjectsV2(S3_BUCKET_NAME);
         if(result == null) return false;
         List<S3ObjectSummary> objectSummaries = result.getObjectSummaries();
         return objectSummaries.isEmpty();
