@@ -2,7 +2,6 @@ package com.serwertetowy.controllers;
 
 import com.serwertetowy.entities.Tags;
 import com.serwertetowy.repos.TagRepository;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -21,14 +20,14 @@ public class TagController {
     }
     //get for all tags
     @GetMapping
-    public List<Tags> getTags(){
+    public List<Tags> getAllTags(){
         return tagRepository.findAllByOrderByIdAsc();
     }
     //get for specific tag data
     @GetMapping("/{id}")
-    public ResponseEntity<Tags> getById(@PathVariable Integer id){
+    public ResponseEntity<Tags> getTagById(@PathVariable Integer id){
         Optional<Tags> tag = tagRepository.findById(id);
-        return tag.map(tags -> new ResponseEntity<>(tags, HttpStatus.OK)).orElseGet(() -> new ResponseEntity<>(HttpStatus.NOT_FOUND));
+        return tag.map(ResponseEntity::ok).orElse(ResponseEntity.notFound().build());
     }
     //post for adding a tag
     @PostMapping
@@ -36,28 +35,28 @@ public class TagController {
         Tags tag = new Tags();
         tag.setName(request.name);
         tagRepository.save(tag);
-        return new ResponseEntity<>(tag, HttpStatus.OK);
+        return ResponseEntity.ok(tag);
     }
     //delete for a tag (may cause problems with series)
     @DeleteMapping("/{id}")
     public ResponseEntity<Tags> deleteTag(@PathVariable Integer id){
         if(tagRepository.existsById(id)){
             tagRepository.deleteById(id);
-            return new ResponseEntity<>(HttpStatus.OK);
+            return ResponseEntity.ok().build();
         }
-        else return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        else return ResponseEntity.notFound().build();
     }
     //put tag request
     @PutMapping("/{id}")
     public ResponseEntity<Tags> updateTag(@PathVariable Integer id, @RequestBody TagRequest request){
         Optional<Tags> tag = tagRepository.findById(id);
         if(tag.isPresent()){
-            Tags tag1 = tag.get();
-            tag1.setName(request.name);
-            tagRepository.save(tag1);
-            return new ResponseEntity<>(tag1, HttpStatus.OK);
+            Tags updatedTag = tag.get();
+            updatedTag.setName(request.name);
+            tagRepository.save(updatedTag);
+            return ResponseEntity.ok(updatedTag);
         }else {
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+            return ResponseEntity.notFound().build();
         }
     }
 }
