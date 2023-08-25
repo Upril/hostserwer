@@ -96,53 +96,41 @@ public class RatingController {
         return new ResponseEntity<>(ratingService.getRating(id), HttpStatus.OK);
     }
 
+    //Exception handlers
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    @ExceptionHandler({MethodArgumentNotValidException.class, ConstraintViolationException.class})
+    public Map<String, String> handleValidationExceptions(Exception ex) {
+        Map<String, String> errors = new HashMap<>();
+        if (ex instanceof MethodArgumentNotValidException) {
+            ((MethodArgumentNotValidException) ex).getBindingResult().getAllErrors().forEach((error) -> {
+                String name = ((FieldError) error).getField();
+                String msg = error.getDefaultMessage();
+                errors.put(name, msg);
+            });
+        } else if (ex instanceof ConstraintViolationException) {
+            ((ConstraintViolationException) ex).getConstraintViolations().forEach((error) -> {
+                String name = String.valueOf(error.getPropertyPath());
+                String msg = error.getMessage();
+                errors.put(name, msg);
+            });
+        }
+        return errors;
+    }
+
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    @ExceptionHandler({
+            UserNotFoundException.class,
+            SeriesNotFoundException.class,
+            RatingNotFoundException.class,
+            FailedToAuthenticateException.class,
+            UserDeletedException.class})
+    public Map<String,String> handleExceptions(UserNotFoundException ex){
+        return messageCreator(ex);
+    }
+
     private Map<String,String> messageCreator(Exception ex){
         Map<String,String> errors = new HashMap<>();
         errors.put("error",ex.getMessage());
         return errors;
     }
-    @ResponseStatus(HttpStatus.BAD_REQUEST)
-    @ExceptionHandler(MethodArgumentNotValidException.class)
-    public Map<String,String> handleValidationExceptions(MethodArgumentNotValidException ex){
-        Map<String,String> errors = new HashMap<>();
-        ex.getBindingResult().getAllErrors().forEach((error) -> {
-            String name = ((FieldError) error).getField();
-            String msg = error.getDefaultMessage();
-            errors.put(name,msg);
-        });
-        return errors;
-    }
-    @ResponseStatus(HttpStatus.BAD_REQUEST)
-    @ExceptionHandler(ConstraintViolationException.class)
-    public Map<String,String> handleConstraintExceptions(ConstraintViolationException ex){
-        Map<String,String> errors = new HashMap<>();
-        ex.getConstraintViolations().forEach((error) -> {
-            String name = String.valueOf(error.getPropertyPath());
-            String msg =  error.getMessage();
-            errors.put(name,msg);
-        });
-        return errors;
-    }
-    @ResponseStatus(HttpStatus.NOT_FOUND)
-    @ExceptionHandler(UserNotFoundException.class)
-    public Map<String,String> handleUserNotFoundExceptions(UserNotFoundException ex){
-        return messageCreator(ex);
-    }
-    @ResponseStatus(HttpStatus.NOT_FOUND)
-    @ExceptionHandler(SeriesNotFoundException.class)
-    public Map<String,String> handleSeriesNotFoundExceptions(SeriesNotFoundException ex){return messageCreator(ex);}
-    @ResponseStatus(HttpStatus.NOT_FOUND)
-    @ExceptionHandler(RatingNotFoundException.class)
-    public Map<String,String> handleRatingNotFoundExceptions(RatingNotFoundException ex){return messageCreator(ex);}
-    @ResponseStatus(HttpStatus.FORBIDDEN)
-    @ExceptionHandler(FailedToAuthenticateException.class)
-    public Map<String,String> handleFailedToAuthException(FailedToAuthenticateException ex){
-        return messageCreator(ex);
-    }
-    @ResponseStatus(HttpStatus.NOT_FOUND)
-    @ExceptionHandler(UserDeletedException.class)
-    public Map<String,String> handleUserDeletedExceptions(UserDeletedException ex){
-        return messageCreator(ex);
-    }
-
 }
