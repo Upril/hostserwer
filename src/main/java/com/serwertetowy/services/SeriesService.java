@@ -2,7 +2,6 @@ package com.serwertetowy.services;
 
 import com.serwertetowy.entities.Series;
 import com.serwertetowy.services.dto.SeriesSummary;
-import com.serwertetowy.services.dto.UserSeriesSummary;
 import org.springframework.core.io.Resource;
 import org.springframework.web.multipart.MultipartFile;
 import reactor.core.publisher.Mono;
@@ -20,6 +19,5 @@ public interface SeriesService {
     //Webflux method to retrieve series icon
     Mono<Resource> getSeriesImageData(Integer id);
     //method allowing the user to add a series into their watchlist, may be moved into user service
-    UserSeriesSummary addToWatchlist(Integer seriesId, Integer userId, Integer watchflagId);
 
 }
