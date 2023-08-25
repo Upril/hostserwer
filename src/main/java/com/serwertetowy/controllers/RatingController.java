@@ -124,7 +124,7 @@ public class RatingController {
             RatingNotFoundException.class,
             FailedToAuthenticateException.class,
             UserDeletedException.class})
-    public Map<String,String> handleExceptions(UserNotFoundException ex){
+    public Map<String,String> handleExceptions(Exception ex){
         return messageCreator(ex);
     }
 

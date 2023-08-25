@@ -4,7 +4,6 @@ import com.serwertetowy.entities.Series;
 import com.serwertetowy.exceptions.SeriesNotFoundException;
 import com.serwertetowy.services.SeriesService;
 import com.serwertetowy.services.dto.SeriesSummary;
-import com.serwertetowy.services.dto.UserSeriesSummary;
 import jakarta.transaction.Transactional;
 import jakarta.validation.ConstraintViolationException;
 import jakarta.validation.constraints.Min;
@@ -42,36 +41,32 @@ public class SeriesController {
         if (file == null) series = seriesService.saveSeries(name,description,tags);
         else series = seriesService.saveSeriesWithImage(file,name,description,tags);
         SeriesSummary seriesSummary = seriesService.getSeriesById(series.getId().intValue());
-        return new ResponseEntity<>(seriesSummary,HttpStatus.OK);
+        return ResponseEntity.ok(seriesSummary);
     }
     //get request for all series info without the episode video including detailed tag information
     @GetMapping
     public ResponseEntity<List<SeriesSummary>> getAllSeries(){
-        return new ResponseEntity<>(seriesService.getAllSeries(), HttpStatus.OK);
+        return ResponseEntity.ok(seriesService.getAllSeries());
     }
     //get request for given series info without the episode video including detailed tag information
     @GetMapping("/{id}")
     public ResponseEntity<SeriesSummary> getSeriesById(@PathVariable("id") @Min(1) Integer id){
-        return new ResponseEntity<>(seriesService.getSeriesById(id), HttpStatus.OK);
+        return ResponseEntity.ok(seriesService.getSeriesById(id));
     }
+    //get request for series thumbnail
     @GetMapping(value = "/{id}/image", produces = MediaType.IMAGE_JPEG_VALUE)
     @Transactional
     public Mono<Resource> getSeriesImage(@PathVariable("id") @Min(1) Integer id){
         return seriesService.getSeriesImageData(id);
     }
-    //post method allowing the user to add a given series into their watchlist, may move it to the user controller
-    @Deprecated
-    @PostMapping("/addToWatchlist")
-    public ResponseEntity<UserSeriesSummary> addSeriesToWatchlist(@RequestParam Integer seriesId, @RequestParam Integer userId, @RequestParam Integer watchflagId){
-        return new ResponseEntity<>(seriesService.addToWatchlist(seriesId,userId, watchflagId), HttpStatus.OK);
-    }
 
+    //Exception handlers
     @ResponseStatus(HttpStatus.BAD_REQUEST)
-    @ExceptionHandler(MissingServletRequestParameterException.class)
-    public Map<String,String> handleMissingRequestParameterExceptions(MissingServletRequestParameterException ex){
-        Map<String,String> errors = new HashMap<>();
-        errors.put(ex.getParameterName(),ex.getMessage());
-        return errors;
+    @ExceptionHandler({
+            MissingServletRequestParameterException.class,
+            SeriesNotFoundException.class})
+    public Map<String,String> handleExceptions(Exception ex){
+        return messageCreator(ex);
     }
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     @ExceptionHandler(ConstraintViolationException.class)
@@ -91,9 +86,7 @@ public class SeriesController {
         errors.put(ex.getName(), "Id not valid");
         return errors;
     }
-    @ResponseStatus(HttpStatus.NOT_FOUND)
-    @ExceptionHandler(SeriesNotFoundException.class)
-    public Map<String,String> handleSeriesNotFoundExceptions(SeriesNotFoundException ex){
+    private Map<String,String> messageCreator(Exception ex){
         Map<String,String> errors = new HashMap<>();
         errors.put("error",ex.getMessage());
         return errors;
