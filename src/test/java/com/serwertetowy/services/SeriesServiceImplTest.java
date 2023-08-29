@@ -43,13 +43,7 @@ public class SeriesServiceImplTest {
     @Mock
     SeriesTagsRepository seriesTagsRepository;
     @Mock
-    UserSeriesRepository userSeriesRepository;
-    @Mock
-    WatchFlagRepository watchFlagRepository;
-    @Mock
     private EpisodesService episodesService;
-    @Mock
-    private UserService userService;
     @Mock
     private ResourceLoader resourceLoader;
     @InjectMocks
@@ -344,69 +338,6 @@ public class SeriesServiceImplTest {
         long id = 1L;
         Assertions.assertThrows(SeriesNotFoundException.class, () -> seriesService.getSeriesImageData((int) id));
         verify(seriesRepository, times(1)).existsById((int) id);
-    }
-    @Test
-    void testAddToWatchlist() {
-        Long seriesId = 1L;
-        Long userId = 1L;
-        Long watchflagId = 1L;
-
-        User user = new User();
-        user.setId(1L);
-        user.setFirstname("John");
-        user.setLastname("Darksouls");
-        user.setEmail("email@email.com");
-
-        Series series = new Series();
-        series.setId(seriesId);
-
-        WatchFlags watchFlag = new WatchFlags();
-        watchFlag.setId(watchflagId);
-
-        UserSeries userSeries = new UserSeries(user,series,watchFlag);
-
-        when(userService.getUserById(userId)).thenReturn(user);
-        when(seriesRepository.findById(seriesId.intValue())).thenReturn(Optional.of(series));
-        when(watchFlagRepository.findById(watchflagId.intValue())).thenReturn(Optional.of(watchFlag));
-        when(userSeriesRepository.save(any(UserSeries.class))).thenReturn(userSeries);
-        when(userService.getUserByEmail(anyString())).thenReturn(new UserSummary() {
-            @Override
-            public Long getId() {
-                return 1L;
-            }
-
-            @Override
-            public String getFirstname() {
-                return user.getFirstname();
-            }
-
-            @Override
-            public String getLastname() {
-                return user.getLastname();
-            }
-
-            @Override
-            public String getEmail() {
-                return user.getEmail();
-            }
-
-            @Override
-            public Boolean getDeleted() {
-                return false;
-            }
-        });
-
-        UserSeriesSummary result = seriesService.addToWatchlist(seriesId.intValue(), userId.intValue(), watchflagId.intValue());
-        verify(userService, times(1)).getUserById(userId);
-        verify(seriesRepository, times(1)).findById(seriesId.intValue());
-        verify(watchFlagRepository, times(1)).findById(watchflagId.intValue());
-        verify(userSeriesRepository, times(1)).save(any(UserSeries.class));
-        Assertions.assertNotNull(result);
-        Assertions.assertEquals(user.getId(), result.getUserSummary().getId());
-        Assertions.assertEquals(series.getId(), result.getSeriesSummary().getId());
-        Assertions.assertEquals(watchFlag.getId(), result.getWatchflag().getId());
-
-
     }
 
 }

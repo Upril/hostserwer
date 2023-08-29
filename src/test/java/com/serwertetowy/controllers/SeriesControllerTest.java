@@ -93,24 +93,6 @@ public class SeriesControllerTest {
         }
     };
     @Test
-    void when_SaveSeriesWithoutFile_thenReturn_Series() throws Exception {
-//        Series savedSeries = new Series();
-//        savedSeries.setId(1L);
-//        savedSeries.setName(expected.getName());
-//        savedSeries.setDescription(expected.getDescription());
-//
-//        Mockito.when(seriesService.saveSeries(expected.getName(), expected.getDescription(), List.of(1,2,3)))
-//                .thenReturn(savedSeries);
-//
-//        mockMvc.perform(MockMvcRequestBuilders.post("/api/v1/series")
-//                .param("name","tetowa")
-//                .param("description","seriaTetowa")
-//                .param("tags","1","2","3")
-//                        .param("file", (String) null))
-//                .andExpect(status().isOk())
-//                .andExpect(jsonPath("$.name").value("tetowa"));
-    }
-    @Test
     void when_SaveSeriesWithfile_thenReturn_SeriesSummary()throws Exception{
         Series savedSeries = new Series(1L,expected.getName(),expected.getDescription());
         MockMultipartFile file = new MockMultipartFile("file","test.jpg", MediaType.IMAGE_JPEG_VALUE,
@@ -162,18 +144,5 @@ public class SeriesControllerTest {
                 .expectHeader().contentType(MediaType.IMAGE_JPEG)
                 .expectBody(byte[].class).isEqualTo(imageBytes);
         Mockito.verify(seriesService).getSeriesImageData(1);
-    }
-    @Test
-    void when_addSeriesToWatchlist_thenReturn_UserSeriesSummary() throws Exception {
-        Mockito.when(seriesService.addToWatchlist(expected.getId().intValue(),userSummary.getId().intValue(),watchFlag.getId().intValue())).thenReturn(userSeriesSummary);
-        mockMvc.perform(MockMvcRequestBuilders.post("/api/v1/series/addToWatchlist")
-                .param("seriesId",expected.getId().toString())
-                .param("userId",userSummary.getId().toString())
-                .param("watchflagId",watchFlag.getId().toString())
-                .contentType(MediaType.APPLICATION_FORM_URLENCODED))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.id").value(userSeriesSummary.getId()))
-                .andExpect(jsonPath("$.watchflag.name").value(userSeriesSummary.getWatchflag().getName()))
-                .andExpect(jsonPath("$.seriesSummary.name").value(userSeriesSummary.getSeriesSummary().getName()));
     }
 }

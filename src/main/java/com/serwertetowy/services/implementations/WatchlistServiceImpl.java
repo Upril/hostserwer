@@ -11,7 +11,6 @@ import com.serwertetowy.services.dto.UserSeriesData;
 import com.serwertetowy.services.dto.UserSeriesSummary;
 import com.serwertetowy.services.dto.UserSummary;
 import lombok.AllArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
@@ -23,30 +22,24 @@ import java.util.Objects;
 @Service
 @AllArgsConstructor
 public class WatchlistServiceImpl implements WatchlistService {
-    @Autowired
-    private UserSeriesRepository userSeriesRepository;
-    @Autowired
-    private SeriesRepository seriesRepository;
-    @Autowired
-    private EpisodesService episodesService;
-    @Autowired
-    private SeriesTagsRepository seriesTagsRepository;
-    @Autowired
-    private TagRepository tagRepository;
-    @Autowired
-    private WatchFlagRepository watchFlagRepository;
-    @Autowired
-    private UserService userService;
-    @Autowired
-    private UserRepository userRepository;
+    private final UserSeriesRepository userSeriesRepository;
+    private final SeriesRepository seriesRepository;
+    private final EpisodesService episodesService;
+    private final SeriesTagsRepository seriesTagsRepository;
+    private final TagRepository tagRepository;
+    private final WatchFlagRepository watchFlagRepository;
+    private final UserService userService;
+    private final UserRepository userRepository;
 
     // method for constructing watchlist from userseries with details about series, episodes, tags and watchflags
     @Override
     public List<UserSeriesSummary> getWatchlist(Long id, String authIdentity) {
-        if(!userRepository.existsById(id)) throw new UserNotFoundException();
         if(userRepository.findById(id).orElseThrow(UserNotFoundException::new).isDeleted()) throw new UserDeletedException();
         User user = userRepository.findById(id).orElseThrow(UserNotFoundException::new);
-        if(!Objects.equals(user.getEmail(), authIdentity)) throw new FailedToAuthenticateException();
+
+        if(!Objects.equals(user.getEmail(), authIdentity)){
+            throw new FailedToAuthenticateException();
+        }
         List<UserSeriesData> userSeriesList = userSeriesRepository.findByUserId(id);
         List<UserSeriesSummary> userSeriesSummaryList = new ArrayList<>();
         //convert userseriesdata, which contains only user and series id, into a proper watchlist dto
@@ -59,22 +52,10 @@ public class WatchlistServiceImpl implements WatchlistService {
 
                 @Override
                 public SeriesSummary getSeriesSummary() {
-                    //SeriesSummary needs to be constructed from series and tag info
-                    SeriesSummary summary = new SeriesSummary();
+
                     Series series = seriesRepository.findById(userSeries.getSeriesId().intValue()).orElseThrow(()->
                             new ResponseStatusException(HttpStatus.NOT_FOUND));
-                    summary.setId(series.getId());
-                    summary.setName(series.getName());
-                    summary.setDescription(series.getDescription());
-                    summary.setEpisodes(episodesService.getEpisodesBySeries(userSeries.getSeriesId().intValue()));
-                    List<Tags> tags = new ArrayList<>();
-                    for(SeriesTags sTag: seriesTagsRepository.findBySeriesId(series.getId())){
-                        Tags foundTags = tagRepository.findById(sTag.getTags().getId().intValue()).orElseThrow(()->
-                                new ResponseStatusException(HttpStatus.NOT_FOUND));
-                        tags.add(foundTags);
-                    }
-                    summary.setSeriesTags(tags);
-                    return summary;
+                    return constructSeriesSummary(series);
                 }
 
                 @Override
@@ -97,34 +78,19 @@ public class WatchlistServiceImpl implements WatchlistService {
     @Override
     public UserSeriesSummary addToWatchlist(Integer seriesId, Integer userId, Integer watchflagId, String authIdentity) {
         if(!userRepository.existsById(userId.longValue())) throw new UserNotFoundException();
-        if(!seriesRepository.existsById(seriesId)) throw new SeriesNotFoundException();
         if(!watchFlagRepository.existsById(watchflagId)) throw new WatchflagNotFoundException();
         if(!userRepository.existsById(userId.longValue())) throw new UserNotFoundException();
-        if(userRepository.findById(userId.longValue()).orElseThrow(UserNotFoundException::new).isDeleted()) throw new UserDeletedException();
+        if(userRepository.findById(userId.longValue()).orElseThrow(UserNotFoundException::new)
+                .isDeleted()) throw new UserDeletedException();
         User user = userService.getUserById(userId.longValue());
         if(!Objects.equals(user.getEmail(), authIdentity)) throw new FailedToAuthenticateException();
-        if(user.isDeleted()) throw new UserDeletedException();
 
-        Series series = seriesRepository.findById(seriesId)
-                .orElseThrow(()->new ResponseStatusException(HttpStatus.NOT_FOUND));
-        //series added to watchlist by default are set to the "Watching" watchflag
+        Series series = seriesRepository.findById(seriesId).orElseThrow(SeriesNotFoundException::new);
         UserSeries userSeries = new UserSeries(user,series,watchFlagRepository.findById(watchflagId)
-                .orElseThrow(()->new ResponseStatusException(HttpStatus.NOT_FOUND)));
+                .orElseThrow(UserSeriesNotFoundException::new));
         userSeriesRepository.save(userSeries);
 
-        SeriesSummary seriesSummary = new SeriesSummary();
-        seriesSummary.setId(series.getId());
-        seriesSummary.setName(series.getName());
-        seriesSummary.setDescription(series.getDescription());
-        seriesSummary.setEpisodes(episodesService.getEpisodesBySeries(seriesId));
-
-        List<Tags> tags = new ArrayList<>();
-        for(SeriesTags sTag: seriesTagsRepository.findBySeriesId(series.getId())){
-            Tags foundTags = tagRepository.findById(sTag.getTags().getId().intValue())
-                    .orElseThrow(()->new ResponseStatusException(HttpStatus.NOT_FOUND));
-            tags.add(foundTags);
-        }
-        seriesSummary.setSeriesTags(tags);
+        SeriesSummary seriesSummary = constructSeriesSummary(series);
         return new UserSeriesSummary() {
             @Override
             public Long getId() {
@@ -147,12 +113,25 @@ public class WatchlistServiceImpl implements WatchlistService {
             }
         };
     }
+    //SeriesSummary needs to be constructed from series and tag info
+    private SeriesSummary constructSeriesSummary(Series series){
+        SeriesSummary seriesSummary = new SeriesSummary();
+        seriesSummary.setId(series.getId());
+        seriesSummary.setName(series.getName());
+        seriesSummary.setDescription(series.getDescription());
+        seriesSummary.setEpisodes(episodesService.getEpisodesBySeries(series.getId().intValue()));
+        List<Tags> tags = new ArrayList<>();
+        for(SeriesTags sTag: seriesTagsRepository.findBySeriesId(series.getId())){
+            Tags foundTags = tagRepository.findById(sTag.getTags().getId().intValue()).orElseThrow(()->
+                    new ResponseStatusException(HttpStatus.NOT_FOUND));
+            tags.add(foundTags);
+        }
+        seriesSummary.setSeriesTags(tags);
+        return seriesSummary;
+    }
 
     @Override
     public void putWatchlistItem(Long id, Integer seriesId, Integer watchflagId, Boolean isFavourite, String authIdentity) {
-        if(!seriesRepository.existsById(seriesId)) throw new SeriesNotFoundException();
-        if(!watchFlagRepository.existsById(watchflagId)) throw new WatchflagNotFoundException();
-        if(!userSeriesRepository.existsById(id)) throw new UserSeriesNotFoundException();
         UserSeries userSeries = userSeriesRepository.findById(id).orElseThrow(UserSeriesNotFoundException::new);
         User user = userSeries.getUser();
         if(!Objects.equals(user.getEmail(), authIdentity)) throw new FailedToAuthenticateException();
@@ -165,7 +144,6 @@ public class WatchlistServiceImpl implements WatchlistService {
 
     @Override
     public void deleteWatchlistItem(Long id, String authIdentity) {
-        if(!userSeriesRepository.existsById(id)) throw new UserSeriesNotFoundException();
         User user = userService.getUserById(id);
         if(!Objects.equals(user.getEmail(), authIdentity)) throw new FailedToAuthenticateException();
         if(user.isDeleted()) throw new UserDeletedException();
