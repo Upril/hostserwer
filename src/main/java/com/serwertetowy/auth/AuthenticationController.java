@@ -26,8 +26,20 @@ import java.util.Map;
 public class AuthenticationController {
     private final AuthenticationService authenticationService;
     public record AuthenticationResponse(String token){}
-    public record RegisterRequest(String firstname, String lastname, String email, @NotBlank(message = "Password is mandatory") @Length(min = 6, max = 40, message = "The password must have between 6 and 40 characters.") String password, @NotNull(message = "Role is mandatory") Role role){}
-    public record AuthenticationRequest(@NotBlank(message = "Email is mandatory") @Email(message = "Email not valid") String email, @NotBlank(message = "Password is mandatory") @Length(min = 6, max = 40, message = "The password must have between 6 and 40 characters.") String password){}
+    public record RegisterRequest(
+            String firstname,
+            String lastname,
+            String email,
+            @NotBlank(message = "Password is mandatory")
+            @Length(min = 6, max = 40, message = "The password must have between 6 and 40 characters.")
+            String password,
+            @NotNull(message = "Role is mandatory") Role role){}
+    public record AuthenticationRequest(
+            @NotBlank(message = "Email is mandatory")
+            @Email(message = "Email not valid") String email,
+            @NotBlank(message = "Password is mandatory")
+            @Length(min = 6, max = 40, message = "The password must have between 6 and 40 characters.")
+            String password){}
     @PostMapping("/register")
     public ResponseEntity<AuthenticationResponse> register(@Valid @RequestBody RegisterRequest request) throws IOException {
         return ResponseEntity.ok(authenticationService.register(request));

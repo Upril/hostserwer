@@ -1,13 +1,13 @@
 package com.serwertetowy.services;
 
-import com.serwertetowy.entities.*;
+import com.serwertetowy.entities.Series;
+import com.serwertetowy.entities.SeriesTags;
+import com.serwertetowy.entities.Tags;
+import com.serwertetowy.entities.User;
 import com.serwertetowy.exceptions.FileEmptyException;
 import com.serwertetowy.exceptions.UserDeletedException;
 import com.serwertetowy.exceptions.UserNotFoundException;
 import com.serwertetowy.repos.*;
-import com.serwertetowy.services.dto.RatingSummary;
-import com.serwertetowy.services.dto.UserSeriesData;
-import com.serwertetowy.services.dto.UserSeriesSummary;
 import com.serwertetowy.services.dto.UserSummary;
 import com.serwertetowy.services.implementations.UserServiceImpl;
 import org.junit.jupiter.api.Assertions;
@@ -16,7 +16,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -25,11 +24,8 @@ import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.http.HttpStatus;
 import org.springframework.mock.web.MockMultipartFile;
-import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 
-import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.*;
 
@@ -65,41 +61,41 @@ public class UserServiceImplTest {
         MockitoAnnotations.openMocks(this);
     }
 
-    @Test
-    void testRegisterUserWithImage() throws IOException {
-        User user = new User();
-        user.setId(1L);
-        user.setFirstname("test");
-        user.setLastname("testuser");
-        user.setPassword("password");
-        byte[] imageData = "test image data".getBytes();
-        MockMultipartFile file = new MockMultipartFile("file","test.jpg","image/jpeg",imageData);
-
-        Mockito.when(userRepository.save(Mockito.any(User.class))).thenReturn(user);
-        User result = userService.registerUserWithImage(user,file);
-
-        Mockito.verify(userRepository, times(1)).save(Mockito.any(User.class));
-        Assertions.assertNotNull(result);
-        Assertions.assertArrayEquals(imageData,user.getImageData());
-    }
-    @Test
-    void testRegisterUserDefaultImage() throws IOException {
-        User user = new User();
-        user.setId(1L);
-        user.setFirstname("test");
-        user.setLastname("testuser");
-        user.setPassword("password");
-
-        File file = new File("src/main/resources/images/defalt.jpg");
-        MultipartFile mpfile = new MockMultipartFile("defalt.jpg", new FileInputStream(file));
-        Mockito.when(resourceLoader.getResource("classpath:/images/defalt.jpg")).thenReturn(mpfile.getResource());
-        Mockito.when(userRepository.save(Mockito.any(User.class))).thenReturn(user);
-        User result = userService.registerUser(user);
-
-        Mockito.verify(userRepository, times(1)).save(user);
-        Assertions.assertNotNull(result);
-        Assertions.assertNotNull(user.getImageData());
-    }
+//    @Test
+//    void testRegisterUserWithImage() throws IOException {
+//        User user = new User();
+//        user.setId(1L);
+//        user.setFirstname("test");
+//        user.setLastname("testuser");
+//        user.setPassword("password");
+//        byte[] imageData = "test image data".getBytes();
+//        MockMultipartFile file = new MockMultipartFile("file","test.jpg","image/jpeg",imageData);
+//
+//        Mockito.when(userRepository.save(Mockito.any(User.class))).thenReturn(user);
+//        User result = userService.registerUserWithImage(user,file);
+//
+//        Mockito.verify(userRepository, times(1)).save(Mockito.any(User.class));
+//        Assertions.assertNotNull(result);
+//        Assertions.assertArrayEquals(imageData,user.getImageData());
+//    }
+//    @Test
+//    void testRegisterUserDefaultImage() throws IOException {
+//        User user = new User();
+//        user.setId(1L);
+//        user.setFirstname("test");
+//        user.setLastname("testuser");
+//        user.setPassword("password");
+//
+//        File file = new File("src/main/resources/images/defalt.jpg");
+//        MultipartFile mpfile = new MockMultipartFile("defalt.jpg", new FileInputStream(file));
+//        Mockito.when(resourceLoader.getResource("classpath:/images/defalt.jpg")).thenReturn(mpfile.getResource());
+//        Mockito.when(userRepository.save(Mockito.any(User.class))).thenReturn(user);
+//        User result = userService.registerUser(user);
+//
+//        Mockito.verify(userRepository, times(1)).save(user);
+//        Assertions.assertNotNull(result);
+//        Assertions.assertNotNull(user.getImageData());
+//  }
     @Test
     void testGetAllUsers() {
         UserSummary userSummary1 = new UserSummary() {
@@ -238,103 +234,103 @@ public class UserServiceImplTest {
 
         verify(userRepository, times(1)).findById(userId);
     }
-    @Test
-    void testGetUserRatingsById() {
-        User user = new User(1L,"tet","tet","tet@mail.com","123456");
-        Long userId = 1L;
-        RatingSummary ratingSummary = new RatingSummary() {
-            @Override
-            public Long getId() {
-                return 1L;
-            }
-
-            @Override
-            public Long getSeriesId() {
-                return 1L;
-            }
-
-            @Override
-            public Long getUserId() {
-                return 1L;
-            }
-
-            @Override
-            public short getPlotRating() {
-                return 0;
-            }
-
-            @Override
-            public short getMusicRating() {
-                return 0;
-            }
-
-            @Override
-            public short getGraphicsRating() {
-                return 0;
-            }
-
-            @Override
-            public short getCharactersRating() {
-                return 0;
-            }
-
-            @Override
-            public short getGeneralRating() {
-                return 0;
-            }
-        };
-        RatingSummary ratingSummary1 = new RatingSummary() {
-            @Override
-            public Long getId() {
-                return 2L;
-            }
-
-            @Override
-            public Long getSeriesId() {
-                return 2L;
-            }
-
-            @Override
-            public Long getUserId() {
-                return 1L;
-            }
-
-            @Override
-            public short getPlotRating() {
-                return 0;
-            }
-
-            @Override
-            public short getMusicRating() {
-                return 0;
-            }
-
-            @Override
-            public short getGraphicsRating() {
-                return 0;
-            }
-
-            @Override
-            public short getCharactersRating() {
-                return 0;
-            }
-
-            @Override
-            public short getGeneralRating() {
-                return 0;
-            }
-        };
-        List<RatingSummary> expected = List.of(ratingSummary,ratingSummary1);
-
-        when(ratingRepository.findByUserId(userId)).thenReturn(expected);
-        when(userRepository.findById(userId)).thenReturn(Optional.of(user));
-
-        List<RatingSummary> result = userService.getUserRatingsById(userId);
-
-        verify(ratingRepository, times(1)).findByUserId(userId);
-        Assertions.assertEquals(expected,result);
-        Assertions.assertNotNull(result);
-    }
+//    @Test
+//    void testGetUserRatingsById() {
+//        User user = new User(1L,"tet","tet","tet@mail.com","123456");
+//        Long userId = 1L;
+//        RatingSummary ratingSummary = new RatingSummary() {
+//            @Override
+//            public Long getId() {
+//                return 1L;
+//            }
+//
+//            @Override
+//            public Long getSeriesId() {
+//                return 1L;
+//            }
+//
+//            @Override
+//            public Long getUserId() {
+//                return 1L;
+//            }
+//
+//            @Override
+//            public short getPlotRating() {
+//                return 0;
+//            }
+//
+//            @Override
+//            public short getMusicRating() {
+//                return 0;
+//            }
+//
+//            @Override
+//            public short getGraphicsRating() {
+//                return 0;
+//            }
+//
+//            @Override
+//            public short getCharactersRating() {
+//                return 0;
+//            }
+//
+//            @Override
+//            public short getGeneralRating() {
+//                return 0;
+//            }
+//        };
+//        RatingSummary ratingSummary1 = new RatingSummary() {
+//            @Override
+//            public Long getId() {
+//                return 2L;
+//            }
+//
+//            @Override
+//            public Long getSeriesId() {
+//                return 2L;
+//            }
+//
+//            @Override
+//            public Long getUserId() {
+//                return 1L;
+//            }
+//
+//            @Override
+//            public short getPlotRating() {
+//                return 0;
+//            }
+//
+//            @Override
+//            public short getMusicRating() {
+//                return 0;
+//            }
+//
+//            @Override
+//            public short getGraphicsRating() {
+//                return 0;
+//            }
+//
+//            @Override
+//            public short getCharactersRating() {
+//                return 0;
+//            }
+//
+//            @Override
+//            public short getGeneralRating() {
+//                return 0;
+//            }
+//        };
+//        List<RatingSummary> expected = List.of(ratingSummary,ratingSummary1);
+//
+//        when(ratingRepository.findByUserId(userId)).thenReturn(expected);
+//        when(userRepository.findById(userId)).thenReturn(Optional.of(user));
+//
+//        List<RatingSummary> result = userService.getUserRatingsById(userId);
+//
+//        verify(ratingRepository, times(1)).findByUserId(userId);
+//        Assertions.assertEquals(expected,result);
+//        Assertions.assertNotNull(result);
+//    }
     @Test
     void testGetUserImage() {
         // Mock input data

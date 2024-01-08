@@ -2,6 +2,7 @@ package com.serwertetowy.services.implementations;
 
 import com.serwertetowy.entities.*;
 import com.serwertetowy.exceptions.SeriesNotFoundException;
+import com.serwertetowy.exceptions.TagNotFoundException;
 import com.serwertetowy.repos.*;
 import com.serwertetowy.services.EpisodesService;
 import com.serwertetowy.services.dto.*;
@@ -34,6 +35,7 @@ public class SeriesServiceImpl implements SeriesService {
     @Override
     public Series saveSeries(String name, String description, List<Integer> tagIds) throws IOException {
         //assembling series tag data from request data
+        if(tagIds.isEmpty()) throw new TagNotFoundException();
         Series series = seriesAssemble(name,description,tagIds);
         series.setImageData(resourceLoader.getResource("classpath:/images/banner.jpg").getContentAsByteArray());
         seriesRepository.save(series);

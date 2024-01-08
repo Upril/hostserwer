@@ -6,7 +6,6 @@ import com.serwertetowy.entities.Episodes;
 import com.serwertetowy.entities.Series;
 import com.serwertetowy.exceptions.EpisodeNotFoundException;
 import com.serwertetowy.exceptions.FileDownloadException;
-import com.serwertetowy.exceptions.FileUploadException;
 import com.serwertetowy.exceptions.SeriesNotFoundException;
 import com.serwertetowy.repos.EpisodesRepository;
 import com.serwertetowy.repos.SeriesRepository;
@@ -14,6 +13,14 @@ import com.serwertetowy.services.EpisodesService;
 import com.serwertetowy.services.dto.EpisodeSummary;
 import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
+import net.bramp.ffmpeg.FFmpeg;
+import net.bramp.ffmpeg.FFmpegExecutor;
+import net.bramp.ffmpeg.FFmpegUtils;
+import net.bramp.ffmpeg.FFprobe;
+import net.bramp.ffmpeg.builder.FFmpegBuilder;
+import net.bramp.ffmpeg.probe.FFmpegProbeResult;
+import net.bramp.ffmpeg.progress.Progress;
+import net.bramp.ffmpeg.progress.ProgressListener;
 import org.apache.commons.io.FilenameUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.Resource;
@@ -34,6 +41,7 @@ import java.nio.file.Paths;
 import java.util.Date;
 import java.util.List;
 import java.util.Objects;
+import java.util.concurrent.TimeUnit;
 
 @Service
 @AllArgsConstructor
@@ -69,6 +77,44 @@ public class EpisodeServiceImpl implements EpisodesService {
         Episodes newEpisode = new Episodes(name,series,languagesList);
         episodesRepository.save(newEpisode);
         Files.copy(file.getInputStream(), root.resolve(newEpisode.getId()+".mp4"));
+
+        String ffmpegPath = "C:\\Users\\jaxxo\\ffmpeg.exe";
+        String ffprobePath = "C:\\Users\\jaxxo\\ffprobe.exe";
+
+        FFmpeg fFmpeg = new FFmpeg(ffmpegPath);
+        FFprobe fFprobe = new FFprobe(ffprobePath);
+
+        FFmpegProbeResult input = fFprobe.probe("src/main/resources/videos/tetujemy.mp4");
+        FFmpegBuilder builder = new FFmpegBuilder()
+                .setInput(input).overrideOutputFiles(true)
+                .addOutput("src/main/resources/videos/compressed.mp4")
+                .setFormat("mp4")
+                .disableSubtitle()
+                //audio
+                .setAudioChannels(1)
+                .setAudioCodec("aac")
+                .setAudioSampleRate(48_000)
+                .setAudioBitRate(32_768)
+                //video
+                .setVideoCodec("libx264")
+                .setVideoFrameRate(24,1)
+                .setVideoResolution(64,48)
+
+                .setStrict(FFmpegBuilder.Strict.EXPERIMENTAL)
+                .done();
+        FFmpegExecutor executor = new FFmpegExecutor(fFmpeg, fFprobe);
+        executor.createJob(builder, new ProgressListener() {
+            final double duration_ns = input.getFormat().duration * TimeUnit.SECONDS.toNanos(1);
+            @Override
+            public void progress(Progress progress) {
+                final double percentage = progress.out_time_ns/duration_ns;
+                    System.out.println("filename: "+input.getFormat().filename+ " -> "+ String.format("[%.0f%%]",
+                            (percentage * 100)) + " status: "+progress.status+" time: "
+                            + FFmpegUtils.toTimecode(progress.out_time_ns, TimeUnit.NANOSECONDS)+" ms");
+            }
+        }).run();
+
+
         return episodesRepository.findEpisodeSummaryById(newEpisode.getId().intValue());
     }
 
